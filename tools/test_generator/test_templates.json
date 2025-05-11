@@ -1,0 +1,151 @@
+{
+  "test_types": [
+    {
+      "name": "単体テスト",
+      "description": "個々の関数やメソッドをテストします",
+      "frameworks": [
+        {
+          "name": "unittest",
+          "package": "unittest",
+          "is_built_in": true,
+          "template": "import unittest\n\nclass Test{class_name}(unittest.TestCase):\n    def setUp(self):\n        # テスト前の準備\n        pass\n\n    def tearDown(self):\n        # テスト後のクリーンアップ\n        pass\n\n    def test_{method_name}(self):\n        # テストケース\n        self.assertTrue(True)\n\nif __name__ == '__main__':\n    unittest.main()"
+        },
+        {
+          "name": "pytest",
+          "package": "pytest",
+          "is_built_in": false,
+          "template": "import pytest\nfrom {module_path} import {class_name}\n\n@pytest.fixture\ndef setup():\n    # テスト前の準備\n    return {class_name}()\n\ndef test_{method_name}(setup):\n    # テストケース\n    assert True"
+        }
+      ]
+    },
+    {
+      "name": "UI テスト",
+      "description": "ユーザーインターフェースの動作をテストします",
+      "frameworks": [
+        {
+          "name": "Flet テスト",
+          "package": "flet_test",
+          "is_built_in": false,
+          "template": "import flet as ft\nimport unittest\nfrom unittest.mock import MagicMock\nfrom {module_path} import {class_name}\n\nclass Test{class_name}UI(unittest.TestCase):\n    def setUp(self):\n        self.page = MagicMock()\n        self.ui = {class_name}(self.page)\n\n    def test_ui_elements(self):\n        # UIエレメントが正しく構築されているかテスト\n        self.assertIsNotNone(self.ui)\n\n    def test_user_interaction(self):\n        # ボタンクリックなどのイベントをシミュレート\n        # イベントハンドラが呼び出されることを確認\n        pass\n\nif __name__ == '__main__':\n    unittest.main()"
+        }
+      ]
+    },
+    {
+      "name": "統合テスト",
+      "description": "複数のコンポーネントの相互作用をテストします",
+      "frameworks": [
+        {
+          "name": "unittest",
+          "package": "unittest",
+          "is_built_in": true,
+          "template": "import unittest\nimport flet as ft\nfrom {module_path} import {class_name}\n\nclass Integration{class_name}Test(unittest.TestCase):\n    def setUp(self):\n        # テスト環境のセットアップ\n        pass\n\n    def tearDown(self):\n        # テスト環境のクリーンアップ\n        pass\n\n    def test_integration(self):\n        # 統合テストケース\n        self.assertTrue(True)\n\nif __name__ == '__main__':\n    unittest.main()"
+        }
+      ]
+    },
+    {
+      "name": "プラットフォーム互換性テスト",
+      "description": "異なるプラットフォーム間での互換性をテストします",
+      "frameworks": [
+        {
+          "name": "ユニット検証",
+          "package": "unittest",
+          "is_built_in": true,
+          "template": "import unittest\nimport platform\nimport sys\nfrom {module_path} import {class_name}\n\nclass Platform{class_name}Test(unittest.TestCase):\n    def setUp(self):\n        self.current_platform = platform.system()\n        self.python_version = sys.version_info\n\n    def test_platform_compatibility(self):\n        # プラットフォーム固有のコードをテスト\n        if self.current_platform == 'Windows':\n            # Windowsテスト\n            pass\n        elif self.current_platform == 'Darwin':\n            # macOSテスト\n            pass\n        elif self.current_platform == 'Linux':\n            # Linuxテスト\n            pass\n\nif __name__ == '__main__':\n    unittest.main()"
+        }
+      ]
+    },
+    {
+      "name": "パフォーマンステスト",
+      "description": "アプリケーションのパフォーマンスと効率性をテストします",
+      "frameworks": [
+        {
+          "name": "pytest-benchmark",
+          "package": "pytest-benchmark",
+          "is_built_in": false,
+          "template": "import pytest\nfrom {module_path} import {class_name}\n\ndef test_{method_name}_performance(benchmark):\n    # セットアップ\n    instance = {class_name}()\n    \n    # ベンチマークの実行\n    result = benchmark(instance.{method_name})\n    \n    # 結果の検証\n    assert result is not None\n"
+        }
+      ]
+    }
+  ],
+  "assert_templates": [
+    {
+      "name": "等価性",
+      "unittest": "self.assertEqual({expected}, {actual}, \"{message}\")",
+      "pytest": "assert {actual} == {expected}, \"{message}\""
+    },
+    {
+      "name": "近似等価性",
+      "unittest": "self.assertAlmostEqual({expected}, {actual}, places={places}, msg=\"{message}\")",
+      "pytest": "assert abs({actual} - {expected}) < {delta}, \"{message}\""
+    },
+    {
+      "name": "真偽値",
+      "unittest": "self.assertTrue({expression}, \"{message}\")",
+      "pytest": "assert {expression}, \"{message}\""
+    },
+    {
+      "name": "例外",
+      "unittest": "with self.assertRaises({exception}):\n    {code}",
+      "pytest": "with pytest.raises({exception}):\n    {code}"
+    },
+    {
+      "name": "型チェック",
+      "unittest": "self.assertIsInstance({obj}, {type}, \"{message}\")",
+      "pytest": "assert isinstance({obj}, {type}), \"{message}\""
+    },
+    {
+      "name": "存在チェック",
+      "unittest": "self.assertIsNotNone({obj}, \"{message}\")",
+      "pytest": "assert {obj} is not None, \"{message}\""
+    },
+    {
+      "name": "リスト要素チェック",
+      "unittest": "self.assertIn({item}, {container}, \"{message}\")",
+      "pytest": "assert {item} in {container}, \"{message}\""
+    }
+  ],
+  "mock_templates": [
+    {
+      "name": "ベーシックモック",
+      "unittest": "from unittest.mock import MagicMock\n{object_name} = MagicMock()",
+      "pytest": "import pytest\n{object_name} = pytest.MagicMock()"
+    },
+    {
+      "name": "メソッドモック",
+      "unittest": "from unittest.mock import MagicMock\n{object_name}.{method_name} = MagicMock(return_value={return_value})",
+      "pytest": "import pytest\n{object_name}.{method_name} = pytest.MagicMock(return_value={return_value})"
+    },
+    {
+      "name": "例外を投げるモック",
+      "unittest": "from unittest.mock import MagicMock\n{object_name}.{method_name} = MagicMock(side_effect={exception}(\"{message}\"))",
+      "pytest": "import pytest\n{object_name}.{method_name} = pytest.MagicMock(side_effect={exception}(\"{message}\"))"
+    },
+    {
+      "name": "パッチ",
+      "unittest": "from unittest.mock import patch\nwith patch('{module}.{object_name}') as mock_obj:\n    mock_obj.return_value = {return_value}\n    # テストコード",
+      "pytest": "import pytest\ndef test_with_patch(monkeypatch):\n    def mock_return(*args, **kwargs):\n        return {return_value}\n    monkeypatch.setattr('{module}.{object_name}', mock_return)\n    # テストコード"
+    }
+  ],
+  "flet_test_templates": [
+    {
+      "name": "ページテスト",
+      "description": "Fletページの基本的なテスト",
+      "template": "import unittest\nfrom unittest.mock import MagicMock\nfrom {module_path} import {function_name}\n\nclass Test{class_name}Page(unittest.TestCase):\n    def setUp(self):\n        self.page = MagicMock()\n        self.controls = []\n        \n        # ページにコントロールを追加する際のモック\n        def mock_add(*args):\n            self.controls.extend(args)\n        self.page.add = mock_add\n        \n    def test_page_creation(self):\n        # ページ作成関数の呼び出し\n        {function_name}(self.page)\n        \n        # ページに要素が追加されていることを確認\n        self.assertGreater(len(self.controls), 0)\n        \nif __name__ == '__main__':\n    unittest.main()"
+    },
+    {
+      "name": "コントロールテスト",
+      "description": "Fletコントロールのテスト",
+      "template": "import unittest\nfrom unittest.mock import MagicMock\nimport flet as ft\nfrom {module_path} import {class_name}\n\nclass Test{class_name}Control(unittest.TestCase):\n    def setUp(self):\n        self.page = MagicMock()\n        self.control = {class_name}()\n        \n    def test_control_build(self):\n        # コントロールのビルドメソッドをテスト\n        result = self.control.build()\n        self.assertIsInstance(result, ft.Control)\n        \n    def test_event_handlers(self):\n        # イベントハンドラをテスト\n        # 例: ボタンクリックをシミュレート\n        event = MagicMock()\n        # self.control.button.on_click(event)\n        # アサーション\n        \nif __name__ == '__main__':\n    unittest.main()"
+    },
+    {
+      "name": "レスポンシブテスト",
+      "description": "レスポンシブデザインのテスト",
+      "template": "import unittest\nfrom unittest.mock import MagicMock\nimport flet as ft\nfrom {module_path} import {class_name}\n\nclass Test{class_name}Responsive(unittest.TestCase):\n    def setUp(self):\n        self.page = MagicMock()\n        # 異なる画面サイズをシミュレート\n        self.page.width = 1920\n        self.page.height = 1080\n        self.control = {class_name}()\n        \n    def test_desktop_layout(self):\n        # デスクトップレイアウトのテスト\n        # ワイドスクリーンでのレイアウトをテスト\n        result = self.control.build()\n        self.assertIsNotNone(result)\n        \n    def test_mobile_layout(self):\n        # モバイルレイアウトのテスト\n        # 画面サイズを小さくしてテスト\n        self.page.width = 375\n        self.page.height = 812\n        # ページサイズ変更イベントをシミュレート\n        if hasattr(self.control, 'on_resize'):\n            self.control.on_resize(None)\n        result = self.control.build()\n        self.assertIsNotNone(result)\n        \nif __name__ == '__main__':\n    unittest.main()"
+    },
+    {
+      "name": "テーマテスト",
+      "description": "ダークモードと明るいモードのテスト",
+      "template": "import unittest\nfrom unittest.mock import MagicMock\nimport flet as ft\nfrom {module_path} import {class_name}\n\nclass Test{class_name}Theme(unittest.TestCase):\n    def setUp(self):\n        self.page = MagicMock()\n        self.control = {class_name}()\n        \n    def test_light_theme(self):\n        # ライトテーマでのテスト\n        self.page.theme_mode = ft.ThemeMode.LIGHT\n        if hasattr(self.control, 'on_theme_changed'):\n            self.control.on_theme_changed(None)\n        result = self.control.build()\n        self.assertIsNotNone(result)\n        \n    def test_dark_theme(self):\n        # ダークテーマでのテスト\n        self.page.theme_mode = ft.ThemeMode.DARK\n        if hasattr(self.control, 'on_theme_changed'):\n            self.control.on_theme_changed(None)\n        result = self.control.build()\n        self.assertIsNotNone(result)\n        \nif __name__ == '__main__':\n    unittest.main()"
+    }
+  ]
+}

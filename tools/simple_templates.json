@@ -1,0 +1,36 @@
+{
+  "project_templates": [
+    {
+      "name": "シンプルアプリ",
+      "description": "基本的なFletアプリケーションの構造",
+      "files": [
+        {
+          "path": "main.py",
+          "content": "import flet as ft\n\ndef main(page: ft.Page):\n    page.title = \"{{project_name}}\"\n    \n    # タイトル\n    title = ft.Text(\"{{project_name}}\", size=30)\n    \n    # メインコンテンツ\n    content = ft.Column([\n        ft.Text(\"ようこそ！\", size=20),\n        ft.ElevatedButton(\"クリックしてください\", on_click=lambda _: show_message())\n    ])\n    \n    def show_message():\n        page.add(ft.Text(\"ボタンがクリックされました！\"))\n        page.update()\n    \n    # レイアウト\n    page.add(\n        title,\n        content\n    )\n\nif __name__ == \"__main__\":\n    ft.app(target=main)\n"
+        },
+        {
+          "path": "README.md",
+          "content": "# {{project_name}}\n\n{{project_description}}\n\n## セットアップ\n\n```bash\n# 依存関係のインストール\npip install flet\n\n# アプリケーションの実行\npython main.py\n```\n"
+        },
+        {
+          "path": "requirements.txt",
+          "content": "flet>=0.8.0\n"
+        }
+      ]
+    }
+  ],
+  "component_templates": [
+    {
+      "name": "シンプルカード",
+      "description": "基本的なカードコンポーネント",
+      "content": "import flet as ft\n\nclass {{component_name}}(ft.UserControl):\n    \"\"\"{{component_description}}\"\"\"\n    \n    def __init__(self, title=\"カードタイトル\", content=\"カードの内容\"):\n        super().__init__()\n        self.title = title\n        self.content = content\n    \n    def build(self):\n        return ft.Card(\n            content=ft.Container(\n                content=ft.Column([\n                    ft.Text(self.title, weight=\"bold\", size=16),\n                    ft.Text(self.content)\n                ]),\n                padding=10\n            )\n        )\n"
+    }
+  ],
+  "screen_templates": [
+    {
+      "name": "シンプル画面",
+      "description": "基本的な画面レイアウト",
+      "content": "import flet as ft\n\nclass {{screen_name}}(ft.UserControl):\n    \"\"\"{{screen_description}}\"\"\"\n    \n    def __init__(self, page):\n        super().__init__()\n        self.page = page\n    \n    def build(self):\n        # ヘッダー\n        header = ft.Text(\"{{screen_name}}\", size=24)\n        \n        # コンテンツ\n        content = ft.Column([\n            ft.Text(\"ここにコンテンツを配置します\"),\n            ft.ElevatedButton(\"アクション\")\n        ])\n        \n        # レイアウト\n        return ft.Container(\n            content=ft.Column([\n                header,\n                ft.Divider(),\n                content\n            ]),\n            padding=20,\n            expand=True\n        )\n"
+    }
+  ]
+}

@@ -1,0 +1,214 @@
+[
+  {
+    "locale": "ja",
+    "language": "日本語",
+    "direction": "ltr",
+    "translations": {
+      "common": {
+        "ok": "OK",
+        "cancel": "キャンセル",
+        "save": "保存",
+        "delete": "削除",
+        "edit": "編集",
+        "back": "戻る",
+        "next": "次へ",
+        "submit": "送信",
+        "loading": "読み込み中...",
+        "error": "エラーが発生しました",
+        "success": "成功しました",
+        "search": "検索",
+        "menu": "メニュー",
+        "settings": "設定",
+        "help": "ヘルプ",
+        "home": "ホーム",
+        "profile": "プロフィール"
+      },
+      "errors": {
+        "required": "{field}は必須です",
+        "min_length": "{field}は{min}文字以上で入力してください",
+        "max_length": "{field}は{max}文字以下で入力してください",
+        "invalid_email": "有効なメールアドレスを入力してください",
+        "password_mismatch": "パスワードが一致しません",
+        "network_error": "ネットワークエラーが発生しました",
+        "unknown_error": "不明なエラーが発生しました"
+      },
+      "auth": {
+        "login": "ログイン",
+        "logout": "ログアウト",
+        "register": "登録",
+        "forgot_password": "パスワードをお忘れですか？",
+        "email": "メールアドレス",
+        "password": "パスワード",
+        "confirm_password": "パスワード（確認）",
+        "username": "ユーザー名",
+        "remember_me": "ログイン状態を保持する"
+      },
+      "navigation": {
+        "dashboard": "ダッシュボード",
+        "notifications": "通知",
+        "messages": "メッセージ",
+        "favorites": "お気に入り",
+        "account": "アカウント"
+      }
+    }
+  },
+  {
+    "locale": "en",
+    "language": "English",
+    "direction": "ltr",
+    "translations": {
+      "common": {
+        "ok": "OK",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "back": "Back",
+        "next": "Next",
+        "submit": "Submit",
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "success": "Success",
+        "search": "Search",
+        "menu": "Menu",
+        "settings": "Settings",
+        "help": "Help",
+        "home": "Home",
+        "profile": "Profile"
+      },
+      "errors": {
+        "required": "{field} is required",
+        "min_length": "{field} must be at least {min} characters",
+        "max_length": "{field} must be at most {max} characters",
+        "invalid_email": "Please enter a valid email address",
+        "password_mismatch": "Passwords do not match",
+        "network_error": "A network error occurred",
+        "unknown_error": "An unknown error occurred"
+      },
+      "auth": {
+        "login": "Login",
+        "logout": "Logout",
+        "register": "Register",
+        "forgot_password": "Forgot password?",
+        "email": "Email",
+        "password": "Password",
+        "confirm_password": "Confirm Password",
+        "username": "Username",
+        "remember_me": "Remember me"
+      },
+      "navigation": {
+        "dashboard": "Dashboard",
+        "notifications": "Notifications",
+        "messages": "Messages",
+        "favorites": "Favorites",
+        "account": "Account"
+      }
+    }
+  },
+  {
+    "locale": "zh",
+    "language": "中文",
+    "direction": "ltr",
+    "translations": {
+      "common": {
+        "ok": "确定",
+        "cancel": "取消",
+        "save": "保存",
+        "delete": "删除",
+        "edit": "编辑",
+        "back": "返回",
+        "next": "下一步",
+        "submit": "提交",
+        "loading": "加载中...",
+        "error": "发生错误",
+        "success": "成功",
+        "search": "搜索",
+        "menu": "菜单",
+        "settings": "设置",
+        "help": "帮助",
+        "home": "首页",
+        "profile": "个人资料"
+      },
+      "errors": {
+        "required": "{field}是必填项",
+        "min_length": "{field}至少需要{min}个字符",
+        "max_length": "{field}最多只能有{max}个字符",
+        "invalid_email": "请输入有效的电子邮箱地址",
+        "password_mismatch": "密码不匹配",
+        "network_error": "网络错误",
+        "unknown_error": "未知错误"
+      },
+      "auth": {
+        "login": "登录",
+        "logout": "登出",
+        "register": "注册",
+        "forgot_password": "忘记密码？",
+        "email": "电子邮箱",
+        "password": "密码",
+        "confirm_password": "确认密码",
+        "username": "用户名",
+        "remember_me": "记住我"
+      },
+      "navigation": {
+        "dashboard": "仪表板",
+        "notifications": "通知",
+        "messages": "消息",
+        "favorites": "收藏",
+        "account": "账户"
+      }
+    }
+  },
+  {
+    "locale": "ar",
+    "language": "العربية",
+    "direction": "rtl",
+    "translations": {
+      "common": {
+        "ok": "موافق",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "delete": "حذف",
+        "edit": "تعديل",
+        "back": "رجوع",
+        "next": "التالي",
+        "submit": "إرسال",
+        "loading": "جاري التحميل...",
+        "error": "حدث خطأ",
+        "success": "تم بنجاح",
+        "search": "بحث",
+        "menu": "القائمة",
+        "settings": "الإعدادات",
+        "help": "المساعدة",
+        "home": "الرئيسية",
+        "profile": "الملف الشخصي"
+      },
+      "errors": {
+        "required": "{field} مطلوب",
+        "min_length": "يجب أن يحتوي {field} على الأقل {min} أحرف",
+        "max_length": "يجب أن يحتوي {field} على الأكثر {max} أحرف",
+        "invalid_email": "يرجى إدخال عنوان بريد إلكتروني صالح",
+        "password_mismatch": "كلمات المرور غير متطابقة",
+        "network_error": "حدث خطأ في الشبكة",
+        "unknown_error": "حدث خطأ غير معروف"
+      },
+      "auth": {
+        "login": "تسجيل الدخول",
+        "logout": "تسجيل الخروج",
+        "register": "تسجيل",
+        "forgot_password": "نسيت كلمة المرور؟",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "confirm_password": "تأكيد كلمة المرور",
+        "username": "اسم المستخدم",
+        "remember_me": "تذكرني"
+      },
+      "navigation": {
+        "dashboard": "لوحة المعلومات",
+        "notifications": "الإشعارات",
+        "messages": "الرسائل",
+        "favorites": "المفضلة",
+        "account": "الحساب"
+      }
+    }
+  }
+]

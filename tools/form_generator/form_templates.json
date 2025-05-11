@@ -1,0 +1,185 @@
+[
+  {
+    "name": "連絡先フォーム",
+    "fields": [
+      {
+        "type": "text",
+        "name": "name",
+        "label": "お名前",
+        "required": true,
+        "validators": ["required", "min_length: 2"]
+      },
+      {
+        "type": "text",
+        "name": "email",
+        "label": "メールアドレス",
+        "required": true,
+        "validators": ["required", "email"]
+      },
+      {
+        "type": "text",
+        "name": "subject",
+        "label": "件名",
+        "required": true,
+        "validators": ["required"]
+      },
+      {
+        "type": "text",
+        "name": "message",
+        "label": "メッセージ",
+        "multiline": true,
+        "required": true,
+        "validators": ["required", "min_length: 10"]
+      }
+    ]
+  },
+  {
+    "name": "ログインフォーム",
+    "fields": [
+      {
+        "type": "text",
+        "name": "username",
+        "label": "ユーザー名またはメールアドレス",
+        "required": true,
+        "validators": ["required"]
+      },
+      {
+        "type": "text",
+        "name": "password",
+        "label": "パスワード",
+        "password": true,
+        "required": true,
+        "validators": ["required", "min_length: 8"]
+      },
+      {
+        "type": "checkbox",
+        "name": "remember_me",
+        "label": "ログイン状態を保持する",
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "登録フォーム",
+    "fields": [
+      {
+        "type": "text",
+        "name": "username",
+        "label": "ユーザー名",
+        "required": true,
+        "validators": ["required", "min_length: 4"]
+      },
+      {
+        "type": "text",
+        "name": "email",
+        "label": "メールアドレス",
+        "required": true,
+        "validators": ["required", "email"]
+      },
+      {
+        "type": "text",
+        "name": "password",
+        "label": "パスワード",
+        "password": true,
+        "required": true,
+        "validators": ["required", "min_length: 8"]
+      },
+      {
+        "type": "text",
+        "name": "confirm_password",
+        "label": "パスワード（確認）",
+        "password": true,
+        "required": true,
+        "validators": ["required", "match: password"]
+      },
+      {
+        "type": "checkbox",
+        "name": "agree_terms",
+        "label": "利用規約に同意する",
+        "required": true,
+        "validators": ["required"]
+      }
+    ]
+  },
+  {
+    "name": "プロフィール設定",
+    "fields": [
+      {
+        "type": "text",
+        "name": "display_name",
+        "label": "表示名",
+        "required": true,
+        "validators": ["required"]
+      },
+      {
+        "type": "text",
+        "name": "bio",
+        "label": "自己紹介",
+        "multiline": true,
+        "max_length": 200
+      },
+      {
+        "type": "dropdown",
+        "name": "country",
+        "label": "国",
+        "options": [
+          {"text": "日本", "value": "JP"},
+          {"text": "アメリカ", "value": "US"},
+          {"text": "カナダ", "value": "CA"},
+          {"text": "イギリス", "value": "GB"},
+          {"text": "オーストラリア", "value": "AU"}
+        ]
+      },
+      {
+        "type": "date",
+        "name": "birth_date",
+        "label": "生年月日"
+      },
+      {
+        "type": "switch",
+        "name": "notifications",
+        "label": "通知を受け取る",
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "商品検索フォーム",
+    "fields": [
+      {
+        "type": "text",
+        "name": "keyword",
+        "label": "キーワード",
+        "hint_text": "検索キーワードを入力"
+      },
+      {
+        "type": "dropdown",
+        "name": "category",
+        "label": "カテゴリ",
+        "options": [
+          {"text": "すべてのカテゴリ", "value": "all"},
+          {"text": "電子機器", "value": "electronics"},
+          {"text": "書籍", "value": "books"},
+          {"text": "衣類", "value": "clothing"},
+          {"text": "家具", "value": "furniture"}
+        ],
+        "value": "all"
+      },
+      {
+        "type": "slider",
+        "name": "price_range",
+        "label": "価格帯",
+        "min": 0,
+        "max": 50000,
+        "divisions": 10,
+        "value": 25000
+      },
+      {
+        "type": "checkbox",
+        "name": "in_stock",
+        "label": "在庫あり",
+        "value": true
+      }
+    ]
+  }
+]

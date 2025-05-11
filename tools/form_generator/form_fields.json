@@ -1,0 +1,120 @@
+[
+  {
+    "type": "text",
+    "name": "TextField",
+    "properties": [
+      {"name": "label", "type": "str", "default": "", "description": "フィールドのラベル"},
+      {"name": "hint_text", "type": "str", "default": "", "description": "ヒントテキスト"},
+      {"name": "value", "type": "str", "default": "", "description": "初期値"},
+      {"name": "password", "type": "bool", "default": "False", "description": "パスワードフィールドとして表示する"},
+      {"name": "multiline", "type": "bool", "default": "False", "description": "複数行のテキスト入力"},
+      {"name": "max_length", "type": "int", "default": "0", "description": "最大文字数（0は無制限）"},
+      {"name": "required", "type": "bool", "default": "False", "description": "必須フィールド"}
+    ],
+    "validators": [
+      {"name": "required", "message": "{label}は必須です"},
+      {"name": "min_length", "message": "{label}は{min}文字以上で入力してください"},
+      {"name": "max_length", "message": "{label}は{max}文字以下で入力してください"},
+      {"name": "email", "message": "有効なメールアドレスを入力してください"},
+      {"name": "regex", "message": "{label}の形式が正しくありません"}
+    ]
+  },
+  {
+    "type": "dropdown",
+    "name": "Dropdown",
+    "properties": [
+      {"name": "label", "type": "str", "default": "", "description": "フィールドのラベル"},
+      {"name": "hint_text", "type": "str", "default": "", "description": "ヒントテキスト"},
+      {"name": "options", "type": "list", "default": "[]", "description": "選択肢のリスト"},
+      {"name": "value", "type": "str", "default": "", "description": "初期選択値"},
+      {"name": "required", "type": "bool", "default": "False", "description": "必須フィールド"}
+    ],
+    "validators": [
+      {"name": "required", "message": "{label}を選択してください"}
+    ]
+  },
+  {
+    "type": "checkbox",
+    "name": "Checkbox",
+    "properties": [
+      {"name": "label", "type": "str", "default": "", "description": "フィールドのラベル"},
+      {"name": "value", "type": "bool", "default": "False", "description": "初期値"},
+      {"name": "tristate", "type": "bool", "default": "False", "description": "3状態（null/True/False）を許可する"}
+    ],
+    "validators": []
+  },
+  {
+    "type": "radio",
+    "name": "RadioGroup",
+    "properties": [
+      {"name": "value", "type": "str", "default": "", "description": "初期選択値"},
+      {"name": "content", "type": "ft.Column", "default": "ft.Column([])", "description": "Radioボタンのリスト"},
+      {"name": "required", "type": "bool", "default": "False", "description": "必須フィールド"}
+    ],
+    "validators": [
+      {"name": "required", "message": "選択してください"}
+    ]
+  },
+  {
+    "type": "switch",
+    "name": "Switch",
+    "properties": [
+      {"name": "label", "type": "str", "default": "", "description": "フィールドのラベル"},
+      {"name": "value", "type": "bool", "default": "False", "description": "初期値"}
+    ],
+    "validators": []
+  },
+  {
+    "type": "slider",
+    "name": "Slider",
+    "properties": [
+      {"name": "value", "type": "float", "default": "0", "description": "初期値"},
+      {"name": "min", "type": "float", "default": "0", "description": "最小値"},
+      {"name": "max", "type": "float", "default": "100", "description": "最大値"},
+      {"name": "divisions", "type": "int", "default": "0", "description": "区切りの数"}
+    ],
+    "validators": [
+      {"name": "min_value", "message": "{min}以上の値を選択してください"},
+      {"name": "max_value", "message": "{max}以下の値を選択してください"}
+    ]
+  },
+  {
+    "type": "date",
+    "name": "DatePicker",
+    "properties": [
+      {"name": "value", "type": "datetime.date", "default": "None", "description": "初期選択日"},
+      {"name": "first_date", "type": "datetime.date", "default": "None", "description": "選択可能な最初の日"},
+      {"name": "last_date", "type": "datetime.date", "default": "None", "description": "選択可能な最後の日"},
+      {"name": "required", "type": "bool", "default": "False", "description": "必須フィールド"}
+    ],
+    "validators": [
+      {"name": "required", "message": "日付を選択してください"}
+    ]
+  },
+  {
+    "type": "time",
+    "name": "TimePicker",
+    "properties": [
+      {"name": "value", "type": "datetime.time", "default": "None", "description": "初期選択時刻"},
+      {"name": "required", "type": "bool", "default": "False", "description": "必須フィールド"}
+    ],
+    "validators": [
+      {"name": "required", "message": "時刻を選択してください"}
+    ]
+  },
+  {
+    "type": "file",
+    "name": "FilePicker",
+    "properties": [
+      {"name": "upload_url", "type": "str", "default": "", "description": "アップロードURL"},
+      {"name": "allowed_extensions", "type": "list", "default": "[]", "description": "許可するファイル拡張子"},
+      {"name": "max_size", "type": "int", "default": "0", "description": "最大ファイルサイズ（バイト）"},
+      {"name": "required", "type": "bool", "default": "False", "description": "必須フィールド"}
+    ],
+    "validators": [
+      {"name": "required", "message": "ファイルを選択してください"},
+      {"name": "max_size", "message": "ファイルサイズは{max_size}バイト以下にしてください"},
+      {"name": "file_type", "message": "許可されていないファイル形式です"}
+    ]
+  }
+]
