@@ -1,0 +1,114 @@
+[
+  {
+    "name": "Text",
+    "description": "テキストを表示するための基本コンポーネント。さまざまなスタイルやフォーマットに対応。",
+    "code": "ft.Text(\n    \"こんにちは、Fletへようこそ！\",\n    size=20,\n    weight=ft.FontWeight.BOLD,\n    color=\"blue\",\n    italic=False,\n    text_align=ft.TextAlign.CENTER\n)",
+    "properties": ["value", "size", "weight", "color", "italic", "font_family", "text_align"],
+    "category": "基本"
+  },
+  {
+    "name": "ElevatedButton",
+    "description": "立体的なボタンコンポーネント。ユーザーアクションのトリガーに使用。",
+    "code": "ft.ElevatedButton(\n    text=\"クリック\",\n    icon=ft.icons.PLAY_ARROW,\n    on_click=lambda e: print(\"ボタンがクリックされました\"),\n    style=ft.ButtonStyle(\n        shape=ft.RoundedRectangleBorder(radius=10)\n    )\n)",
+    "properties": ["text", "icon", "on_click", "style", "disabled"],
+    "category": "入力"
+  },
+  {
+    "name": "TextField",
+    "description": "ユーザーからのテキスト入力を受け付けるコンポーネント。",
+    "code": "ft.TextField(\n    label=\"お名前\",\n    hint_text=\"フルネームを入力してください\",\n    border=ft.InputBorder.OUTLINE,\n    prefix_icon=ft.icons.PERSON,\n    helper_text=\"姓と名の間にスペースを入れてください\"\n)",
+    "properties": ["value", "label", "hint_text", "border", "prefix_icon", "suffix_icon", "helper_text", "password", "multiline"],
+    "category": "入力"
+  },
+  {
+    "name": "Row",
+    "description": "子要素を水平方向に配置するレイアウトコンポーネント。",
+    "code": "ft.Row(\n    controls=[\n        ft.Text(\"アイテム1\"),\n        ft.Text(\"アイテム2\"),\n        ft.Text(\"アイテム3\")\n    ],\n    alignment=ft.MainAxisAlignment.CENTER,\n    spacing=10,\n    vertical_alignment=ft.CrossAxisAlignment.CENTER\n)",
+    "properties": ["controls", "alignment", "spacing", "vertical_alignment"],
+    "category": "レイアウト"
+  },
+  {
+    "name": "Column",
+    "description": "子要素を垂直方向に配置するレイアウトコンポーネント。",
+    "code": "ft.Column(\n    controls=[\n        ft.Text(\"上のアイテム\"),\n        ft.Text(\"中央のアイテム\"),\n        ft.Text(\"下のアイテム\")\n    ],\n    alignment=ft.MainAxisAlignment.START,\n    spacing=20,\n    horizontal_alignment=ft.CrossAxisAlignment.CENTER\n)",
+    "properties": ["controls", "alignment", "spacing", "horizontal_alignment"],
+    "category": "レイアウト"
+  },
+  {
+    "name": "Container",
+    "description": "他のコンポーネントをラップし、余白、背景色、境界線などを設定できるコンポーネント。",
+    "code": "ft.Container(\n    content=ft.Text(\"コンテナ内のコンテンツ\"),\n    width=200,\n    height=100,\n    padding=10,\n    margin=ft.margin.all(5),\n    bgcolor=ft.colors.BLUE_100,\n    border_radius=10,\n    alignment=ft.alignment.center\n)",
+    "properties": ["content", "width", "height", "padding", "margin", "bgcolor", "border_radius", "alignment", "border"],
+    "category": "レイアウト"
+  },
+  {
+    "name": "Card",
+    "description": "情報をカード形式で表示するコンポーネント。影やボーダーを持つことができる。",
+    "code": "ft.Card(\n    content=ft.Container(\n        content=ft.Column([\n            ft.ListTile(\n                leading=ft.Icon(ft.icons.ALBUM),\n                title=ft.Text(\"カードのタイトル\"),\n                subtitle=ft.Text(\"カードの説明文\")\n            ),\n            ft.Row(\n                controls=[\n                    ft.TextButton(\"アクション1\"),\n                    ft.TextButton(\"アクション2\")\n                ],\n                alignment=ft.MainAxisAlignment.END\n            )\n        ]),\n        padding=10\n    ),\n    elevation=5\n)",
+    "properties": ["content", "elevation", "margin", "color"],
+    "category": "表示"
+  },
+  {
+    "name": "Tabs",
+    "description": "複数のタブ付きコンテンツを切り替えて表示するコンポーネント。",
+    "code": "ft.Tabs(\n    selected_index=0,\n    animation_duration=300,\n    tabs=[\n        ft.Tab(\n            text=\"タブ1\",\n            icon=ft.icons.HOME,\n            content=ft.Container(\n                content=ft.Text(\"タブ1のコンテンツ\"),\n                padding=10\n            )\n        ),\n        ft.Tab(\n            text=\"タブ2\",\n            icon=ft.icons.SETTINGS,\n            content=ft.Container(\n                content=ft.Text(\"タブ2のコンテンツ\"),\n                padding=10\n            )\n        )\n    ]\n)",
+    "properties": ["selected_index", "animation_duration", "tabs", "on_change"],
+    "category": "ナビゲーション"
+  },
+  {
+    "name": "NavigationRail",
+    "description": "サイドナビゲーションを提供するコンポーネント。デスクトップやタブレットのUIに適している。",
+    "code": "ft.NavigationRail(\n    selected_index=0,\n    label_type=ft.NavigationRailLabelType.ALL,\n    extended=True,\n    destinations=[\n        ft.NavigationRailDestination(\n            icon=ft.icons.HOME_OUTLINED,\n            selected_icon=ft.icons.HOME,\n            label=\"ホーム\"\n        ),\n        ft.NavigationRailDestination(\n            icon=ft.icons.FAVORITE_BORDER,\n            selected_icon=ft.icons.FAVORITE,\n            label=\"お気に入り\"\n        ),\n        ft.NavigationRailDestination(\n            icon=ft.icons.SETTINGS_OUTLINED,\n            selected_icon=ft.icons.SETTINGS,\n            label=\"設定\"\n        )\n    ],\n    on_change=lambda e: print(f\"選択されたインデックス: {e.control.selected_index}\")\n)",
+    "properties": ["selected_index", "label_type", "extended", "destinations", "on_change"],
+    "category": "ナビゲーション"
+  },
+  {
+    "name": "NavigationBar",
+    "description": "画面下部に表示するナビゲーションバー。モバイルアプリのUIに適している。",
+    "code": "ft.NavigationBar(\n    destinations=[\n        ft.NavigationDestination(icon=ft.icons.HOME, label=\"ホーム\"),\n        ft.NavigationDestination(icon=ft.icons.SEARCH, label=\"検索\"),\n        ft.NavigationDestination(icon=ft.icons.FAVORITE, label=\"お気に入り\"),\n        ft.NavigationDestination(icon=ft.icons.PERSON, label=\"プロフィール\")\n    ],\n    selected_index=0,\n    on_change=lambda e: print(f\"選択されたインデックス: {e.control.selected_index}\")\n)",
+    "properties": ["destinations", "selected_index", "on_change", "bgcolor"],
+    "category": "ナビゲーション"
+  },
+  {
+    "name": "ListView",
+    "description": "スクロール可能なリストを表示するコンポーネント。大量のアイテムを効率的に表示できる。",
+    "code": "ft.ListView(\n    controls=[\n        ft.ListTile(title=ft.Text(f\"アイテム {i}\"), leading=ft.Icon(ft.icons.LIST))\n        for i in range(1, 11)\n    ],\n    spacing=10,\n    padding=20,\n    auto_scroll=True\n)",
+    "properties": ["controls", "spacing", "padding", "auto_scroll", "divider_thickness"],
+    "category": "表示"
+  },
+  {
+    "name": "GridView",
+    "description": "アイテムをグリッド形式で表示するコンポーネント。画像ギャラリーなどに適している。",
+    "code": "ft.GridView(\n    expand=1,\n    runs_count=5,\n    max_extent=150,\n    spacing=10,\n    run_spacing=10,\n    child_aspect_ratio=1.0,\n    controls=[\n        ft.Container(\n            content=ft.Text(f\"アイテム {i}\"),\n            alignment=ft.alignment.center,\n            bgcolor=ft.colors.BLUE_100,\n            border_radius=10,\n            width=100,\n            height=100\n        )\n        for i in range(1, 21)\n    ]\n)",
+    "properties": ["expand", "runs_count", "max_extent", "spacing", "run_spacing", "child_aspect_ratio", "controls"],
+    "category": "表示"
+  },
+  {
+    "name": "Checkbox",
+    "description": "ユーザーがオプションをオン/オフできるチェックボックスコンポーネント。",
+    "code": "ft.Checkbox(\n    label=\"同意する\",\n    value=False,\n    on_change=lambda e: print(f\"チェック状態: {e.control.value}\"),\n    label_position=ft.LabelPosition.RIGHT\n)",
+    "properties": ["label", "value", "on_change", "disabled", "label_position"],
+    "category": "入力"
+  },
+  {
+    "name": "Switch",
+    "description": "オン/オフを切り替えるスイッチコンポーネント。設定などに使用。",
+    "code": "ft.Switch(\n    label=\"通知を有効にする\",\n    value=True,\n    on_change=lambda e: print(f\"スイッチ状態: {e.control.value}\"),\n    label_position=ft.LabelPosition.LEFT\n)",
+    "properties": ["label", "value", "on_change", "active_color", "label_position"],
+    "category": "入力"
+  },
+  {
+    "name": "AlertDialog",
+    "description": "ユーザーに情報を表示し、アクションを選択させるダイアログコンポーネント。",
+    "code": "def show_dialog(page):\n    page.dialog = ft.AlertDialog(\n        title=ft.Text(\"確認\"),\n        content=ft.Text(\"この操作を実行してもよろしいですか？\"),\n        actions=[\n            ft.TextButton(\"キャンセル\", on_click=lambda e: page.close_dialog()),\n            ft.TextButton(\"OK\", on_click=lambda e: page.close_dialog())\n        ],\n        actions_alignment=ft.MainAxisAlignment.END\n    )\n    page.dialog.open = True\n    page.update()",
+    "properties": ["title", "content", "actions", "actions_alignment", "modal", "open"],
+    "category": "対話"
+  },
+  {
+    "name": "BottomSheet",
+    "description": "画面下部から上にスライドして表示されるシートコンポーネント。",
+    "code": "def show_bottom_sheet(page):\n    bottom_sheet = ft.BottomSheet(\n        ft.Container(\n            ft.Column([\n                ft.Text(\"ボトムシート\", size=20, weight=ft.FontWeight.BOLD),\n                ft.Text(\"ここに追加のコンテンツを表示できます。\"),\n                ft.ElevatedButton(\"閉じる\", on_click=lambda e: bottom_sheet.close())\n            ]),\n            padding=20\n        ),\n        open=True\n    )\n    page.overlay.append(bottom_sheet)\n    page.update()",
+    "properties": ["content", "open", "dismissible", "on_dismiss"],
+    "category": "対話"
+  }
+]

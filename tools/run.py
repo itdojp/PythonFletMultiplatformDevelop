@@ -21,8 +21,7 @@ def main(page: ft.Page):
             alignment=ft.alignment.center
         ),
         ft.Text("Flet マルチプラットフォーム開発ツール", size=28, weight=ft.FontWeight.BOLD),
-    ], alignment=ft.MainAxisAlignment.CENTER, spacing=10)
-      # 利用可能なツールリスト
+    ], alignment=ft.MainAxisAlignment.CENTER, spacing=10)    # 利用可能なツールリスト
     tools_list = [
         {
             "name": "プラットフォーム別機能実装ヘルパー",
@@ -36,7 +35,19 @@ def main(page: ft.Page):
             "icon": "checklist",
             "module_path": "deployment_checklist.main"
         },
-    ]      # ツールを起動する関数
+        {
+            "name": "UIコンポーネントカタログ",
+            "description": "Fletで利用可能な主要UIコンポーネントのサンプルコードとプロパティ集",
+            "icon": "widgets",
+            "module_path": "ui_component_catalog.main"
+        },
+        {
+            "name": "レスポンシブビジュアライザー",
+            "description": "異なる画面サイズでのレイアウト表示をプレビュー",
+            "icon": "responsive",
+            "module_path": "responsive_visualizer.main"
+        },
+    ]# ツールを起動する関数
     def launch_tool(e, tool_info):
         # 新しいウィンドウでツールを起動
         module_path = tool_info["module_path"]
