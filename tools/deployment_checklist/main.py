@@ -41,6 +41,16 @@ def main(page: ft.Page):
         ]),
     ])
     
+    # チェックリストのプレビュー
+    checklist_preview = ft.TextField(
+        label="生成されたチェックリスト",
+        multiline=True,
+        min_lines=20,
+        max_lines=30,
+        read_only=True,
+        width=900
+    )
+    
     # チェックリストの生成
     def generate_checklist(_):
         checklist_data = {
@@ -76,20 +86,11 @@ def main(page: ft.Page):
             json.dump(checklist_data, f, ensure_ascii=False, indent=2)
         
         page.update()
-      generate_button = ft.ElevatedButton(
+    
+    generate_button = ft.ElevatedButton(
         text="チェックリストを生成",
         on_click=generate_checklist,
         icon="checklist"
-    )
-    
-    # チェックリストのプレビュー
-    checklist_preview = ft.TextField(
-        label="生成されたチェックリスト",
-        multiline=True,
-        min_lines=20,
-        max_lines=30,
-        read_only=True,
-        width=900
     )
     
     # チェックリストのエクスポート
@@ -120,7 +121,8 @@ def main(page: ft.Page):
             allowed_extensions=["md"],
             initial_filename=f"{project_name.value or 'flet_app'}_checklist.md"
         )
-      export_button = ft.ElevatedButton(
+    
+    export_button = ft.ElevatedButton(
         text="Markdownとして保存",
         icon="download",
         on_click=export_checklist

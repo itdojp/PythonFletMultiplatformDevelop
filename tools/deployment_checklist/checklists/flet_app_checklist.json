@@ -1,0 +1,277 @@
+{
+  "project_name": "Flet App",
+  "project_description": "マルチプラットフォームFletアプリケーション",
+  "generated_date": "2025-05-11 11:25",
+  "platforms": [
+    {
+      "name": "Android",
+      "checklist": [
+        {
+          "id": "common_1",
+          "text": "アプリの基本機能が正常に動作することを確認",
+          "category": "機能テスト"
+        },
+        {
+          "id": "common_2",
+          "text": "レスポンシブデザインの検証",
+          "category": "UI/UX"
+        },
+        {
+          "id": "common_3",
+          "text": "ダークモード/ライトモード両方での表示確認",
+          "category": "UI/UX"
+        },
+        {
+          "id": "common_4",
+          "text": "アプリアイコンの準備",
+          "category": "アセット"
+        },
+        {
+          "id": "common_5",
+          "text": "アプリバージョンの設定",
+          "category": "設定"
+        },
+        {
+          "id": "common_6",
+          "text": "エラーハンドリングの実装確認",
+          "category": "機能テスト"
+        },
+        {
+          "id": "common_7",
+          "text": "パフォーマンステスト",
+          "category": "パフォーマンス"
+        },
+        {
+          "id": "android_1",
+          "text": "AndroidManifest.xmlの設定確認",
+          "category": "設定"
+        },
+        {
+          "id": "android_2",
+          "text": "必要な権限の設定",
+          "category": "設定"
+        },
+        {
+          "id": "android_3",
+          "text": "異なる画面サイズでのテスト",
+          "category": "UI/UX"
+        },
+        {
+          "id": "android_4",
+          "text": "Google Play Store用のスクリーンショット準備",
+          "category": "マーケティング"
+        },
+        {
+          "id": "android_5",
+          "text": "プライバシーポリシーの作成",
+          "category": "法務"
+        },
+        {
+          "id": "android_6",
+          "text": "App Bundleの生成",
+          "category": "ビルド"
+        },
+        {
+          "id": "android_7",
+          "text": "Google Play Console開発者アカウントの確認",
+          "category": "配布"
+        },
+        {
+          "id": "android_8",
+          "text": "アプリ内課金の設定（必要な場合）",
+          "category": "収益化"
+        },
+        {
+          "id": "android_9",
+          "text": "Firebase Crashlyticsの設定（オプション）",
+          "category": "モニタリング"
+        },
+        {
+          "id": "android_10",
+          "text": "バックボタン処理の確認",
+          "category": "UI/UX"
+        }
+      ]
+    },
+    {
+      "name": "iOS",
+      "checklist": [
+        {
+          "id": "common_1",
+          "text": "アプリの基本機能が正常に動作することを確認",
+          "category": "機能テスト"
+        },
+        {
+          "id": "common_2",
+          "text": "レスポンシブデザインの検証",
+          "category": "UI/UX"
+        },
+        {
+          "id": "common_3",
+          "text": "ダークモード/ライトモード両方での表示確認",
+          "category": "UI/UX"
+        },
+        {
+          "id": "common_4",
+          "text": "アプリアイコンの準備",
+          "category": "アセット"
+        },
+        {
+          "id": "common_5",
+          "text": "アプリバージョンの設定",
+          "category": "設定"
+        },
+        {
+          "id": "common_6",
+          "text": "エラーハンドリングの実装確認",
+          "category": "機能テスト"
+        },
+        {
+          "id": "common_7",
+          "text": "パフォーマンステスト",
+          "category": "パフォーマンス"
+        },
+        {
+          "id": "ios_1",
+          "text": "Info.plistの設定確認",
+          "category": "設定"
+        },
+        {
+          "id": "ios_2",
+          "text": "必要な権限の設定とUsage Descriptionの追加",
+          "category": "設定"
+        },
+        {
+          "id": "ios_3",
+          "text": "異なるiOSデバイスでのテスト",
+          "category": "UI/UX"
+        },
+        {
+          "id": "ios_4",
+          "text": "App Store用のスクリーンショット準備",
+          "category": "マーケティング"
+        },
+        {
+          "id": "ios_5",
+          "text": "プライバシーポリシーの作成",
+          "category": "法務"
+        },
+        {
+          "id": "ios_6",
+          "text": "アーカイブの生成とApp Store Connectへのアップロード",
+          "category": "ビルド"
+        },
+        {
+          "id": "ios_7",
+          "text": "Apple Developer Programの有効期限確認",
+          "category": "配布"
+        },
+        {
+          "id": "ios_8",
+          "text": "In-App Purchaseの設定（必要な場合）",
+          "category": "収益化"
+        },
+        {
+          "id": "ios_9",
+          "text": "App Store Connect上のアプリ情報入力",
+          "category": "配布"
+        },
+        {
+          "id": "ios_10",
+          "text": "TestFlightを使ったベータテスト",
+          "category": "テスト"
+        }
+      ]
+    },
+    {
+      "name": "Web",
+      "checklist": [
+        {
+          "id": "common_1",
+          "text": "アプリの基本機能が正常に動作することを確認",
+          "category": "機能テスト"
+        },
+        {
+          "id": "common_2",
+          "text": "レスポンシブデザインの検証",
+          "category": "UI/UX"
+        },
+        {
+          "id": "common_3",
+          "text": "ダークモード/ライトモード両方での表示確認",
+          "category": "UI/UX"
+        },
+        {
+          "id": "common_4",
+          "text": "アプリアイコンの準備",
+          "category": "アセット"
+        },
+        {
+          "id": "common_5",
+          "text": "アプリバージョンの設定",
+          "category": "設定"
+        },
+        {
+          "id": "common_6",
+          "text": "エラーハンドリングの実装確認",
+          "category": "機能テスト"
+        },
+        {
+          "id": "common_7",
+          "text": "パフォーマンステスト",
+          "category": "パフォーマンス"
+        },
+        {
+          "id": "web_1",
+          "text": "ブラウザ互換性テスト（Chrome, Firefox, Safari, Edge）",
+          "category": "互換性"
+        },
+        {
+          "id": "web_2",
+          "text": "レスポンシブWebデザインの検証",
+          "category": "UI/UX"
+        },
+        {
+          "id": "web_3",
+          "text": "ファビコンの設定",
+          "category": "アセット"
+        },
+        {
+          "id": "web_4",
+          "text": "SEO対策（メタタグ、OGタグ）",
+          "category": "マーケティング"
+        },
+        {
+          "id": "web_5",
+          "text": "Webアナリティクスの設定",
+          "category": "モニタリング"
+        },
+        {
+          "id": "web_6",
+          "text": "サービスワーカーの設定（PWA対応）",
+          "category": "機能"
+        },
+        {
+          "id": "web_7",
+          "text": "HTTPS対応の確認",
+          "category": "セキュリティ"
+        },
+        {
+          "id": "web_8",
+          "text": "Webホスティングプラットフォームの選定",
+          "category": "インフラ"
+        },
+        {
+          "id": "web_9",
+          "text": "ドメイン設定の確認",
+          "category": "インフラ"
+        },
+        {
+          "id": "web_10",
+          "text": "ビルドサイズの最適化",
+          "category": "パフォーマンス"
+        }
+      ]
+    }
+  ]
+}
