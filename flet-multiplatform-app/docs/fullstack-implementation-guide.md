@@ -97,31 +97,31 @@ flet-multiplatform-app/
 ## 技術スタック
 
 ### フロントエンド
-- Flet （UIフレームワーク）
-- SQLite （ローカルストレージ）
-- Pydantic （データバリデーション）
+- Flet（UIフレームワーク）
+- SQLite（ローカルストレージ）
+- Pydantic（データバリデーション）
 
 ### バックエンド
-- FastAPI （APIフレームワーク）
-- SQLAlchemy （ORM）
-- PostgreSQL （データベース）
-- Redis （キャッシュ）
-- JWT （認証）
-- WebSocket （リアルタイム通信）
+- FastAPI（APIフレームワーク）
+- SQLAlchemy（ORM）
+- PostgreSQL（データベース）
+- Redis（キャッシュ）
+- JWT（認証）
+- WebSocket（リアルタイム通信）
 
 ### インフラストラクチャ
-- Docker （コンテナー化）
-- Kubernetes （オーケストレーション）
-- GitHub Actions （CI/CD）
-- Prometheus （モニタリング）
-- Grafana （可視化）
+- Docker（コンテナー化）
+- Kubernetes（オーケストレーション）
+- GitHub Actions（CI/CD）
+- Prometheus（モニタリング）
+- Grafana（可視化）
 
 ### 開発ツール
-- Black (コードフォーマッター)
-- isort (インポートソーター)
-- flake8 (リンター)
-- pytest (テスト)
-- mypy (型チェック)
+- Black（コードフォーマッター）
+- isort（インポートソーター）
+- flake8（リンター）
+- pytest（テスト）
+- mypy（型チェック）
 
 ## 詳細実装計画
 
