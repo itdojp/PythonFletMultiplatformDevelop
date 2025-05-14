@@ -1,57 +1,178 @@
-from flet import Page, Column, Row, NavigationRail, Text, ElevatedButton, Theme, ColorScheme, ThemeMode
-from components.navigation.bottom_nav import BottomNav
-from components.navigation.side_nav import SideNav
-from components.screens.home_screen import HomeScreen
-from components.screens.settings_screen import SettingsScreen
-from components.screens.profile_screen import ProfileScreen
+"""Fletアプリケーションを定義するモジュール"""
 
-class App:
-    def __init__(self, page: Page):
+import flet as ft
+from flet import (
+    AppBar,
+    Column,
+    Container,
+    ElevatedButton,
+    Icon,
+    IconButton,
+    NavigationRail,
+    NavigationRailDestination,
+    Page,
+    Row,
+    Text,
+    TextField,
+    UserControl,
+    colors,
+    icons,
+)
+
+from .backend.schemas import UserResponse
+from .config import settings
+
+
+class LoginView(UserControl):
+    """ログインビュー"""
+
+    def __init__(self, page: Page, on_login_success=None):
+        super().__init__()
         self.page = page
-        self.page.title = "Flet Multi-Platform App"
-        self.page.theme = Theme(
-            color_scheme=ColorScheme(
-                primary=0xFF6200EE,
-                secondary=0xFF03DAC6,
-                background=0xFFFFFFFF,
-                surface=0xFFFFFFFF,
-                error=0xFFB00020,
-                on_primary=0xFFFFFFFF,
-                on_secondary=0xFF000000,
-                on_background=0xFF000000,
-                on_surface=0xFF000000,
-                on_error=0xFFFFFFFF,
-            )
+        self.on_login_success = on_login_success
+        self.username = TextField(
+            label="ユーザー名",
+            autofocus=True,
+            on_submit=self._login,
         )
-        self.page.theme_mode = ThemeMode.SYSTEM
-        self.current_screen = HomeScreen()
-
-        self.setup_ui()
-
-    def setup_ui(self):
-        self.page.add(
-            Row([
-                SideNav(self.navigate),
-                Column([
-                    self.current_screen,
-                    ElevatedButton("Go to Settings", on_click=lambda e: self.navigate("settings")),
-                    ElevatedButton("Go to Profile", on_click=lambda e: self.navigate("profile")),
-                ])
-            ])
+        self.password = TextField(
+            label="パスワード",
+            password=True,
+            can_reveal_password=True,
+            on_submit=self._login,
+        )
+        self.error_text = Text(
+            color=colors.RED_400,
+            visible=False,
         )
 
-    def navigate(self, screen_name):
-        if screen_name == "settings":
-            self.current_screen = SettingsScreen()
-        elif screen_name == "profile":
-            self.current_screen = ProfileScreen()
+    def _login(self, e):
+        """ログイン処理"""
+        # TODO: 実際のログイン処理を実装
+        if self.username.value == "admin" and self.password.value == "admin":
+            self.error_text.visible = False
+            if self.on_login_success:
+                self.on_login_success(UserResponse(
+                    id=1,
+                    username="admin",
+                    email="admin@example.com",
+                    full_name="Administrator",
+                    is_active=True,
+                    is_superuser=True,
+                    created_at="2024-01-01T00:00:00",
+                    updated_at="2024-01-01T00:00:00",
+                ))
         else:
-            self.current_screen = HomeScreen()
+            self.error_text.value = "ユーザー名またはパスワードが正しくありません"
+            self.error_text.visible = True
+        self.update()
 
-        self.page.update()
+    def build(self):
+        """ビューを構築する"""
+        return Container(
+            content=Column(
+                controls=[
+                    Text("ログイン", size=30, weight=ft.FontWeight.BOLD),
+                    self.username,
+                    self.password,
+                    self.error_text,
+                    ElevatedButton(
+                        "ログイン",
+                        on_click=self._login,
+                    ),
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=20,
+            ),
+            padding=20,
+            alignment=ft.alignment.center,
+        )
 
-def main(page: Page):
-    app = App(page)
 
-if __name__ == "__main__":
-    main(Page())
+class MainView(UserControl):
+    """メインビュー"""
+
+    def __init__(self, page: Page, user: UserResponse):
+        super().__init__()
+        self.page = page
+        self.user = user
+        self.selected_index = 0
+        self.rail = NavigationRail(
+            selected_index=0,
+            label_type=ft.NavigationRailLabelType.ALL,
+            min_width=100,
+            min_extended_width=200,
+            destinations=[
+                NavigationRailDestination(
+                    icon=icons.DASHBOARD_OUTLINED,
+                    selected_icon=icons.DASHBOARD,
+                    label="ダッシュボード",
+                ),
+                NavigationRailDestination(
+                    icon=icons.PERSON_OUTLINE,
+                    selected_icon=icons.PERSON,
+                    label="プロフィール",
+                ),
+                NavigationRailDestination(
+                    icon=icons.SETTINGS_OUTLINED,
+                    selected_icon=icons.SETTINGS,
+                    label="設定",
+                ),
+            ],
+            on_change=self._rail_changed,
+        )
+        self.content = Container(
+            content=Text("ダッシュボード", size=30),
+            padding=20,
+        )
+
+    def _rail_changed(self, e):
+        """ナビゲーションの変更を処理する"""
+        self.selected_index = e.control.selected_index
+        if self.selected_index == 0:
+            self.content.content = Text("ダッシュボード", size=30)
+        elif self.selected_index == 1:
+            self.content.content = Column(
+                controls=[
+                    Text("プロフィール", size=30),
+                    Text(f"ユーザー名: {self.user.username}"),
+                    Text(f"メールアドレス: {self.user.email}"),
+                    Text(f"氏名: {self.user.full_name}"),
+                ],
+                spacing=10,
+            )
+        elif self.selected_index == 2:
+            self.content.content = Text("設定", size=30)
+        self.update()
+
+    def build(self):
+        """ビューを構築する"""
+        return Row(
+            controls=[
+                self.rail,
+                ft.VerticalDivider(width=1),
+                self.content,
+            ],
+            expand=True,
+        )
+
+
+def create_app(page: Page):
+    """アプリケーションを作成する"""
+    page.title = settings.PROJECT_NAME
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.padding = 0
+    page.window_width = 1200
+    page.window_height = 800
+    page.window_min_width = 800
+    page.window_min_height = 600
+
+    def _on_login_success(user: UserResponse):
+        """ログイン成功時の処理"""
+        page.clean()
+        page.add(MainView(page, user))
+
+    # ログインビューを表示
+    page.add(LoginView(page, _on_login_success))
+
+    return page

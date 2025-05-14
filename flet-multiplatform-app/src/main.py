@@ -1,12 +1,40 @@
-import flet as ft
-from app import create_app
+"""メインアプリケーションファイル"""
 
-def main(page: ft.Page):
-    page.title = "Flet Multiplatform App"
-    page.vertical_alignment = ft.MainAxisAlignment.START
+import asyncio
+import uvicorn
+from contextlib import asynccontextmanager
 
-    app = create_app(page)
-    page.add(app)
+from .backend.app import app
+from .backend.models import Base
+from .config import settings
+from .config.database import engine
+
+
+@asynccontextmanager
+async def lifespan(app):
+    """アプリケーションのライフサイクルを管理する"""
+    # 起動時の処理
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # シャットダウン時の処理
+    await engine.dispose()
+
+
+# ライフサイクルイベントの設定
+app.router.lifespan_context = lifespan
+
+
+def main():
+    """メイン関数"""
+    uvicorn.run(
+        "src.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=settings.DEBUG,
+        log_level=settings.LOG_LEVEL.lower(),
+    )
+
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    main()
