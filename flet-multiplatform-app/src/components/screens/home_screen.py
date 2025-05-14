@@ -1,4 +1,5 @@
-from flet import Page, Column, Text, ElevatedButton, Row
+from flet import Column, ElevatedButton, Page, Row, Text
+
 
 def home_screen(page: Page):
     page.title = "ホーム"
@@ -9,7 +10,9 @@ def home_screen(page: Page):
             Text("ようこそ！", size=32, weight="bold"),
             Text("このアプリケーションはマルチプラットフォーム対応です。", size=16),
             ElevatedButton("設定に移動", on_click=lambda e: page.go("/settings")),
-            ElevatedButton("プロフィールに移動", on_click=lambda e: page.go("/profile")),
+            ElevatedButton(
+                "プロフィールに移動", on_click=lambda e: page.go("/profile")
+            ),
         ],
         alignment="center",
         spacing=20,

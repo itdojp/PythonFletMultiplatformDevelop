@@ -1,5 +1,6 @@
 # theme_config.py
 
+
 def get_theme():
     return {
         "color_scheme": {

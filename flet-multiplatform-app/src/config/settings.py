@@ -10,6 +10,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # プロジェクトのルートディレクトリ
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
+
 class Settings(BaseSettings):
     """アプリケーションの設定クラス"""
 
@@ -37,6 +38,14 @@ class Settings(BaseSettings):
         """データベース接続URIを構築する"""
         if isinstance(v, str):
             return v
+
+        # Docker Composeの環境変数からデータベース接続情報を取得
+        db_url = os.getenv("DATABASE_URL")
+        if db_url:
+            # postgresql:// を postgresql+asyncpg:// に置き換え
+            return db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+        # 環境変数が設定されていない場合はデフォルト値を使用
         return PostgresDsn.build(
             scheme="postgresql+asyncpg",
             username=values.data.get("POSTGRES_USER"),
@@ -66,4 +75,5 @@ class Settings(BaseSettings):
         super().__init__(**kwargs)
         self.LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-settings = Settings() 
+
+settings = Settings()

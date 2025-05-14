@@ -2,7 +2,8 @@
 
 from fastapi import APIRouter
 
-from .endpoints import auth, users
+# 絶対インポートを使用
+from backend.api.v1.endpoints import auth, users
 
 api_router = APIRouter()
 
@@ -18,4 +19,4 @@ api_router.include_router(
     users.router,
     prefix="/users",
     tags=["ユーザー"],
-) 
+)

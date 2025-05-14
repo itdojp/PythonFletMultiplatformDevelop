@@ -1,4 +1,7 @@
-def get_breakpoint(page_width):
+import flet as ft
+from typing import Any
+
+def get_breakpoint(page_width: float) -> str:
     if page_width < 600:
         return "mobile"
     elif page_width < 960:
@@ -6,9 +9,10 @@ def get_breakpoint(page_width):
     else:
         return "desktop"
 
-def adjust_layout_for_responsive_design(page):
+
+def adjust_layout_for_responsive_design(page: Any) -> None:
     breakpoint = get_breakpoint(page.width)
-    
+
     if breakpoint == "mobile":
         page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         for control in page.controls:
@@ -21,5 +25,5 @@ def adjust_layout_for_responsive_design(page):
         page.horizontal_alignment = ft.CrossAxisAlignment.START
         for control in page.controls:
             control.width = 800
-            
+
     page.update()

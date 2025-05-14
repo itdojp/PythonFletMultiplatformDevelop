@@ -1,4 +1,5 @@
 """非同期処理のユーティリティ"""
+
 import asyncio
 import functools
 from typing import Any, Callable, Coroutine, TypeVar, cast
@@ -7,18 +8,26 @@ from flet import Page, ProgressBar, Text
 
 T = TypeVar("T")
 
+
 class AsyncError(Exception):
     """非同期処理のエラー"""
+
     def __init__(self, message: str, original_error: Optional[Exception] = None):
         super().__init__(message)
         self.original_error = original_error
 
+
 def handle_async_errors(
     error_message: str = "エラーが発生しました",
     show_error: bool = True,
-) -> Callable[[Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]]:
+) -> Callable[
+    [Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]
+]:
     """非同期処理のエラーハンドリングデコレータ"""
-    def decorator(func: Callable[..., Coroutine[Any, Any, T]]) -> Callable[..., Coroutine[Any, Any, T]]:
+
+    def decorator(
+        func: Callable[..., Coroutine[Any, Any, T]],
+    ) -> Callable[..., Coroutine[Any, Any, T]]:
         @functools.wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> T:
             try:
@@ -28,11 +37,15 @@ def handle_async_errors(
                     # エラーメッセージを表示する処理を実装
                     pass
                 raise AsyncError(error_message, e) from e
+
         return cast(Callable[..., Coroutine[Any, Any, T]], wrapper)
+
     return decorator
+
 
 class LoadingManager:
     """ローディング状態管理クラス"""
+
     def __init__(self, page: Page):
         self.page = page
         self._loading_count = 0
@@ -64,11 +77,21 @@ class LoadingManager:
         finally:
             self.stop_loading()
 
-def with_loading(loading_manager: LoadingManager) -> Callable[[Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]]:
+
+def with_loading(
+    loading_manager: LoadingManager,
+) -> Callable[
+    [Callable[..., Coroutine[Any, Any, T]]], Callable[..., Coroutine[Any, Any, T]]
+]:
     """ローディング状態で非同期処理を実行するデコレータ"""
-    def decorator(func: Callable[..., Coroutine[Any, Any, T]]) -> Callable[..., Coroutine[Any, Any, T]]:
+
+    def decorator(
+        func: Callable[..., Coroutine[Any, Any, T]],
+    ) -> Callable[..., Coroutine[Any, Any, T]]:
         @functools.wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> T:
             return await loading_manager.with_loading(func(*args, **kwargs))
+
         return cast(Callable[..., Coroutine[Any, Any, T]], wrapper)
-    return decorator 
+
+    return decorator

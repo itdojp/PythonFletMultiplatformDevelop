@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .settings import settings
 
+
 def setup_logging() -> None:
     """ロギングの設定を行う"""
     # ルートロガーの設定
@@ -39,6 +40,7 @@ def setup_logging() -> None:
     )
     logging.getLogger("flet").setLevel(logging.INFO)
 
+
 def get_logger(name: str) -> logging.Logger:
     """指定された名前のロガーを取得する"""
-    return logging.getLogger(name) 
+    return logging.getLogger(name)

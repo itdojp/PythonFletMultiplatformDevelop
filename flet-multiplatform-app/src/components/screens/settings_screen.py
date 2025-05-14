@@ -1,4 +1,5 @@
-from flet import Page, Column, Text, ElevatedButton, AppBar, IconButton, icons
+from flet import AppBar, Column, ElevatedButton, IconButton, Page, Text, icons
+
 
 def settings_screen(page: Page):
     page.title = "設定"
@@ -17,9 +18,11 @@ def settings_screen(page: Page):
 
     page.add(settings_content)
 
+
 def save_settings():
     # 設定を保存するロジックをここに追加
     print("設定が保存されました。")
+
 
 def cancel_settings():
     # 設定をキャンセルするロジックをここに追加

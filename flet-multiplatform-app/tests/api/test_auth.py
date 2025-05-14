@@ -1,4 +1,5 @@
 """認証APIのテスト"""
+
 import pytest
 from fastapi import status
 from httpx import AsyncClient
@@ -7,6 +8,7 @@ from src.backend.core.security import create_access_token
 from src.backend.models.user import User
 
 pytestmark = pytest.mark.asyncio
+
 
 async def test_login_success(client: AsyncClient, test_user: User) -> None:
     """ログイン成功のテスト"""
@@ -22,6 +24,7 @@ async def test_login_success(client: AsyncClient, test_user: User) -> None:
     assert "access_token" in data
     assert data["token_type"] == "bearer"
 
+
 async def test_login_invalid_username(client: AsyncClient) -> None:
     """無効なユーザー名でのログイン失敗のテスト"""
     response = await client.post(
@@ -33,6 +36,7 @@ async def test_login_invalid_username(client: AsyncClient) -> None:
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
+
 async def test_login_invalid_password(client: AsyncClient, test_user: User) -> None:
     """無効なパスワードでのログイン失敗のテスト"""
     response = await client.post(
@@ -43,6 +47,7 @@ async def test_login_invalid_password(client: AsyncClient, test_user: User) -> N
         },
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
 
 async def test_get_current_user(client: AsyncClient, test_user: User) -> None:
     """現在のユーザー情報取得のテスト"""
@@ -56,10 +61,11 @@ async def test_get_current_user(client: AsyncClient, test_user: User) -> None:
     assert data["username"] == test_user.username
     assert data["email"] == test_user.email
 
+
 async def test_get_current_user_invalid_token(client: AsyncClient) -> None:
     """無効なトークンでのユーザー情報取得失敗のテスト"""
     response = await client.get(
         "/api/v1/auth/me",
         headers={"Authorization": "Bearer invalid_token"},
     )
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED 
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED

@@ -1,4 +1,5 @@
 """フロントエンドアプリケーション"""
+
 from typing import Optional
 
 from flet import (
@@ -21,10 +22,17 @@ from flet import (
 
 from src.frontend.api.client import APIClient
 from src.frontend.store.auth_store import AuthStore
-from src.frontend.utils.async_utils import AsyncError, LoadingManager, handle_async_errors, with_loading
+from src.frontend.utils.async_utils import (
+    AsyncError,
+    LoadingManager,
+    handle_async_errors,
+    with_loading,
+)
+
 
 class LoginView(UserControl):
     """ログインビュー"""
+
     def __init__(self, auth_store: AuthStore, loading_manager: LoadingManager):
         super().__init__()
         self.auth_store = auth_store
@@ -74,8 +82,10 @@ class LoginView(UserControl):
             self.error_text.visible = True
             self.update()
 
+
 class MainView(UserControl):
     """メインビュー"""
+
     def __init__(self, auth_store: AuthStore, loading_manager: LoadingManager):
         super().__init__()
         self.auth_store = auth_store
@@ -132,6 +142,7 @@ class MainView(UserControl):
             self.content.controls = [Text("設定", size=30, weight="bold")]
         self.update()
 
+
 def create_app(page: Page):
     """アプリケーションの作成"""
     # ページの設定
@@ -160,4 +171,4 @@ def create_app(page: Page):
     auth_store.add_listener(on_auth_state_changed)
 
     # 初期ビューの設定
-    on_auth_state_changed() 
+    on_auth_state_changed()

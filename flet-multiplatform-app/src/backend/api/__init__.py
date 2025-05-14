@@ -1,5 +1,6 @@
 """APIモジュールの初期化ファイル"""
 
-from .v1.api import api_router
+# 絶対インポートを使用
+from backend.api.v1.api import api_router
 
-__all__ = ["api_router"] 
+__all__ = ["api_router"]

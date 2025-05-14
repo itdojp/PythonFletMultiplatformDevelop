@@ -9,6 +9,7 @@ from app.services import item_service
 
 router = APIRouter()
 
+
 @router.get("/", response_model=List[schemas.Item])
 def read_items(
     db: Session = Depends(deps.get_db),
@@ -19,10 +20,9 @@ def read_items(
     """
     Retrieve items.
     """
-    items = item_service.get_items(
-        db, skip=skip, limit=limit, owner_id=current_user.id
-    )
+    items = item_service.get_items(db, skip=skip, limit=limit, owner_id=current_user.id)
     return items
+
 
 @router.post("/", response_model=schemas.Item)
 def create_item(
@@ -34,10 +34,9 @@ def create_item(
     """
     Create new item.
     """
-    item = item_service.create_user_item(
-        db, item=item_in, owner_id=current_user.id
-    )
+    item = item_service.create_user_item(db, item=item_in, owner_id=current_user.id)
     return item
+
 
 @router.put("/{item_id}", response_model=schemas.Item)
 def update_item(
@@ -58,6 +57,7 @@ def update_item(
     item = item_service.update_item(db, db_item=item, item_in=item_in)
     return item
 
+
 @router.get("/{item_id}", response_model=schemas.Item)
 def read_item(
     *,
@@ -74,6 +74,7 @@ def read_item(
     if item.owner_id != current_user.id:
         raise HTTPException(status_code=400, detail="Not enough permissions")
     return item
+
 
 @router.delete("/{item_id}", response_model=schemas.Item)
 def delete_item(

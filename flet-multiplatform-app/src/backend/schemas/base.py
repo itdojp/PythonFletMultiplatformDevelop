@@ -47,4 +47,4 @@ class BaseInDB(BaseSchema):
     class Config:
         """設定"""
 
-        from_attributes = True 
+        from_attributes = True

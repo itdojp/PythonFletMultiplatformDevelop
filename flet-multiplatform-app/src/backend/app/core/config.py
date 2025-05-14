@@ -1,5 +1,8 @@
-from typing import List, Optional, Any, Union
-from pydantic import AnyHttpUrl, BaseSettings, validator
+from typing import Any, List, Optional, Union
+
+from pydantic import AnyHttpUrl, validator
+from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Flet Multiplatform App"
@@ -8,28 +11,32 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-secret-key-here"  # 本番環境では環境変数から取得する
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8日間
-    
+
     # PostgreSQL
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_DB: str = "flet_app"
     SQLALCHEMY_DATABASE_URI: Optional[str] = None
-    
+
     # CORS設定
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = ["http://localhost:8000", "http://localhost:8501"]
-    
-    @validator('BACKEND_CORS_ORIGINS', pre=True)
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
+        "http://localhost:8000",
+        "http://localhost:8501",
+    ]
+
+    @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)
-    
+
     class Config:
         case_sensitive = True
         env_file = ".env"
+
 
 settings = Settings()
 

@@ -52,16 +52,18 @@ class LoginView(UserControl):
         if self.username.value == "admin" and self.password.value == "admin":
             self.error_text.visible = False
             if self.on_login_success:
-                self.on_login_success(UserResponse(
-                    id=1,
-                    username="admin",
-                    email="admin@example.com",
-                    full_name="Administrator",
-                    is_active=True,
-                    is_superuser=True,
-                    created_at="2024-01-01T00:00:00",
-                    updated_at="2024-01-01T00:00:00",
-                ))
+                self.on_login_success(
+                    UserResponse(
+                        id=1,
+                        username="admin",
+                        email="admin@example.com",
+                        full_name="Administrator",
+                        is_active=True,
+                        is_superuser=True,
+                        created_at="2024-01-01T00:00:00",
+                        updated_at="2024-01-01T00:00:00",
+                    )
+                )
         else:
             self.error_text.value = "ユーザー名またはパスワードが正しくありません"
             self.error_text.visible = True

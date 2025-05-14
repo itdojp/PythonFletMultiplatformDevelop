@@ -7,12 +7,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ....config import settings
-from ....config.database import get_db
-from ....utils.security import create_access_token, get_password_hash
-from ...deps import authenticate_user
-from ..models import User
-from ..schemas import Token, UserCreate, UserResponse
+from backend.deps import authenticate_user
+from backend.models import User
+from backend.schemas import Token, UserCreate, UserResponse
+from backend.utils.security import create_access_token, get_password_hash
+
+# 絶対インポートを使用
+from config import settings
+from config.database import get_db
 
 router = APIRouter()
 
@@ -70,4 +72,4 @@ async def register(
     db.add(user)
     await db.commit()
     await db.refresh(user)
-    return user 
+    return user

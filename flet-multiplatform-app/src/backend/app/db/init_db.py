@@ -1,14 +1,15 @@
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash
+from app.db.base import Base
 from app.db.database import engine
-from app.models.user import User
-from app.models.item import Item
-from app.schemas.user import UserCreate
 
 # テーブルを作成するためにすべてのモデルをインポートする
 from app.models import *
-from app.db.base import Base
+from app.models.item import Item
+from app.models.user import User
+from app.schemas.user import UserCreate
+
 
 def init_db(db: Session) -> None:
     # テーブルを作成
@@ -32,20 +33,21 @@ def init_db(db: Session) -> None:
         db.add(user)
         db.commit()
         db.refresh(user)
-        
+
         # テスト用アイテムを作成
         item = Item(
             title="テストアイテム",
             description="これはテスト用のアイテムです。",
-            owner_id=user.id
+            owner_id=user.id,
         )
         db.add(item)
         db.commit()
         db.refresh(item)
 
+
 if __name__ == "__main__":
     from app.db.database import SessionLocal
-    
+
     print("データベースを初期化しています...")
     db = SessionLocal()
     try:

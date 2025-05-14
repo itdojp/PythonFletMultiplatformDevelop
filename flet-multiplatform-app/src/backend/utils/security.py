@@ -1,22 +1,21 @@
 """セキュリティ関連のユーティリティを提供するモジュール"""
 
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from jose import jwt
 from passlib.context import CryptContext
 
-from ..config import settings
+from config import settings
 
-# パスワードハッシュ化の設定
+# パスワードのハッシュ化に使用するコンテキスト
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def create_access_token(
-    subject: str | Any,
-    expires_delta: Optional[timedelta] = None,
+    subject: Union[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
-    """アクセストークンを作成する"""
+    """JWTアクセストークンを作成する"""
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -25,9 +24,7 @@ def create_access_token(
         )
     to_encode = {"exp": expire, "sub": str(subject)}
     encoded_jwt = jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM,
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
     )
     return encoded_jwt
 

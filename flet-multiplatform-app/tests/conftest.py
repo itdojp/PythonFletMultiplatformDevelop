@@ -1,4 +1,5 @@
 """テスト用の設定ファイル"""
+
 import asyncio
 import os
 from typing import AsyncGenerator, Generator
@@ -11,11 +12,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from src.backend.app import app
+from src.backend.core.security import get_password_hash
 from src.backend.db.base import Base
 from src.backend.db.session import get_db
 from src.backend.models.user import User
 from src.backend.schemas.user import UserCreate
-from src.backend.core.security import get_password_hash
 
 # テスト用のデータベースURL
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -30,12 +31,14 @@ TestingSessionLocal = sessionmaker(
     test_engine, class_=AsyncSession, expire_on_commit=False
 )
 
+
 @pytest.fixture(scope="session")
 def event_loop() -> Generator:
     """イベントループのフィクスチャ"""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
+
 
 @pytest_asyncio.fixture(scope="session")
 async def test_db() -> AsyncGenerator[AsyncSession, None]:
@@ -49,9 +52,11 @@ async def test_db() -> AsyncGenerator[AsyncSession, None]:
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
 
+
 @pytest.fixture(scope="module")
 def client(test_db: AsyncSession) -> Generator:
     """テストクライアントのフィクスチャ"""
+
     async def override_get_db():
         yield test_db
 
@@ -59,6 +64,7 @@ def client(test_db: AsyncSession) -> Generator:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
 
 @pytest_asyncio.fixture(scope="module")
 async def test_user(test_db: AsyncSession) -> User:
@@ -80,4 +86,4 @@ async def test_user(test_db: AsyncSession) -> User:
     test_db.add(user)
     await test_db.commit()
     await test_db.refresh(user)
-    return user 
+    return user

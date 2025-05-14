@@ -1,8 +1,9 @@
 """バックエンドモジュールの初期化ファイル"""
 
-from .api import api_router
-from .models import Base, User
-from .schemas import (
+# 絶対インポートを使用
+from backend.api import api_router
+from backend.models import Base, User
+from backend.schemas import (
     BaseCreateSchema,
     BaseInDB,
     BaseResponseSchema,
@@ -33,4 +34,4 @@ __all__ = [
     "UserResponse",
     "Token",
     "TokenPayload",
-] 
+]

@@ -55,4 +55,4 @@ class TokenPayload(BaseModel):
     """トークンペイロードスキーマ"""
 
     sub: Optional[int] = None
-    exp: Optional[datetime] = None 
+    exp: Optional[datetime] = None

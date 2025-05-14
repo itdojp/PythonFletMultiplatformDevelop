@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, Boolean
+from sqlalchemy import Boolean, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
@@ -53,4 +53,4 @@ class User(Base):
 
     def __repr__(self) -> str:
         """文字列表現を返す"""
-        return f"<User {self.username}>" 
+        return f"<User {self.username}>"

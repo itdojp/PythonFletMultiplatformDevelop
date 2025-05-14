@@ -1,4 +1,5 @@
 """APIクライアントの実装"""
+
 import json
 from typing import Any, Dict, Optional
 
@@ -8,8 +9,10 @@ from flet import Page
 from src.backend.schemas.user import UserCreate, UserResponse
 from src.frontend.config import settings
 
+
 class APIClient:
     """APIクライアントクラス"""
+
     def __init__(self, page: Page):
         self.page = page
         self.base_url = settings.API_BASE_URL
@@ -78,4 +81,4 @@ class APIClient:
     def __del__(self) -> None:
         """デストラクタ"""
         if hasattr(self, "_client"):
-            self.page.loop.create_task(self.close()) 
+            self.page.loop.create_task(self.close())

@@ -1,4 +1,5 @@
 """認証状態管理ストア"""
+
 from dataclasses import dataclass, field
 from typing import Callable, List, Optional
 
@@ -7,9 +8,11 @@ from flet import Page
 from src.backend.schemas.user import UserResponse
 from src.frontend.api.client import APIClient
 
+
 @dataclass
 class AuthStore:
     """認証状態管理クラス"""
+
     page: Page
     api_client: APIClient
     _current_user: Optional[UserResponse] = None
@@ -54,4 +57,4 @@ class AuthStore:
         """ユーザー情報の更新"""
         if self.is_authenticated:
             self._current_user = await self.api_client.get_current_user()
-            self._notify_listeners() 
+            self._notify_listeners()

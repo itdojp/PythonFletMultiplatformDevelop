@@ -46,4 +46,4 @@ async def root():
 @app.get("/health")
 async def health_check():
     """ヘルスチェックエンドポイント"""
-    return {"status": "ok"} 
+    return {"status": "ok"}

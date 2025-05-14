@@ -1,4 +1,5 @@
-from flet import NavigationRail, NavigationRailDestination, IconButton, icons
+from flet import NavigationRail, NavigationRailDestination, NavigationRailLabelType, icons
+
 
 class SideNav:
     def __init__(self, selected_index=0, on_select=None):
@@ -14,5 +15,5 @@ class SideNav:
                 NavigationRailDestination(icon=icons.BOOKMARK, label="保存"),
                 NavigationRailDestination(icon=icons.SETTINGS, label="設定"),
             ],
-            on_change=self.on_select
+            on_change=self.on_select,
         )

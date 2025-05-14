@@ -7,11 +7,11 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..config import settings
-from ..config.database import get_db
-from ..utils.security import verify_password
-from .models import User
-from .schemas import TokenPayload
+from backend.models import User
+from backend.schemas import TokenPayload
+from backend.utils.security import verify_password
+from config import settings
+from config.database import get_db
 
 # OAuth2パスワードベアラーの設定
 oauth2_scheme = OAuth2PasswordBearer(
@@ -87,4 +87,4 @@ async def authenticate_user(
         return None
     if not verify_password(password, user.hashed_password):
         return None
-    return user 
+    return user

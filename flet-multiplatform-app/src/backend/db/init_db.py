@@ -6,11 +6,11 @@ from datetime import datetime
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ...config.database import AsyncSessionLocal
+from ...config.logging import get_logger
 from ..models import User
 from ..schemas import UserCreate
 from ..utils.security import get_password_hash
-from ...config.database import AsyncSessionLocal
-from ...config.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -51,4 +51,4 @@ async def create_first_superuser(db: AsyncSession) -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(init_db()) 
+    asyncio.run(init_db())

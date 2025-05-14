@@ -1,5 +1,7 @@
 from typing import Any, Dict
+
 import requests
+
 
 class APIService:
     BASE_URL = "https://api.example.com"  # Replace with your actual API base URL
