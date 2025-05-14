@@ -38,7 +38,11 @@ repos:
     hooks:
       - id: mypy
         additional_dependencies:
-          - types-all
+          - types-python-dateutil
+          - types-pytz
+          - types-requests
+          - types-setuptools
+          - types-six
         args: [--ignore-missing-imports]
 
   - repo: https://github.com/asottile/pyupgrade
@@ -52,4 +56,4 @@ repos:
     hooks:
       - id: bandit
         args: ["-c", "pyproject.toml"]
-        additional_dependencies: ["bandit[toml]"] 
+        additional_dependencies: ["bandit[toml]"]

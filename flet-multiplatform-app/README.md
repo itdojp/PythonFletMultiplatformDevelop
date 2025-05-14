@@ -4,6 +4,13 @@
 
 ## プロジェクト構成
 
+## ドキュメント
+
+- [開発者ガイド](./docs/DEVELOPER_GUIDE.md) - 開発環境のセットアップやコントリビューション方法など
+- [デザインガイドライン](./docs/design_guidelines.md) - UI/UX デザインのガイドライン
+
+## プロジェクト構成
+
 ```
 flet-multiplatform-app
 ├── src                     # アプリケーションのソースコード
@@ -43,7 +50,8 @@ flet-multiplatform-app
 │   ├── test_components.py
 │   └── test_responsive.py
 ├── docs                    # ドキュメント
-│   └── design_guidelines.md
+│   ├── DEVELOPER_GUIDE.md  # 開発者向けガイド
+│   └── design_guidelines.md # デザインガイドライン
 ├── requirements.txt        # 依存関係
 ├── pyproject.toml         # プロジェクト設定
 └── README.md               # プロジェクトの概要
@@ -51,19 +59,19 @@ flet-multiplatform-app
 
 ## 使用方法
 
-1. **依存関係のインストール**  
+1. **依存関係のインストール**
    プロジェクトのルートディレクトリで以下のコマンドを実行して、必要なパッケージをインストールします。
    ```
    pip install -r requirements.txt
    ```
 
-2. **アプリケーションの起動**  
+2. **アプリケーションの起動**
    `src/main.py`を実行してアプリケーションを起動します。
    ```
    python src/main.py
    ```
 
-3. **テストの実行**  
+3. **テストの実行**
    テストを実行するには、以下のコマンドを使用します。
    ```
    pytest tests/
