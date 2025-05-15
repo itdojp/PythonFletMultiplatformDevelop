@@ -2,7 +2,12 @@
 
 import asyncio
 import os
+import sys
+from pathlib import Path
 from typing import AsyncGenerator, Generator
+
+# src ディレクトリを Python パスに追加
+sys.path.append(str(Path(__file__).parent.parent / "src"))
 
 import pytest
 import pytest_asyncio
@@ -10,7 +15,6 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-
 from src.backend.app import app
 from src.backend.core.security import get_password_hash
 from src.backend.db.base import Base

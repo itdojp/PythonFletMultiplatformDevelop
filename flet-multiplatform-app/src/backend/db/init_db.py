@@ -3,11 +3,12 @@
 import asyncio
 import logging
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from ...config.database import AsyncSessionLocal
-from ...config.logging import get_logger
+from ..config.database import AsyncSessionLocal
+from ..config.logging import get_logger
 from ..models import User
 from ..schemas import UserCreate
 from ..utils.security import get_password_hash

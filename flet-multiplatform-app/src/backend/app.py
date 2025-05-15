@@ -3,9 +3,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from ..config import settings
-from ..config.logging import setup_logging
 from .api import api_router
+from .config import settings
+from .config.logging import setup_logging
 
 # ロギングの設定
 setup_logging()

@@ -1,9 +1,10 @@
 """バックエンドモジュールの初期化ファイル"""
 
-# 絶対インポートを使用
-from backend.api import api_router
-from backend.models import Base, User
-from backend.schemas import (
+# 相対インポートを使用
+from .api import api_router
+from .core.config import settings  # noqa: F401
+from .models import Base, User
+from .schemas import (
     BaseCreateSchema,
     BaseInDB,
     BaseResponseSchema,
@@ -22,16 +23,17 @@ __all__ = [
     "api_router",
     "Base",
     "User",
-    "BaseSchema",
-    "BaseResponseSchema",
     "BaseCreateSchema",
-    "BaseUpdateSchema",
     "BaseInDB",
-    "UserBase",
-    "UserCreate",
-    "UserUpdate",
-    "UserInDB",
-    "UserResponse",
+    "BaseResponseSchema",
+    "BaseSchema",
+    "BaseUpdateSchema",
     "Token",
     "TokenPayload",
+    "UserBase",
+    "UserCreate",
+    "UserInDB",
+    "UserResponse",
+    "UserUpdate",
+    "settings",
 ]

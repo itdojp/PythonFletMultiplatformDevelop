@@ -1,0 +1,129 @@
+name: Test and Coverage
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    - cron: '0 0 * * 1'  # 毎週月曜日
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        os: [ubuntu-latest, windows-latest]
+        exclude:
+          - os: windows-latest
+            python-version: "3.9"
+          - os: windows-latest
+            python-version: "3.12"
+
+    # カバレッジレポートを1回だけアップロードするための設定
+    outputs:
+      coverage: ${{ steps.coverage.outputs.coverage }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev]
+
+    - name: Run tests with coverage
+      id: coverage
+      run: |
+        # カバレッジレポートを生成
+        python -m pytest tests/ -v --cov=src --cov-report=xml:coverage.xml --cov-report=term-missing --cov-report=html
+
+        # カバレッジの閾値チェック（70%未満で失敗）
+        python -m coverage report --fail-under=70
+
+        # カバレッジのパーセンテージを取得
+        COVERAGE=$(python -c "import xml.etree.ElementTree as ET; print(ET.parse('coverage.xml').getroot().attrib['line-rate'])")
+        echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+
+    - name: Upload coverage report artifact
+      if: matrix.python-version == '3.10' && matrix.os == 'ubuntu-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          htmlcov/
+          coverage.xml
+        retention-days: 5
+
+  deploy-coverage:
+    needs: test
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop') && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download coverage report
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-report
+        path: ./coverage-report
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./coverage-report/htmlcov
+        publish_branch: gh-pages
+        force_orphan: true
+        keep_files: true
+
+  comment-pr:
+    needs: test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download coverage report
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-report
+        path: ./coverage-report
+
+    - name: Extract coverage percentage
+      id: coverage
+      run: |
+        COVERAGE=$(python -c "import xml.etree.ElementTree as ET; print(ET.parse('coverage-report/coverage.xml').getroot().attrib['line-rate'])")
+        COVERAGE_PERCENT=$(python -c "print(round($COVERAGE * 100, 2))")
+        echo "coverage=${COVERAGE_PERCENT}%" >> $GITHUB_OUTPUT
+        echo "coverage_number=${COVERAGE}" >> $GITHUB_OUTPUT
+
+    - name: Create PR comment
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const coverage = `${{ steps.coverage.outputs.coverage }}`;
+          const coverageNumber = parseFloat(`${{ steps.coverage.outputs.coverage_number }}`);
+
+          let message = '## 📊 Test Coverage Report\n\n';
+          message += `- **Coverage**: ${coverage}\n`;
+
+          if (coverageNumber < 0.7) {
+            message += '❌ **WARNING**: Coverage is below the minimum threshold of 70%\n';
+          } else if (coverageNumber < 0.8) {
+            message += '⚠️ **NOTE**: Coverage is below the recommended threshold of 80%\n';
+          } else {
+            message += '✅ Great job! Coverage meets the recommended threshold\n';
+          }
+
+          message += '\n[View detailed coverage report]';
+          message += `(https://${context.repo.owner}.github.io/${context.repo.repo}/)`;
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: message
+          });

@@ -1,0 +1,67 @@
+site_name: Flet マルチプラットフォーム開発テンプレート
+site_description: Flet を使用したマルチプラットフォームアプリケーション開発のためのテンプレートプロジェクト
+site_author: Your Name
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.top
+    - navigation.sections
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - toc.integrate
+    - content.tabs.link
+    - content.code.copy
+    - header.autohide
+
+repo_name: your-username/flet-multiplatform-app
+repo_url: https://github.com/your-username/flet-multiplatform-app
+
+nav:
+  - ホーム: index.md
+  - はじめに: getting_started.md
+  - チュートリアル: tutorial.md
+  - API リファレンス: api_reference.md
+  - トラブルシューティング: troubleshooting.md
+  - 開発ガイド:
+    - 開発ロードマップ: development_roadmap.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_category_heading: true
+
+extra_css:
+  - css/extra.css
