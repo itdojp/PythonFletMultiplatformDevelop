@@ -13,6 +13,9 @@ exclude_lines =
     except Exception:
     except:  # noqa
     except Exception:  # noqa
+fail_under = 70
+show_missing = True
+skip_covered = True
 
 [html]
 directory = htmlcov
