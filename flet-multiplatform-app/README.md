@@ -212,3 +212,4 @@ flet-multiplatform-app
 ## ライセンス
 
 このプロジェクトはMITライセンスの下で公開されています。詳細はLICENSEファイルを参照してください。
+\n
