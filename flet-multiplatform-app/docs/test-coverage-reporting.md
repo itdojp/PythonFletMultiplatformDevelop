@@ -92,3 +92,61 @@ coverage report -m
 - [pytest-cov 公式ドキュメント](https://pytest-cov.readthedocs.io/)
 - [Python Coverage.py ドキュメント](https://coverage.readthedocs.io/)
 - [GitHub Actions ワークフロー構文](https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions)
+
+---
+
+## 9. GitHub Pages の設定手順
+
+### 9.1 リポジトリ設定
+1. GitHub でリポジトリのトップページにアクセス
+2. 上部の「Settings」タブをクリック
+3. 左サイドバーから「Pages」を選択
+
+### 9.2 ソースの設定
+1. 「Source」セクションで以下を設定:
+   - Branch: `gh-pages`
+   - Folder: `/ (root)`
+2. 「Save」ボタンをクリック
+
+### 9.3 Actions の権限設定
+1. リポジトリの「Settings」に戻る
+2. 左サイドバーから「Actions」→「General」を選択
+3. 「Workflow permissions」セクションで以下を設定:
+   - ✅ Read and write permissions を有効化
+   - ✅ Allow GitHub Actions to create and approve pull requests を有効化
+4. ページ下部の「Save」ボタンをクリック
+
+### 9.4 初回設定後の確認
+1. `main` または `develop` ブランチにプッシュ
+2. GitHub Actions の実行を確認
+3. 数分後に `https://<ユーザー名>.github.io/<リポジトリ名>/` にアクセスしてレポートを確認
+
+## 10. トラブルシューティング（GitHub Pages 編）
+
+### 10.1 ページが表示されない場合
+1. GitHub Actions のワークフローが正常に完了しているか確認
+2. ブランチ名とフォルダの設定が正しいか確認
+3. 初回のデプロイには最大10分かかることがあります
+
+### 10.2 404 エラーが表示される場合
+1. リポジトリの「Settings」→「Pages」でデプロイの状態を確認
+2. ワークフローファイルの `deploy` ステップが実行されているか確認
+3. `gh-pages` ブランチに `index.html` が存在するか確認
+
+## 11. カスタムドメインの設定（オプション）
+
+カスタムドメインを使用する場合は、以下の手順で設定できます：
+
+1. リポジトリの「Settings」→「Pages」→「Custom domain」にドメインを入力
+2. DNSプロバイダで以下のレコードを設定:
+   ```
+   CNAME レコード: yourdomain.com → <ユーザー名>.github.io
+   CNAME レコード: www → <ユーザー名>.github.io
+   ```
+3. 「Enforce HTTPS」を有効化
+
+## 12. 参考リンク（追加）
+
+- [GitHub Pages 公式ドキュメント](https://docs.github.com/ja/pages)
+- [GitHub Actions ワークフロー構文](https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions)
+- [カスタムドメインの設定](https://docs.github.com/ja/pages/configuring-a-custom-domain-for-your-github-pages-site)
