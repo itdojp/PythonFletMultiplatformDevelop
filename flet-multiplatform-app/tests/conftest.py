@@ -1,4 +1,7 @@
-"""テスト用の設定ファイル"""
+"""テスト用の設定ファイル。
+
+このファイルは、pytestのテスト環境を設定します。
+"""
 
 import asyncio
 import os
@@ -6,15 +9,20 @@ import sys
 from pathlib import Path
 from typing import AsyncGenerator, Generator
 
-# src ディレクトリを Python パスに追加
-sys.path.append(str(Path(__file__).parent.parent / "src"))
-
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
+
+# src ディレクトリを Python パスに追加
+sys.path.append(str(Path(__file__).parent.parent / "src"))
+
+# テスト環境変数を設定
+os.environ["TESTING"] = "True"
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+
 from src.backend.app import app
 from src.backend.core.security import get_password_hash
 from src.backend.db.base import Base
