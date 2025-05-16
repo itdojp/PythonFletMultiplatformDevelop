@@ -44,6 +44,22 @@ jobs:
     - name: Run tests with coverage
       id: coverage
       run: |
+        # デバッグ情報を表示
+        python --version
+        pip list
+        
+        # テスト環境変数を設定
+        if [ "$RUNNER_OS" == "Linux" ] || [ "$RUNNER_OS" == "macOS" ]; then
+          export TESTING=True
+          export DATABASE_URL=sqlite+aiosqlite:///:memory:
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+          echo "TESTING=True" >> $GITHUB_ENV
+          echo "DATABASE_URL=sqlite+aiosqlite:///:memory:" >> $GITHUB_ENV
+        fi
+        
+        # まずテストのみを実行して詳細なエラー情報を取得
+        python -m pytest tests/ -v
+        
         # カバレッジレポートを生成
         python -m pytest tests/ -v --cov=src --cov-report=xml:coverage.xml --cov-report=term-missing --cov-report=html
 
