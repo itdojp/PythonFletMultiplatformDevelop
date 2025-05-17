@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
 
-from app.core.security import get_password_hash
-from app.db.base import Base
-from app.db.database import engine
+from backend.app.core.security import get_password_hash
+from backend.app.db.base import Base
+from backend.app.db.database import engine
 
 # テーブルを作成するためにすべてのモデルをインポートする
-from app.models import *
-from app.models.item import Item
-from app.models.user import User
-from app.schemas.user import UserCreate
+from backend.app.models import *
+from backend.app.models.item import Item
+from backend.app.models.user import User
+from backend.app.schemas.user import UserCreate
 
 
 def init_db(db: Session) -> None:
@@ -46,7 +46,7 @@ def init_db(db: Session) -> None:
 
 
 if __name__ == "__main__":
-    from app.db.database import SessionLocal
+    from backend.app.db.database import SessionLocal
 
     print("データベースを初期化しています...")
     db = SessionLocal()

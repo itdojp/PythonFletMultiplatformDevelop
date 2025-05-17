@@ -3,12 +3,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api import api_router
-from .config import settings
-from .config.logging import setup_logging
+from backend.api.routes import api_router
+from backend.core.config import settings
 
-# ロギングの設定
-setup_logging()
+# ロギング設定はコアモジュールで対応
+# 必要に応じてロギング設定を行う
 
 # FastAPIアプリケーションの作成
 app = FastAPI(

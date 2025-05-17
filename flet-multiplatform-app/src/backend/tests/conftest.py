@@ -11,8 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from backend.config import settings
+
 from ..app import app
-from ..config import settings
 from ..config.database import Base, get_db
 from ..models import User
 from ..schemas import UserCreate

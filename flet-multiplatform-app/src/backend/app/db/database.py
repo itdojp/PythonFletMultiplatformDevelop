@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.core.config import settings
-from app.db.base import Base
+from backend.app.core.config import settings
+from backend.app.db.base import Base
 
 # データベースURLを取得
 SQLALCHEMY_DATABASE_URL = settings.SQLALCHEMY_DATABASE_URI

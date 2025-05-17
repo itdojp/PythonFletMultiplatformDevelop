@@ -5,17 +5,21 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.deps import (
-    get_current_active_superuser,
-    get_current_active_user,
-    get_current_user,
+from backend.core.config import settings
+from backend.core.db import get_db
+from backend.core.security import (
+    create_access_token,
+    get_password_hash,
+    verify_password,
 )
-from config.database import get_db
 
 # 依存関係のエイリアス
-CurrentUser = Annotated[dict, Depends(get_current_user)]
-CurrentActiveUser = Annotated[dict, Depends(get_current_active_user)]
-CurrentActiveSuperuser = Annotated[dict, Depends(get_current_active_superuser)]
+# 注: 認証関連の依存関係は再実装します
+# CurrentUser = Annotated[dict, Depends(get_current_user)]
+# CurrentActiveUser = Annotated[dict, Depends(get_current_active_user)]
+# CurrentActiveSuperuser = Annotated[dict, Depends(get_current_active_superuser)]
+
+# DBセッション依存関係
 AsyncDbSession = Annotated[AsyncSession, Depends(get_db)]
 
 

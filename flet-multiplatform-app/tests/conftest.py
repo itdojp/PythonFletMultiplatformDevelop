@@ -1,7 +1,4 @@
-"""テスト用の設定ファイル。
-
-このファイルは、pytestのテスト環境を設定します。
-"""
+"""バックエンドテストの設定ファイル"""
 
 import asyncio
 import os
@@ -23,12 +20,15 @@ sys.path.append(str(Path(__file__).parent.parent / "src"))
 os.environ["TESTING"] = "True"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from src.backend.app import app
-from src.backend.core.security import get_password_hash
-from src.backend.db.base import Base
-from src.backend.db.session import get_db
-from src.backend.models.user import User
-from src.backend.schemas.user import UserCreate
+# フロントエンドの依存を無効化
+os.environ["SKIP_FRONTEND"] = "True"
+
+# バックエンドのみのインポート
+from backend.app import app
+from backend.core.db import Base, get_db
+from backend.core.security import get_password_hash
+from backend.models.user import User
+from backend.schemas.user import UserCreate
 
 # テスト用のデータベースURL
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

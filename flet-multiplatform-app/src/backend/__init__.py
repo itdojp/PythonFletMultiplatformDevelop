@@ -1,15 +1,21 @@
 """バックエンドモジュールの初期化ファイル"""
 
-# 相対インポートを使用
-from .api import api_router
-from .core.config import settings  # noqa: F401
-from .models import Base, User
-from .schemas import (
+# 新しい構造に合わせた絶対インポート
+from backend.api import api_router
+from backend.core.config import settings
+from backend.core.db import Base
+from backend.models.item import Item
+from backend.models.user import User
+from backend.schemas import (
     BaseCreateSchema,
     BaseInDB,
     BaseResponseSchema,
     BaseSchema,
     BaseUpdateSchema,
+    ItemBase,
+    ItemCreate,
+    ItemResponse,
+    ItemUpdate,
     Token,
     TokenPayload,
     UserBase,
@@ -23,6 +29,7 @@ __all__ = [
     "api_router",
     "Base",
     "User",
+    "Item",
     "BaseCreateSchema",
     "BaseInDB",
     "BaseResponseSchema",
@@ -35,5 +42,9 @@ __all__ = [
     "UserInDB",
     "UserResponse",
     "UserUpdate",
+    "ItemBase",
+    "ItemCreate",
+    "ItemUpdate",
+    "ItemResponse",
     "settings",
 ]

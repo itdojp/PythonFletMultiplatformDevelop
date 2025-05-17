@@ -3,7 +3,7 @@
 import pytest
 from fastapi import status
 
-from ..config import settings
+from backend.config import settings
 
 
 class TestApp:

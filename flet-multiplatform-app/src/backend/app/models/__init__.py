@@ -6,4 +6,4 @@ from .user import User
 __all__ = ["User", "Item"]
 
 # Baseをインポート
-from app.db.base import Base  # noqa
+from backend.app.db.base import Base  # noqa

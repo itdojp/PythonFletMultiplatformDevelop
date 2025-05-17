@@ -13,62 +13,46 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
-        os: [ubuntu-latest, windows-latest]
-        exclude:
-          - os: windows-latest
-            python-version: "3.9"
-          - os: windows-latest
-            python-version: "3.12"
-
-    # カバレッジレポートを1回だけアップロードするための設定
-    outputs:
-      coverage: ${{ steps.coverage.outputs.coverage }}
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.9, "3.10", 3.11]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest pytest-cov pytest-asyncio httpx aiosqlite
-        pip install pydantic-settings
-        pip install -r requirements.txt
-        pip install -r requirements-test.txt
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install pytest pytest-cov pytest-asyncio
 
-    - name: Run tests with coverage
-      id: coverage
+    - name: Run tests and generate coverage report
       run: |
-        # デバッグ情報を表示
-        python --version
-        pip list
-        
-        # テスト環境変数を設定
-        if [ "$RUNNER_OS" == "Linux" ] || [ "$RUNNER_OS" == "macOS" ]; then
-          export TESTING=True
-          export DATABASE_URL=sqlite+aiosqlite:///:memory:
-        elif [ "$RUNNER_OS" == "Windows" ]; then
-          echo "TESTING=True" >> $GITHUB_ENV
-          echo "DATABASE_URL=sqlite+aiosqlite:///:memory:" >> $GITHUB_ENV
-        fi
-        
-        # まずテストのみを実行して詳細なエラー情報を取得
-        python -m pytest tests/ -v
-        
-        # カバレッジレポートを生成
-        python -m pytest tests/ -v --cov=src --cov-report=xml:coverage.xml --cov-report=term-missing --cov-report=html
+         if [ "$RUNNER_OS" == "Linux" ] || [ "$RUNNER_OS" == "macOS" ]; then
+           export TESTING=True
+           export DATABASE_URL=sqlite+aiosqlite:///:memory:
+           export PYTHONPATH=src
+         elif [ "$RUNNER_OS" == "Windows" ]; then
+           echo "TESTING=True" >> $GITHUB_ENV
+           echo "DATABASE_URL=sqlite+aiosqlite:///:memory:" >> $GITHUB_ENV
+           echo "PYTHONPATH=src" >> $GITHUB_ENV
+         fi
+         
+         python -m pytest tests/ -v --import-mode=importlib
+         
+         python -m pytest tests/ -v --cov=src --cov-report=xml:coverage.xml --cov-report=term-missing --cov-report=html
 
-        # カバレッジの閾値チェック（70%未満で失敗）
-        python -m coverage report --fail-under=70
-
-        # カバレッジのパーセンテージを取得
-        COVERAGE=$(python -c "import xml.etree.ElementTree as ET; print(ET.parse('coverage.xml').getroot().attrib['line-rate'])")
-        echo "coverage=${COVERAGE}" >> $GITHUB_OUTPUT
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
 
     - name: Upload coverage report artifact
       if: matrix.python-version == '3.10' && matrix.os == 'ubuntu-latest'

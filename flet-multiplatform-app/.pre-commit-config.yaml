@@ -15,7 +15,7 @@ repos:
     rev: 24.1.1
     hooks:
       - id: black
-        language_version: python3.13
+        language_version: python3
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
@@ -49,10 +49,10 @@ repos:
     rev: v3.15.0
     hooks:
       - id: pyupgrade
-        args: [--py313-plus]
+        args: [--py3-plus]
 
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.7
+    rev: 1.7.5
     hooks:
       - id: bandit
         args: ["-c", "pyproject.toml"]

@@ -1,13 +1,14 @@
 """スキーマモジュールの初期化ファイル"""
 
-from .base import (
+from backend.schemas.base import (
     BaseCreateSchema,
     BaseInDB,
     BaseResponseSchema,
     BaseSchema,
     BaseUpdateSchema,
 )
-from .user import (
+from backend.schemas.item import ItemBase, ItemCreate, ItemResponse, ItemUpdate
+from backend.schemas.user import (
     Token,
     TokenPayload,
     UserBase,
@@ -30,4 +31,9 @@ __all__ = [
     "UserResponse",
     "Token",
     "TokenPayload",
+    # アイテムスキーマ
+    "ItemBase",
+    "ItemCreate",
+    "ItemUpdate",
+    "ItemResponse",
 ]
