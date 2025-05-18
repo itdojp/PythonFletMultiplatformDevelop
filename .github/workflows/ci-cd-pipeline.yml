@@ -223,50 +223,76 @@ jobs:
         echo "Waiting for application to start..."
         sleep 5
 
-    - name: Run performance tests with coverage
+    - name: Run performance tests
       env:
-        # データベース設定
+        # Database configuration
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
         APP_ENV: test
         BASE_URL: http://localhost:8000
         
-        # ロードテスト設定
+        # Performance test configuration
+        PERFORMANCE_TEST_ENABLED: "true"
+        PERFORMANCE_TEST_GENERATE_REPORT: "true"
+        PERFORMANCE_TEST_SAVE_RESULTS: "true"
+        
+        # Test data configuration
+        GENERATE_TEST_DATA: "true"
+        TEST_DATA_SIZE: "medium"
+        
+        # Load test settings
         PERF_LOAD_USERS: 10
         PERF_LOAD_SPAWN_RATE: 2
-        PERF_LOAD_DURATION: 30s
+        PERF_LOAD_DURATION: "30s"
         PERF_LOAD_WARM_UP: 5
         
-        # ストレステスト設定
+        # Stress test settings
         PERF_STRESS_USERS: 20
         PERF_STRESS_SPAWN_RATE: 5
-        PERF_STRESS_DURATION: 1m
+        PERF_STRESS_DURATION: "1m"
         PERF_STRESS_WARM_UP: 5
         
-        # エンデュランステスト設定
+        # Endurance test settings
         PERF_ENDURANCE_USERS: 5
         PERF_ENDURANCE_SPAWN_RATE: 1
-        PERF_ENDURANCE_DURATION: 2m
+        PERF_ENDURANCE_DURATION: "2m"
         PERF_ENDURANCE_WARM_UP: 10
         
-        # スケーラビリティテスト設定
+        # Scalability test settings
         PERF_SCALE_START_USERS: 1
         PERF_SCALE_MAX_USERS: 5
         PERF_SCALE_STEP_SIZE: 1
-        PERF_SCALE_STEP_DURATION: 30s
+        PERF_SCALE_STEP_DURATION: "30s"
         PERF_SCALE_WARM_UP: 5
       run: |
         source .venv/bin/activate
         cd flet-multiplatform-app
-        echo "Running performance tests with coverage..."
-        coverage run --source=. --omit="*/tests/*,*/migrations/*,*/venv/*,*/.tox/*,*/node_modules/*" -m pytest tests/performance -v --html=reports/pytest_report.html --self-contained-html
         
-    - name: Generate coverage report
-      run: |
-        source .venv/bin/activate
-        cd flet-multiplatform-app
-        echo "Generating coverage report..."
+        echo "🔄 Generating test data..."
+        python scripts/generate_performance_test_data.py --size $TEST_DATA_SIZE
+        
+        echo "🚀 Starting performance tests..."
+        python scripts/run_performance_tests.py
+        
+        echo "📊 Generating performance report..."
+        python scripts/generate_performance_report.py
+        
+        echo "✅ Performance tests completed"
+        
+        # Generate coverage report for unit tests in performance tests
+        coverage run --source=. --omit="*/tests/*,*/migrations/*,*/venv/*,*/.tox/*,*/node_modules/*" -m pytest tests/performance/unit -v
         coverage xml -o coverage.xml
         coverage html -d coverage_html_report
+        
+    - name: Upload performance test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-test-results
+        path: |
+          flet-multiplatform-app/reports/performance
+          flet-multiplatform-app/test-results/performance
+        retention-days: 7
+        if-no-files-found: warn
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -274,7 +300,7 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./flet-multiplatform-app/coverage.xml
         flags: performance
-        name: codecov-umbrella
+        name: codecov-performance
         fail_ci_if_error: false
 
     - name: Send Slack notification
