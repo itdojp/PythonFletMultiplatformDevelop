@@ -277,6 +277,21 @@ jobs:
         name: codecov-umbrella
         fail_ci_if_error: false
 
+    - name: Send Slack notification
+      if: always()
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_RUN_ID: ${{ github.run_id }}
+      run: |
+        source .venv/bin/activate
+        cd flet-multiplatform-app
+        python scripts/send_slack_notification.py \
+          --results-dir results \
+          --repo-url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+          --run-id "$GITHUB_RUN_ID"
+      continue-on-error: true
+
     - name: Upload application logs
       if: always()
       uses: actions/upload-artifact@v3
