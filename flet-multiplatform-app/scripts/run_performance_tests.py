@@ -81,6 +81,7 @@ class PerformanceTestRunner:
         env = os.environ.copy()
         env["APP_ENV"] = "test"
         env["DATABASE_URL"] = "postgresql://postgres:postgres@localhost:5432/test_db"
+        env["PYTHONPATH"] = str(PROJECT_ROOT)  # Add project root to PYTHONPATH
 
         # Start the application
         self.app_process = subprocess.Popen(
@@ -88,16 +89,32 @@ class PerformanceTestRunner:
                 "uvicorn",
                 "src.backend.app.main:app",
                 "--host", "0.0.0.0",
-                "--port", "8000"
+                "--port", "8000",
+                "--reload"  # Enable auto-reload for development
             ],
             env=env,
+            cwd=str(PROJECT_ROOT),  # Set working directory to project root
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
 
         # Wait for the application to start
-        await asyncio.sleep(5)
-        print("✅ Application started")
+        max_attempts = 10
+        for _ in range(max_attempts):
+            try:
+                # Try to connect to the application
+                import requests
+                response = requests.get("http://localhost:8000/health")
+                if response.status_code == 200:
+                    print("✅ Application started successfully")
+                    return
+            except Exception as e:
+                print(f"Waiting for application to start... ({e})")
+                await asyncio.sleep(2)
+        
+        print("❌ Failed to start application")
+        self._log_process_output()
+        raise RuntimeError("Failed to start application")
 
     async def stop_application(self):
         """Stop the FastAPI application."""
@@ -158,63 +175,36 @@ class PerformanceTestRunner:
             # Ensure results directory exists
             RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-            print(f"\n🔍 Running {test_type.replace('_', ' ')}...")
-            print(f"📄 Test file: {test_file}")
-            print(f"📊 Report will be saved to: {report_file}")
-
-            # Prepare the pytest command with dynamic parameters
-            cmd = [
-                sys.executable,  # Use the same Python interpreter
-                "-m", "pytest",
-                "-v",
-                "--perf-test",
-                f"--junitxml={report_file}",
-                f"--metrics-file={metrics_file}",
-                str(test_file),
-                f"--users={config.get('users', 100)}",
-                f"--spawn-rate={config.get('spawn_rate', 10)}",
-                f"--duration={config.get('duration', '30s')}",
-                f"--warm-up-time={config.get('warm_up_time', 5)}"
-            ]
-
-            # Add test-specific parameters
-            if test_type == 'scalability_test':
-                cmd.extend([
-                    f"--start-users={config.get('start_users', 1)}",
-                    f"--max-users={config.get('max_users', 500)}",
-                    f"--step-size={config.get('step_size', 10)}",
-                    f"--step-duration={config.get('step_duration', '30s')}"
-                ])
-
-            print(f"🚀 Command: {' '.join(cmd)}")
-
-            # Run the test
             process = await asyncio.create_subprocess_exec(
                 *cmd,
-                cwd=PROJECT_ROOT,  # Run from project root
+                env=test_env,
+                cwd=str(PROJECT_ROOT),  # Set working directory to project root
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE
             )
-
-            # Capture output
-            stdout, stderr = await process.communicate()
-
-            # Check the result
-            success = process.returncode == 0
-            output = stdout.decode()
-
-            if stderr:
-                error_output = stderr.decode()
-                output += "\n" + error_output
-                print(f"⚠️  Error output: {error_output}")
-
-            # Save the test results
-            self.test_results[test_type] = {
-                "success": success,
-                "output": output,
-                "report_file": str(report_file),
-                "metrics_file": str(metrics_file)
-            }
+            
+            # Wait for the process to complete with a timeout
+            try:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=3600)  # 1 hour timeout
+            except asyncio.TimeoutError:
+                print(f"⚠️  {test_name} timed out after 1 hour")
+                process.terminate()
+                return False
+            
+            # Log the output
+            if stdout:
+                print(f"\n📝 {test_name} output:")
+                print(stdout.decode())
+            
+            if process.returncode != 0:
+                print(f"❌ {test_name} failed with return code {process.returncode}")
+                if stderr:
+                    print(f"STDERR: {stderr.decode()}")
+                return False
+                
+            print(f"✅ {test_name} completed successfully")
+            return True
+            
 
             status = "PASSED" if success else "FAILED"
             print(f"✅ {test_type.replace('_', ' ').title()} {status}")
