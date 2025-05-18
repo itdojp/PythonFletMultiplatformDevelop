@@ -184,6 +184,12 @@ jobs:
         pip install -r requirements-dev.txt
         pip install -r tests/performance/requirements-test.txt
 
+    - name: Create required directories
+      run: |
+        mkdir -p results
+        mkdir -p reports
+        mkdir -p plots
+
     - name: Start PostgreSQL
       uses: harmon758/postgresql-action@v1
       with:
