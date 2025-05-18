@@ -223,7 +223,7 @@ jobs:
         echo "Waiting for application to start..."
         sleep 5
 
-    - name: Run performance tests
+    - name: Run performance tests with coverage
       env:
         # データベース設定
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
@@ -257,8 +257,25 @@ jobs:
       run: |
         source .venv/bin/activate
         cd flet-multiplatform-app
-        echo "Running performance tests..."
-        python scripts/run_performance_tests.py
+        echo "Running performance tests with coverage..."
+        coverage run --source=. --omit="*/tests/*,*/migrations/*,*/venv/*,*/.tox/*,*/node_modules/*" -m pytest tests/performance -v --html=reports/pytest_report.html --self-contained-html
+        
+    - name: Generate coverage report
+      run: |
+        source .venv/bin/activate
+        cd flet-multiplatform-app
+        echo "Generating coverage report..."
+        coverage xml -o coverage.xml
+        coverage html -d coverage_html_report
+        
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./flet-multiplatform-app/coverage.xml
+        flags: performance
+        name: codecov-umbrella
+        fail_ci_if_error: false
 
     - name: Upload application logs
       if: always()
