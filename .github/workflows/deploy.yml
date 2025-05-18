@@ -1,0 +1,73 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        python -m pytest tests/ --cov=src --cov-report=xml:coverage.xml
+
+    - name: Run security scans
+      run: |
+        pip install bandit safety
+        bandit -r src/
+        safety check
+
+    - name: Build Docker image
+      run: |
+        docker build -t flet-app:${{ github.sha }} .
+
+    - name: Push to Docker Hub
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: |
+          flet-app:${{ github.sha }}
+          flet-app:latest
+
+    - name: Deploy to production
+      if: github.ref == 'refs/heads/main'
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.PROD_SERVER_HOST }}
+        username: ${{ secrets.PROD_SERVER_USER }}
+        key: ${{ secrets.PROD_SERVER_KEY }}
+        script: |
+          cd /opt/flet-app
+          docker-compose pull
+          docker-compose up -d
+
+    - name: Notify Slack
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        author_name: GitHub Actions
+        color: ${{ job.status == 'success' && 'good' || 'danger' }}
+        fields: all
+        payload: |
+          {"text": "${{ github.event.head_commit.message }}"}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

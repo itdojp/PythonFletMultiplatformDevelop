@@ -1,0 +1,53 @@
+name: Performance Testing
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # 毎週月曜日 0時
+  workflow_dispatch:  # マニュアル実行も可能
+
+jobs:
+  performance:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        cd backend
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-benchmark pytest-asyncio
+
+    - name: Run performance tests
+      run: |
+        cd backend
+        export TESTING=True
+        export DATABASE_URL=sqlite+aiosqlite:///:memory:
+        python -m pytest tests/performance/ -v --benchmark-autosave --benchmark-json=benchmark.json
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      with:
+        name: benchmark-results
+        path: backend/benchmark.json
+
+    - name: Compare performance
+      if: github.event_name == 'schedule'
+      run: |
+        cd backend
+        python -m pytest tests/performance/ -v --benchmark-compare --benchmark-json=benchmark.json
+
+    - name: Generate performance report
+      if: github.event_name == 'schedule'
+      run: |
+        cd backend
+        python -m pytest tests/performance/ -v --benchmark-json=benchmark.json --benchmark-compare --benchmark-compare-fail=min:1.10,max:0.90

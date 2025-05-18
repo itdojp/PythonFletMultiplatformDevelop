@@ -1,0 +1,145 @@
+name: Test Reporting
+
+on:
+  workflow_run:
+    workflows: ["Test Data Generation", "Parallel Testing"]
+    types: [completed]
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download test data
+      uses: actions/download-artifact@v3
+      with:
+        name: test-data
+        path: test-data
+
+    - name: Download test results
+      uses: actions/download-artifact@v3
+      with:
+        name: test-results
+        path: test-results
+
+    - name: Install reporting tools
+      run: |
+        pip install pandas matplotlib seaborn jinja2
+
+    - name: Generate test report
+      run: |
+        python -c """
+        import json
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        from datetime import datetime
+
+        # テストデータの読み込み
+        with open('test-data/test-data-summary.json') as f:
+            test_data = json.load(f)
+
+        # テスト結果の読み込み
+        results = []
+        for file in os.listdir('test-results'):
+            if file.endswith('.json'):
+                with open(f'test-results/{file}') as f:
+                    results.append(json.load(f))
+
+        # データフレームの作成
+        df = pd.DataFrame(results)
+
+        # データの分析
+        summary = {
+            'total_tests': len(df),
+            'passed_tests': len(df[df['status'] == 'passed']),
+            'failed_tests': len(df[df['status'] == 'failed']),
+            'test_coverage': df['coverage'].mean(),
+            'execution_time': df['execution_time'].sum(),
+            'generation_date': datetime.now().isoformat()
+        }
+
+        # グラフの生成
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x='test_type', y='execution_time', data=df)
+        plt.title('Test Execution Time by Type')
+        plt.savefig('test-results/execution_time.png')
+
+        # レポートの生成
+        with open('test-report.md', 'w') as f:
+            f.write("# Test Report\n\n")
+            f.write(f"Generated on: {summary['generation_date']}\n\n")
+            f.write("## Summary\n\n")
+            f.write(f"- Total Tests: {summary['total_tests']}\n")
+            f.write(f"- Passed: {summary['passed_tests']}\n")
+            f.write(f"- Failed: {summary['failed_tests']}\n")
+            f.write(f"- Average Coverage: {summary['test_coverage']:.2f}%\n")
+            f.write(f"- Total Execution Time: {summary['execution_time']:.2f}s\n\n")
+            f.write("![](execution_time.png)")
+        """
+
+    - name: Generate coverage report
+      run: |
+        python -c """
+        import json
+        from datetime import datetime
+
+        # カバレッジデータの読み込み
+        with open('test-results/coverage.xml') as f:
+            coverage_data = json.load(f)
+
+        # カバレッジレポートの生成
+        with open('coverage-report.md', 'w') as f:
+            f.write("# Coverage Report\n\n")
+            f.write(f"Generated on: {datetime.now().isoformat()}\n\n")
+            f.write("## Coverage Summary\n\n")
+            f.write(f"- Total Coverage: {coverage_data['total_coverage']:.2f}%\n")
+            f.write("\n## Coverage Details\n\n")
+            for file, data in coverage_data['files'].items():
+                f.write(f"### {file}\n")
+                f.write(f"- Statements: {data['statements']}\n")
+                f.write(f"- Missed: {data['missed']}\n")
+                f.write(f"- Coverage: {data['coverage']:.2f}%\n")
+        """
+
+    - name: Generate performance metrics
+      run: |
+        python -c """
+        import json
+        from datetime import datetime
+
+        # パフォーマンスメトリクスの読み込み
+        with open('test-results/performance_metrics.json') as f:
+            metrics = json.load(f)
+
+        # パフォーマンスレポートの生成
+        with open('performance-report.md', 'w') as f:
+            f.write("# Performance Report\n\n")
+            f.write(f"Generated on: {datetime.now().isoformat()}\n\n")
+            f.write("## Performance Metrics\n\n")
+            for metric, value in metrics.items():
+                f.write(f"- {metric}: {value}\n")
+        """
+
+    - name: Create GitHub PR comment
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const testReport = fs.readFileSync('test-report.md', 'utf8');
+          const coverageReport = fs.readFileSync('coverage-report.md', 'utf8');
+          const performanceReport = fs.readFileSync('performance-report.md', 'utf8');
+          const prNumber = context.payload.pull_request?.number;
+
+          if (prNumber) {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `# Test Results Summary\n\n${testReport}\n\n## Coverage Details\n\n${coverageReport}\n\n## Performance Metrics\n\n${performanceReport}`
+            });
+          }

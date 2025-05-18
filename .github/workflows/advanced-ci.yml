@@ -1,0 +1,126 @@
+name: Advanced CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      test_data_path: ${{ steps.setup.outputs.test_data_path }}
+      database_url: ${{ steps.setup.outputs.database_url }}
+      log_level: ${{ steps.setup.outputs.log_level }}
+      parallel_tests: ${{ steps.setup.outputs.parallel_tests }}
+      max_workers: ${{ steps.setup.outputs.max_workers }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup test environment
+      id: setup
+      run: |
+        echo "test_data_path=$(python -c 'from backend.tests.config.test_config import TestSettings; print(TestSettings.get_test_data_path())')" >> $GITHUB_OUTPUT
+        echo "database_url=$(python -c 'from backend.tests.config.test_config import TestSettings; print(TestSettings.get_database_url())')" >> $GITHUB_OUTPUT
+        echo "log_level=$(python -c 'from backend.tests.config.test_config import TestSettings; print(TestSettings.get_log_level())')" >> $GITHUB_OUTPUT
+        echo "parallel_tests=$(python -c 'from backend.tests.config.test_config import TestSettings; print(TestSettings.get_parallel_tests())')" >> $GITHUB_OUTPUT
+        echo "max_workers=$(python -c 'from backend.tests.config.test_config import TestSettings; print(TestSettings.get_max_workers() or 0)')" >> $GITHUB_OUTPUT
+
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+        test-type: [unit, integration, performance]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio pytest-xdist pytest-benchmark
+
+    - name: Generate test data
+      run: |
+        python -c """
+        from backend.tests.data.data_generator import DataGenerator
+        from backend.tests.data.extended_data import ExtendedData
+
+        generator = DataGenerator()
+        test_data = {
+            'users': generator.generate_user_data(100),
+            'items': ExtendedData.generate_extended_item_data(500, with_history=True)
+        }
+
+        import json
+        with open('${{ needs.setup.outputs.test_data_path }}/test_data.json', 'w') as f:
+            json.dump(test_data, f, indent=2)
+        """
+
+    - name: Run tests
+      run: |
+        python -m pytest tests/${{ matrix.test-type }}/ \
+          -v \
+          --cov=src/backend \
+          --cov-report=xml:coverage.xml \
+          --cov-report=term-missing \
+          ${${{ needs.setup.outputs.parallel_tests }} && "-n auto" || ""} \
+          ${${{ needs.setup.outputs.max_workers }} && "--max-workers=${{ needs.setup.outputs.max_workers }}" || ""}
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: coverage.xml
+        name: ${{ matrix.test-type }}
+        flags: ${{ matrix.test-type }}
+        fail_ci_if_error: true
+
+  analyze:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download test results
+      uses: actions/download-artifact@v3
+      with:
+        name: test-results
+        path: test-results
+
+    - name: Install analysis tools
+      run: |
+        pip install pytest-cov pytest-benchmark
+
+    - name: Generate test report
+      run: |
+        python -m pytest --cov-report=html:coverage-report
+
+    - name: Generate benchmark report
+      run: |
+        python -m pytest --benchmark-compare
+
+    - name: Upload reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports
+        path: |
+          coverage-report
+          benchmark-report.html

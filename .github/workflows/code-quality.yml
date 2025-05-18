@@ -1,0 +1,77 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install quality tools
+      run: |
+        pip install flake8 black isort mypy bandit
+
+    - name: Run flake8
+      run: |
+        flake8 src/ --max-line-length=88 --extend-ignore=E203,W503 --exclude=*.pyc,__pycache__
+
+    - name: Run black
+      run: |
+        black --check src/
+
+    - name: Run isort
+      run: |
+        isort --check src/
+
+    - name: Run mypy
+      run: |
+        mypy src/ --strict
+
+    - name: Run bandit
+      run: |
+        bandit -r src/ --skip B101,B303,B305,B311,B404,B506,B603,B607,B701,B703,B807
+
+    - name: Run pylint
+      run: |
+        pip install pylint
+        pylint src/ --rcfile=.pylintrc
+
+    - name: Run radon
+      run: |
+        pip install radon
+        radon cc -a -nc src/
+        radon mi -s src/
+        radon raw -s src/
+
+    - name: Run pytest with coverage
+      run: |
+        pip install pytest pytest-cov
+        python -m pytest tests/ --cov=src --cov-report=xml:coverage.xml --cov-report=term-missing
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: coverage.xml
+        name: code-quality
+        flags: code-quality
+        fail_ci_if_error: true

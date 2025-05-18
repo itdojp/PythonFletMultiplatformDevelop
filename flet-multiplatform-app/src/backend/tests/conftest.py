@@ -12,15 +12,21 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from backend.config import settings
+from backend.config.test_config import test_settings
 
 from ..app import app
 from ..config.database import Base, get_db
 from ..models import User
 from ..schemas import UserCreate
 from ..utils.security import get_password_hash
+from .data.data_generator import DataGenerator
+from .data.extended_data import ExtendedData
+from .data.test_data import TestData
+from .mocks.test_mocks import TestMocks
+from .utils.test_utils import TestUtils
 
 # テスト用のデータベースURL
-TEST_SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+TEST_SQLALCHEMY_DATABASE_URL = test_settings.TEST_DATABASE_URL
 
 # テスト用のエンジンとセッションファクトリの作成
 test_engine = create_async_engine(
@@ -39,7 +45,11 @@ TestingSessionLocal = sessionmaker(
 
 @pytest_asyncio.fixture(scope="function")
 async def db() -> AsyncGenerator[AsyncSession, None]:
-    """テスト用のデータベースセッションを提供するフィクスチャ"""
+    """テスト用のデータベースセッションを提供するフィクスチャ。
+
+    Yields:
+        AsyncSession: テスト用のデータベースセッション
+    """
     # テーブルを作成
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -58,14 +68,21 @@ async def db() -> AsyncGenerator[AsyncSession, None]:
 
 @pytest.fixture(scope="function")
 def client(db: AsyncSession) -> Generator[TestClient, None, None]:
-    """テスト用のクライアントを提供するフィクスチャ"""
+    """テスト用のクライアントを提供するフィクスチャ。認証ヘッダー付きのクライアントを提供します。
+
+    Args:
+        db: テスト用のデータベースセッション
+
+    Yields:
+        TestClient: テスト用のクライアント
+    """
 
     # 依存関係のオーバーライド
     def override_get_db():
         try:
             yield db
         finally:
-            pass
+            db.close()
 
     app.dependency_overrides[get_db] = override_get_db
 
@@ -79,17 +96,13 @@ def client(db: AsyncSession) -> Generator[TestClient, None, None]:
 @pytest_asyncio.fixture(scope="function")
 async def test_user(db: AsyncSession) -> User:
     """テスト用のユーザーを作成するフィクスチャ"""
-    user_in = UserCreate(
-        email="test@example.com",
-        username="testuser",
-        password="testpassword",
-        full_name="Test User",
-    )
+    generator = DataGenerator()
+    user_data = generator.generate_user_data(1)[0]
     user = User(
-        email=user_in.email,
-        username=user_in.username,
-        hashed_password=get_password_hash(user_in.password),
-        full_name=user_in.full_name,
+        email=user_data.email,
+        username=user_data.username,
+        hashed_password=get_password_hash(user_data.password),
+        full_name=user_data.full_name,
         is_active=True,
     )
     db.add(user)

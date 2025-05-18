@@ -1,0 +1,317 @@
+name: Monitoring Workflow
+
+on:
+  workflow_run:
+    workflows: ["Advanced Test Automation", "Coverage Optimization"]
+    types: [completed]
+  schedule:
+    - cron: '0 0 * * *'  # 毎日午前0時
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+        pip install prometheus-client grafana-api
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: test-results
+        path: test-results
+
+    - name: Parse test results
+      run: |
+        python -c """
+        import json
+        from datetime import datetime
+        import os
+
+        # テスト結果の解析
+        test_results = []
+        for file in os.listdir('test-results'):
+            if file.endswith('.json'):
+                with open(f'test-results/{file}') as f:
+                    result = json.load(f)
+                    test_results.append({
+                        'timestamp': datetime.now().isoformat(),
+                        'workflow': file.replace('.json', ''),
+                        'status': result.get('status', 'unknown'),
+                        'duration': result.get('duration', 0),
+                        'tests': result.get('tests', 0),
+                        'passed': result.get('passed', 0),
+                        'failed': result.get('failed', 0)
+                    })
+
+        # 結果をJSONに保存
+        with open('monitoring-results.json', 'w') as f:
+            json.dump(test_results, f)
+        """
+
+    - name: Upload monitoring data
+      uses: actions/upload-artifact@v3
+      with:
+        name: monitoring-data
+        path: monitoring-results.json
+
+    - name: Generate metrics
+      run: |
+        python -c """
+        import json
+        from prometheus_client import Gauge, start_http_server
+        import time
+
+        # Prometheusメトリクスの設定
+        test_status = Gauge('test_status', 'Test status', ['workflow', 'status'])
+        test_duration = Gauge('test_duration', 'Test duration', ['workflow'])
+        test_count = Gauge('test_count', 'Number of tests', ['workflow', 'result'])
+
+        # メトリクスサーバーの起動
+        start_http_server(8000)
+
+        # メトリクスの更新
+        with open('monitoring-results.json') as f:
+            results = json.load(f)
+
+            for result in results:
+                workflow = result['workflow']
+                status = result['status']
+                duration = result['duration']
+
+                test_status.labels(workflow=workflow, status=status).set(1)
+                test_duration.labels(workflow=workflow).set(duration)
+                test_count.labels(workflow=workflow, result='passed').set(result['passed'])
+                test_count.labels(workflow=workflow, result='failed').set(result['failed'])
+
+        # メトリクスサーバーの継続稼働
+        while True:
+            time.sleep(60)
+        """
+
+    - name: Send to Grafana
+      run: |
+        python -c """
+        import json
+        import requests
+        from datetime import datetime
+
+        # Grafana設定
+        grafana_url = os.getenv('GRAFANA_URL')
+        api_key = os.getenv('GRAFANA_API_KEY')
+
+        # データの送信
+        with open('monitoring-results.json') as f:
+            results = json.load(f)
+
+            for result in results:
+                payload = {
+                    'timestamp': result['timestamp'],
+                    'workflow': result['workflow'],
+                    'status': result['status'],
+                    'duration': result['duration'],
+                    'tests': result['tests'],
+                    'passed': result['passed'],
+                    'failed': result['failed']
+                }
+
+                headers = {
+                    'Authorization': f'Bearer {api_key}',
+                    'Content-Type': 'application/json'
+                }
+
+                response = requests.post(
+                    f'{grafana_url}/api/datasources/proxy/1/api/v1/import',
+                    headers=headers,
+                    json=payload
+                )
+
+                if response.status_code != 200:
+                    print(f'Error sending data to Grafana: {response.text}')
+        """
+
+    - name: Generate dashboard
+      run: |
+        python -c """
+        import json
+        from datetime import datetime
+        import os
+
+        # ダッシュボードの生成
+        dashboard = {
+            'title': 'CI/CD Monitoring Dashboard',
+            'panels': [
+                {
+                    'title': 'Test Status',
+                    'type': 'stat',
+                    'targets': [
+                        {
+                            'expr': 'test_status',
+                            'legendFormat': '{{workflow}} - {{status}}'
+                        }
+                    ]
+                },
+                {
+                    'title': 'Test Duration',
+                    'type': 'graph',
+                    'targets': [
+                        {
+                            'expr': 'test_duration',
+                            'legendFormat': '{{workflow}}'
+                        }
+                    ]
+                },
+                {
+                    'title': 'Test Results',
+                    'type': 'gauge',
+                    'targets': [
+                        {
+                            'expr': 'test_count',
+                            'legendFormat': '{{workflow}} - {{result}}'
+                        }
+                    ]
+                }
+            ]
+        }
+
+        # ダッシュボードの保存
+        with open('dashboard.json', 'w') as f:
+            json.dump(dashboard, f)
+        """
+
+    - name: Upload dashboard
+      run: |
+        python -c """
+        import json
+        import requests
+
+        # ダッシュボードのアップロード
+        with open('dashboard.json') as f:
+            dashboard = json.load(f)
+
+            grafana_url = os.getenv('GRAFANA_URL')
+            api_key = os.getenv('GRAFANA_API_KEY')
+
+            headers = {
+                'Authorization': f'Bearer {api_key}',
+                'Content-Type': 'application/json'
+            }
+
+            response = requests.post(
+                f'{grafana_url}/api/dashboards/db',
+                headers=headers,
+                json={'dashboard': dashboard}
+            )
+
+            if response.status_code != 200:
+                print(f'Error uploading dashboard: {response.text}')
+        """
+
+    - name: Generate alerts
+      run: |
+        python -c """
+        import json
+        import requests
+
+        # アラートルールの生成
+        alerts = {
+            'rules': [
+                {
+                    'name': 'Test Failure Alert',
+                    'condition': 'test_status{status="failed"} > 0',
+                    'for': '5m',
+                    'labels': {
+                        'severity': 'critical'
+                    },
+                    'annotations': {
+                        'summary': 'Test failures detected',
+                        'description': 'Tests are failing in the CI/CD pipeline'
+                    }
+                },
+                {
+                    'name': 'Performance Alert',
+                    'condition': 'test_duration > 300',
+                    'for': '10m',
+                    'labels': {
+                        'severity': 'warning'
+                    },
+                    'annotations': {
+                        'summary': 'Performance degradation',
+                        'description': 'Test execution time is above threshold'
+                    }
+                }
+            ]
+        }
+
+        # アラートルールの保存
+        with open('alerts.json', 'w') as f:
+            json.dump(alerts, f)
+        """
+
+    - name: Send alerts
+      run: |
+        python -c """
+        import json
+        import requests
+
+        # アラートの送信
+        with open('alerts.json') as f:
+            alerts = json.load(f)
+
+            grafana_url = os.getenv('GRAFANA_URL')
+            api_key = os.getenv('GRAFANA_API_KEY')
+
+            headers = {
+                'Authorization': f'Bearer {api_key}',
+                'Content-Type': 'application/json'
+            }
+
+            for alert in alerts['rules']:
+                response = requests.post(
+                    f'{grafana_url}/api/alerts/rules',
+                    headers=headers,
+                    json=alert
+                )
+
+                if response.status_code != 200:
+                    print(f'Error creating alert: {response.text}')
+        """
+
+    - name: Generate report
+      run: |
+        python -c """
+        import json
+        from datetime import datetime
+
+        # モニタリングレポートの生成
+        with open('monitoring-results.json') as f:
+            results = json.load(f)
+
+            with open('monitoring-report.md', 'w') as f:
+                f.write('# CI/CD Monitoring Report\n\n')
+                f.write(f'Generated at: {datetime.now().isoformat()}\n\n')
+
+                for result in results:
+                    f.write(f'## {result["workflow"]}\n\n')
+                    f.write(f'- Status: {result["status"]}\n')
+                    f.write(f'- Duration: {result["duration"]}s\n')
+                    f.write(f'- Tests: {result["tests"]}\n')
+                    f.write(f'- Passed: {result["passed"]}\n')
+                    f.write(f'- Failed: {result["failed"]}\n')
+        """
+
+    - name: Upload report
+      uses: actions/upload-artifact@v3
+      with:
+        name: monitoring-report
+        path: monitoring-report.md

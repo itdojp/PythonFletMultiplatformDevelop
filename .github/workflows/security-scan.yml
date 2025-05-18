@@ -1,0 +1,60 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install security tools
+      run: |
+        pip install bandit safety
+
+    - name: Run Bandit security scan
+      run: |
+        bandit -r src/ --skip B101,B303,B305,B311,B404,B506,B603,B607,B701,B703,B807
+
+    - name: Check dependencies for known vulnerabilities
+      run: |
+        safety check --full-report
+
+    - name: Run OWASP ZAP scan
+      uses: zaproxy/action-full-scan@latest
+      with:
+        target: 'http://localhost:8000/api/v1'
+        apikey: 'test'
+        config: |
+          -config attackStrength=LOW
+          -config maxDuration=10
+          -config spider.maxDuration=5
+          -report html=report.html
+          -report md=report.md
+
+    - name: Upload security scan results
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-scan-results
+        path: |
+          zap-report.html
+          zap-report.md

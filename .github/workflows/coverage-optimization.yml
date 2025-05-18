@@ -1,0 +1,183 @@
+name: Coverage Optimization
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.8', '3.9', '3.10']
+        coverage-type: ['statement', 'branch', 'function', 'line']
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+        pip install coverage pytest-cov
+
+    - name: Run coverage
+      run: |
+        coverage run -m pytest --cov=src/backend --cov-report=xml --cov-report=term-missing
+        coverage xml
+        coverage html
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: true
+
+  optimization:
+    needs: coverage
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download coverage
+      uses: actions/download-artifact@v3
+      with:
+        name: coverage-reports
+        path: coverage-reports
+
+    - name: Analyze coverage
+      run: |
+        python -c """
+        import json
+        import xml.etree.ElementTree as ET
+        from pathlib import Path
+
+        # カバレッジレポートの解析
+        coverage = {}
+        for file in Path('coverage-reports').glob('*.xml'):
+            tree = ET.parse(file)
+            root = tree.getroot()
+
+            for package in root.findall('.//package'):
+                name = package.get('name')
+                lines = package.find('lines').findall('line')
+
+                for line in lines:
+                    number = int(line.get('number'))
+                    hits = int(line.get('hits'))
+
+                    if name not in coverage:
+                        coverage[name] = {}
+
+                    coverage[name][number] = {
+                        'hits': hits,
+                        'branch': line.get('branch') == 'true'
+                    }
+
+        # カバレッジ最適化の分析
+        optimization = {
+            'missing_lines': [],
+            'branch_coverage': [],
+            'recommendations': []
+        }
+
+        for file, lines in coverage.items():
+            for line, data in lines.items():
+                if data['hits'] == 0:
+                    optimization['missing_lines'].append({
+                        'file': file,
+                        'line': line
+                    })
+
+                if data['branch']:
+                    optimization['branch_coverage'].append({
+                        'file': file,
+                        'line': line,
+                        'hits': data['hits']
+                    })
+
+        # 最適化の推奨事項
+        if optimization['missing_lines']:
+            optimization['recommendations'].append(
+                f"Add tests for {len(optimization['missing_lines'])} missing lines"
+            )
+
+        if optimization['branch_coverage']:
+            optimization['recommendations'].append(
+                f"Improve branch coverage for {len(optimization['branch_coverage'])} branches"
+            )
+
+        # 結果の保存
+        with open('coverage-optimization.json', 'w') as f:
+            json.dump(optimization, f, indent=2)
+        """
+
+    - name: Upload optimization results
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-optimization
+        path: coverage-optimization.json
+
+  report:
+    needs: optimization
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download optimization results
+      uses: actions/download-artifact@v3
+      with:
+        name: coverage-optimization
+        path: coverage-optimization
+
+    - name: Generate report
+      run: |
+        python -c """
+        import json
+        from datetime import datetime
+
+        # カバレッジ最適化レポートの生成
+        with open('coverage-optimization/coverage-optimization.json') as f:
+            optimization = json.load(f)
+
+        with open('coverage-optimization-report.md', 'w') as f:
+            f.write('# Coverage Optimization Report\n\n')
+            f.write(f'Generated at: {datetime.now().isoformat()}\n\n')
+
+            f.write('## Missing Lines\n\n')
+            for line in optimization['missing_lines']:
+                f.write(f"- {line['file']}:{line['line']}\n")
+
+            f.write('\n## Branch Coverage\n\n')
+            for branch in optimization['branch_coverage']:
+                f.write(f"- {branch['file']}:{branch['line']} (hits: {branch['hits']})\n")
+
+            f.write('\n## Recommendations\n\n')
+            for rec in optimization['recommendations']:
+                f.write(f"- {rec}\n")
+        """
+
+    - name: Upload report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage-optimization-report.md

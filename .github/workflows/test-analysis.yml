@@ -1,0 +1,79 @@
+name: Test Analysis
+
+on:
+  workflow_run:
+    workflows: ["Parallel Testing"]
+    types: [completed]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download coverage reports
+      uses: actions/download-artifact@v3
+      with:
+        name: coverage
+        path: coverage-reports
+
+    - name: Download benchmark results
+      uses: actions/download-artifact@v3
+      with:
+        name: benchmark-results
+        path: benchmark-reports
+
+    - name: Install analysis tools
+      run: |
+        pip install coverage-badge pytest-cov pytest-benchmark
+
+    - name: Generate coverage badge
+      run: |
+        coverage-badge -o coverage-badge.svg
+
+    - name: Generate test report
+      run: |
+        coverage report -m > test-report.txt
+
+    - name: Generate benchmark comparison
+      run: |
+        python -m pytest --benchmark-compare
+
+    - name: Upload analysis results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-analysis
+        path: |
+          coverage-badge.svg
+          test-report.txt
+          benchmark-comparison.html
+
+    - name: Create analysis summary
+      run: |
+        echo "# Test Analysis Summary" > analysis-summary.md
+        echo "" >> analysis-summary.md
+        echo "## Coverage Report" >> analysis-summary.md
+        cat test-report.txt >> analysis-summary.md
+        echo "" >> analysis-summary.md
+        echo "## Benchmark Comparison" >> analysis-summary.md
+        cat benchmark-comparison.html >> analysis-summary.md
+
+    - name: Create GitHub PR comment
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const fs = require('fs');
+          const summary = fs.readFileSync('analysis-summary.md', 'utf8');
+          const prNumber = context.payload.pull_request?.number;
+
+          if (prNumber) {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: summary
+            });
+          }

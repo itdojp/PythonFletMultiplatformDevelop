@@ -1,0 +1,106 @@
+{
+  "load_test": {
+    "users": 100,
+    "spawn_rate": 10,
+    "duration": "30s",
+    "warm_up_time": 5,
+    "env_vars": {
+      "users": {"env": "PERF_LOAD_USERS", "default": 100},
+      "spawn_rate": {"env": "PERF_LOAD_SPAWN_RATE", "default": 10},
+      "duration": {"env": "PERF_LOAD_DURATION", "default": "30s"},
+      "warm_up_time": {"env": "PERF_LOAD_WARM_UP", "default": 5}
+    }
+  },
+  "stress_test": {
+    "users": 1000,
+    "spawn_rate": 100,
+    "duration": "5m",
+    "warm_up_time": 10,
+    "env_vars": {
+      "users": {"env": "PERF_STRESS_USERS", "default": 1000},
+      "spawn_rate": {"env": "PERF_STRESS_SPAWN_RATE", "default": 100},
+      "duration": {"env": "PERF_STRESS_DURATION", "default": "5m"},
+      "warm_up_time": {"env": "PERF_STRESS_WARM_UP", "default": 10}
+    }
+  },
+  "endurance_test": {
+    "users": 100,
+    "spawn_rate": 10,
+    "duration": "1h",
+    "warm_up_time": 30,
+    "env_vars": {
+      "users": {"env": "PERF_ENDURANCE_USERS", "default": 100},
+      "spawn_rate": {"env": "PERF_ENDURANCE_SPAWN_RATE", "default": 10},
+      "duration": {"env": "PERF_ENDURANCE_DURATION", "default": "1h"},
+      "warm_up_time": {"env": "PERF_ENDURANCE_WARM_UP", "default": 30}
+    }
+  },
+  "scalability_test": {
+    "start_users": 1,
+    "max_users": 500,
+    "step_size": 10,
+    "step_duration": "30s",
+    "warm_up_time": 10,
+    "env_vars": {
+      "start_users": {"env": "PERF_SCALE_START_USERS", "default": 1},
+      "max_users": {"env": "PERF_SCALE_MAX_USERS", "default": 500},
+      "step_size": {"env": "PERF_SCALE_STEP_SIZE", "default": 10},
+      "step_duration": {"env": "PERF_SCALE_STEP_DURATION", "default": "30s"},
+      "warm_up_time": {"env": "PERF_SCALE_WARM_UP", "default": 10}
+    }
+  },
+  "environment": {
+    "base_url": "http://localhost:8000",
+    "auth_token": "",
+    "verify_ssl": false,
+    "env_vars": {
+      "base_url": {"env": "PERF_BASE_URL", "default": "http://localhost:8000"},
+      "auth_token": {"env": "PERF_AUTH_TOKEN", "default": ""},
+      "verify_ssl": {"env": "PERF_VERIFY_SSL", "default": false}
+    }
+  },
+  "reporting": {
+    "enabled": true,
+    "output_dir": "reports/performance",
+    "format": "html",
+    "retention_days": 30,
+    "env_vars": {
+      "enabled": {"env": "PERF_REPORT_ENABLED", "default": true},
+      "output_dir": {"env": "PERF_REPORT_DIR", "default": "reports/performance"},
+      "format": {"env": "PERF_REPORT_FORMAT", "default": "html"},
+      "retention_days": {"env": "PERF_REPORT_RETENTION", "default": 30}
+    }
+  },
+  "thresholds": {
+    "response_time": {
+      "warning": 1000,
+      "critical": 3000,
+      "env_vars": {
+        "warning": {"env": "PERF_THRESHOLD_RESPONSE_WARNING", "default": 1000},
+        "critical": {"env": "PERF_THRESHOLD_RESPONSE_CRITICAL", "default": 3000}
+      }
+    },
+    "error_rate": {
+      "warning": 0.01,
+      "critical": 0.05,
+      "env_vars": {
+        "warning": {"env": "PERF_THRESHOLD_ERROR_WARNING", "default": 0.01},
+        "critical": {"env": "PERF_THRESHOLD_ERROR_CRITICAL", "default": 0.05}
+      }
+    },
+    "concurrent_users": {
+      "warning": 500,
+      "critical": 1000,
+      "env_vars": {
+        "warning": {"env": "PERF_THRESHOLD_USERS_WARNING", "default": 500},
+        "critical": {"env": "PERF_THRESHOLD_USERS_CRITICAL", "default": 1000}
+      }
+    }
+  },
+  "test_order": [
+    "load_test",
+    "stress_test",
+    "endurance_test",
+    "scalability_test"
+  ]
+}

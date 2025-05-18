@@ -1,0 +1,94 @@
+name: Test Data Generation
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'  # 毎週月曜日 0時
+  workflow_dispatch:  # マニュアル実行も可能
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install faker
+
+    - name: Generate test data
+      run: |
+        python -c """
+        from backend.tests.data.data_generator import DataGenerator
+        from backend.tests.data.extended_data import ExtendedData
+
+        # ユーザーデータの生成
+        generator = DataGenerator()
+        users = generator.generate_user_data(10, invalid=True)
+
+        # アイテムデータの生成
+        items = ExtendedData.generate_extended_item_data(20, with_history=True)
+
+        # 認証データの生成
+        auth_data = ExtendedData.generate_extended_auth_data(5, with_refresh=True)
+
+        # データをファイルに保存
+        import json
+        with open('test-data.json', 'w') as f:
+            json.dump({
+                'users': [user.dict() for user in users],
+                'items': items,
+                'auth_data': auth_data
+            }, f, indent=2)
+        """
+
+    - name: Upload test data
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-data
+        path: test-data.json
+
+    - name: Generate test data report
+      run: |
+        python -c """
+        import json
+        with open('test-data.json') as f:
+            data = json.load(f)
+
+        print(f"Generated {len(data['users'])} users")
+        print(f"Generated {len(data['items'])} items")
+        print(f"Generated {len(data['auth_data'])} auth entries")
+        """
+
+    - name: Create test data summary
+      run: |
+        python -c """
+        import json
+        with open('test-data.json') as f:
+            data = json.load(f)
+
+        summary = {
+            'total_users': len(data['users']),
+            'total_items': len(data['items']),
+            'total_auth_entries': len(data['auth_data']),
+            'generation_date': datetime.utcnow().isoformat()
+        }
+
+        with open('test-data-summary.json', 'w') as f:
+            json.dump(summary, f, indent=2)
+        """
+
+    - name: Upload test data summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-data-summary
+        path: test-data-summary.json
