@@ -1,0 +1,37 @@
+[run]
+source = flet-multiplatform-app
+omit =
+    */tests/*
+    */.venv/*
+    */__pycache__/*
+    */migrations/*
+    */venv/*
+    */.tox/*
+    */node_modules/*
+    */build/*
+    */dist/*
+
+[report]
+# カバレッジレポートから除外するファイル
+omit =
+    */tests/*
+    */.venv/*
+    */__pycache__/*
+    */migrations/*
+    */venv/*
+    */.tox/*
+    */node_modules/*
+    */build/*
+    */dist/*
+    */flet-multiplatform-app/scripts/*
+
+# カバレッジのしきい値設定
+fail_under = 80
+
+[html]
+# HTMLレポートのディレクトリ
+directory = coverage_html_report
+
+[xml]
+# XMLレポートの出力先
+output = coverage.xml
