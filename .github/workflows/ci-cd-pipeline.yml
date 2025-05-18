@@ -225,22 +225,30 @@ jobs:
 
     - name: Run performance tests
       env:
+        # データベース設定
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
         APP_ENV: test
         BASE_URL: http://localhost:8000
-        # Performance test environment variables
+        
+        # ロードテスト設定
         PERF_LOAD_USERS: 10
         PERF_LOAD_SPAWN_RATE: 2
         PERF_LOAD_DURATION: 30s
         PERF_LOAD_WARM_UP: 5
+        
+        # ストレステスト設定
         PERF_STRESS_USERS: 20
         PERF_STRESS_SPAWN_RATE: 5
         PERF_STRESS_DURATION: 1m
         PERF_STRESS_WARM_UP: 5
+        
+        # エンデュランステスト設定
         PERF_ENDURANCE_USERS: 5
         PERF_ENDURANCE_SPAWN_RATE: 1
         PERF_ENDURANCE_DURATION: 2m
         PERF_ENDURANCE_WARM_UP: 10
+        
+        # スケーラビリティテスト設定
         PERF_SCALE_START_USERS: 1
         PERF_SCALE_MAX_USERS: 5
         PERF_SCALE_STEP_SIZE: 1
