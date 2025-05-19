@@ -1,0 +1,211 @@
+name: Performance Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'flet-multiplatform-app/src/**'
+      - 'flet-multiplatform-app/tests/performance/**'
+      - '.github/workflows/performance-tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'flet-multiplatform-app/src/**'
+      - 'flet-multiplatform-app/tests/performance/**'
+      - '.github/workflows/performance-tests.yml'
+  workflow_dispatch:
+    inputs:
+      users:
+        description: 'Number of concurrent users'
+        required: false
+        default: '10'
+      spawn_rate:
+        description: 'Spawn rate (users per second)'
+        required: false
+        default: '2'
+      duration:
+        description: 'Test duration (e.g., 5m, 1h)'
+        required: false
+        default: '5m'
+
+jobs:
+  performance-test:
+    name: Performance Test
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+      TEST_ENV: ci
+      PYTHONPATH: ${{ github.workspace }}
+      PERF_TEST_USERS: ${{ github.event.inputs.users || '10' }}
+      PERF_TEST_SPAWN_RATE: ${{ github.event.inputs.spawn_rate || '2' }}
+      PERF_TEST_DURATION: ${{ github.event.inputs.duration || '5m' }}
+      PERF_TEST_CONFIG: flet-multiplatform-app/tests/performance/config/performance_config.yaml
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-dev python3-pip python3-venv libpq-dev
+
+    - name: Create and activate virtual environment
+      run: |
+        python -m venv .venv
+        echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+
+    - name: Install project dependencies
+      run: |
+        . .venv/bin/activate
+        python -m pip install --upgrade pip
+        pip install -r flet-multiplatform-app/requirements.txt
+        pip install -r flet-multiplatform-app/requirements-dev.txt
+        pip install -r flet-multiplatform-app/tests/performance/requirements-test.txt
+
+    - name: Create required directories
+      run: |
+        mkdir -p flet-multiplatform-app/test_data/perf
+        mkdir -p flet-multiplatform-app/results/performance
+        mkdir -p flet-multiplatform-app/reports/performance/plots
+        mkdir -p flet-multiplatform-app/test-results/performance
+
+    - name: Wait for PostgreSQL
+      run: |
+        for i in {1..10}; do
+          if pg_isready -h localhost -p 5432 -U postgres -d test_db; then
+            echo "PostgreSQL is ready"
+            exit 0
+          fi
+          echo "Waiting for PostgreSQL to be ready..."
+          sleep 3
+        done
+        echo "Failed to connect to PostgreSQL"
+        exit 1
+
+    - name: Generate test data
+      run: |
+        . .venv/bin/activate
+        cd flet-multiplatform-app
+        python scripts/generate_perf_test_data.py
+
+    - name: Generate sample metrics (for testing)
+      run: |
+        . .venv/bin/activate
+        cd flet-multiplatform-app
+        python scripts/generate_sample_metrics.py
+        cp test_data/performance/baseline_metrics.json test-results/performance/
+
+    - name: Start application in background
+      run: |
+        . .venv/bin/activate
+        cd flet-multiplatform-app
+        nohup uvicorn src.backend.app.main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
+        echo $! > app.pid
+        echo "Waiting for application to start..."
+        sleep 5
+
+    - name: Run load test
+      run: |
+        . .venv/bin/activate
+        cd flet-multiplatform-app
+        set -x
+        # Run load test with Locust
+        locust -f tests/performance/test_load.py \
+          --headless \
+          -u $PERF_TEST_USERS \
+          -r $PERF_TEST_SPAWN_RATE \
+          -t $PERF_TEST_DURATION \
+          --csv=results/performance/load_test \
+          --html=results/performance/load_test_report.html \
+          --logfile=results/performance/locust_load.log \
+          --loglevel=INFO
+
+    - name: Run stress test
+      run: |
+        . .venv/bin/activate
+        cd flet-multiplatform-app
+        # Run stress test with higher load
+        locust -f tests/performance/test_stress.py \
+          --headless \
+          -u $(($PERF_TEST_USERS * 5)) \
+          -r $(($PERF_TEST_SPAWN_RATE * 2)) \
+          -t $PERF_TEST_DURATION \
+          --csv=results/performance/stress_test \
+          --html=results/performance/stress_test_report.html \
+          --logfile=results/performance/locust_stress.log \
+          --loglevel=INFO
+
+    - name: Analyze performance results
+      run: |
+        . .venv/bin/activate
+        cd flet-multiplatform-app
+        python scripts/analyze_performance.py \
+          --input-dir results/performance \
+          --output-dir test-results/performance \
+          --format html,json \
+          --generate-plots
+
+    - name: Check for performance regressions
+      id: check_perf
+      continue-on-error: true
+      run: |
+        . .venv/bin/activate
+        cd flet-multiplatform-app
+        python scripts/check_performance.py \
+          --baseline test-results/performance/baseline_metrics.json \
+          --current test-results/performance/current_metrics.json \
+          --threshold 0.15  # 15%以上のパフォーマンス低下を検知
+
+    - name: Fail on performance regression
+      if: steps.check_perf.outcome == 'failure'
+      run: |
+        echo "::error::Performance regression detected! Check the performance report for details."
+        exit 1
+
+    - name: Upload performance report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-report
+        path: |
+          flet-multiplatform-app/results/performance/**
+          flet-multiplatform-app/reports/performance/**
+          flet-multiplatform-app/test-results/performance/**
+        retention-days: 7
+
+    - name: Upload performance metrics
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-metrics
+        path: flet-multiplatform-app/test-results/performance/*.json
+        retention-days: 30
+
+    - name: Stop application
+      if: always()
+      run: |
+        if [ -f flet-multiplatform-app/app.pid ]; then
+          kill $(cat flet-multiplatform-app/app.pid) || true
+        fi
