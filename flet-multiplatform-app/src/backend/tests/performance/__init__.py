@@ -6,10 +6,10 @@ the performance of the application under various conditions.
 """
 
 __all__ = [
-    'test_load',
-    'test_stress',
-    'test_endurance',
-    'test_scalability',
-    'conftest',
-    'utils'
+    "test_load",
+    "test_stress",
+    "test_endurance",
+    "test_scalability",
+    "conftest",
+    "utils",
 ]

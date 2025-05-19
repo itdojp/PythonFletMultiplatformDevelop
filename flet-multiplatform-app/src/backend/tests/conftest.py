@@ -1,6 +1,7 @@
 """
 テスト用のフィクスチャを定義するモジュール
 """
+
 import asyncio
 from typing import AsyncGenerator, Generator
 

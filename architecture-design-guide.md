@@ -1,14 +1,14 @@
 # Python Flet - マルチプラットフォームアーキテクチャ設計ガイド
 
 > **対象Fletバージョン**: 0.19.0以上
-> 
+>
 > **最終更新日**: 2025年5月10日
 >
 > **注意**: Fletは活発に開発が進んでいるフレームワークです。最新の情報は[Flet公式ドキュメント](https://flet.dev/docs/)を参照してください。
 
 このガイドは、Python Fletを使用したマルチプラットフォームアプリケーション開発のためのアーキテクチャ設計方針を提供します。適切なアーキテクチャ設計により、コードの保守性、拡張性、テスト容易性を向上させ、効率的な開発プロセスを実現します。
 
-> **関連ガイド**: 
+> **関連ガイド**:
 > - [プラットフォーム共通コード管理ガイド](./cross-platform-code-management-guide.md) - 共通コードとプラットフォーム固有コードの分離方法
 > - [APIとバックエンド連携ガイド](./api-backend-integration-guide.md) - データアクセス層の設計と実装
 > - [テスト戦略とQAガイド](./testing-qa-guide.md) - アーキテクチャに基づいたテスト手法
@@ -143,27 +143,27 @@ class HomePage(ft.UserControl):
         super().__init__()
         self.page = page
         self.controller = HomeController()
-    
+
     def build(self):
         # ページのUIを構築
         self.title = ft.Text("ホーム", size=24, weight=ft.FontWeight.BOLD)
         self.product_list = ft.Column(spacing=10)
-        
+
         # データを読み込み表示
         self._load_products()
-        
+
         return ft.Column([
             self.title,
             self.product_list
         ], spacing=20, scroll=ft.ScrollMode.AUTO)
-    
+
     def _load_products(self):
         products = self.controller.get_products()
         self.product_list.controls = [
             ProductCard(product=p, on_click=self._on_product_click)
             for p in products
         ]
-    
+
     def _on_product_click(self, e, product_id):
         # 商品詳細ページへナビゲーション
         self.controller.navigate_to_product_detail(self.page, product_id)
@@ -182,7 +182,7 @@ class ProductCard(ft.UserControl):
         super().__init__()
         self.product = product
         self.on_click = on_click
-    
+
     def build(self):
         return ft.Card(
             elevation=4,
@@ -212,11 +212,11 @@ from app.data.repositories.product_repository import ProductRepository
 class HomeController:
     def __init__(self):
         self.product_repository = ProductRepository()
-    
+
     def get_products(self):
         # データを取得
         return self.product_repository.get_all_products()
-    
+
     def navigate_to_product_detail(self, page, product_id):
         # ナビゲーション処理
         page.go(f"/product/{product_id}")
@@ -234,10 +234,10 @@ class Counter(ft.UserControl):
     def __init__(self):
         super().__init__()
         self.count = 0
-    
+
     def build(self):
         self.text_number = ft.Text(str(self.count), size=24)
-        
+
         return ft.Column([
             self.text_number,
             ft.Row([
@@ -245,12 +245,12 @@ class Counter(ft.UserControl):
                 ft.ElevatedButton("減少", on_click=self._decrement)
             ])
         ])
-    
+
     def _increment(self, e):
         self.count += 1
         self.text_number.value = str(self.count)
         self.update()
-    
+
     def _decrement(self, e):
         self.count -= 1
         self.text_number.value = str(self.count)
@@ -268,22 +268,22 @@ class AppState:
         self.cart_items = []
         self.theme_mode = "light"
         self._listeners = []
-    
+
     def add_listener(self, listener):
         self._listeners.append(listener)
-    
+
     def remove_listener(self, listener):
         self._listeners.remove(listener)
-    
+
     def notify_listeners(self):
         for listener in self._listeners:
             listener()
-    
+
     def add_to_cart(self, product, quantity=1):
         # カートに商品を追加
         self.cart_items.append({"product": product, "quantity": quantity})
         self.notify_listeners()
-    
+
     def set_theme_mode(self, mode):
         self.theme_mode = mode
         self.notify_listeners()
@@ -314,27 +314,27 @@ class Router:
             "/product/:id": self._product_detail_route,
             "/settings": self._settings_route
         }
-    
+
     def initialize(self):
         self.page.on_route_change = self._handle_route_change
         # 初期ルートを設定
         self.page.go("/")
-    
+
     def _handle_route_change(self, route_event):
         new_route = route_event.route
-        
+
         # パラメータを含むルートの処理
         route_parts = new_route.split("/")
-        
+
         for route_pattern, handler in self.routes.items():
             pattern_parts = route_pattern.split("/")
-            
+
             if len(route_parts) != len(pattern_parts):
                 continue
-            
+
             params = {}
             match = True
-            
+
             for i, part in enumerate(pattern_parts):
                 if part.startswith(":"):
                     # パラメータをキャプチャ
@@ -343,7 +343,7 @@ class Router:
                 elif part != route_parts[i]:
                     match = False
                     break
-            
+
             if match:
                 # ルートに一致するハンドラを呼び出す
                 self.page.views.clear()
@@ -351,27 +351,27 @@ class Router:
                 self.page.views.append(view)
                 self.page.update()
                 return
-        
+
         # 一致するルートがない場合は404ページ
         self._not_found_route()
-    
+
     def _home_route(self, params=None):
         from app.presentation.pages.home_page import HomePage
         return ft.View("/", [HomePage(self.page)])
-    
+
     def _products_route(self, params=None):
         from app.presentation.pages.products_page import ProductsPage
         return ft.View("/products", [ProductsPage(self.page)])
-    
+
     def _product_detail_route(self, params):
         from app.presentation.pages.product_detail_page import ProductDetailPage
         product_id = params.get("id")
         return ft.View(f"/product/{product_id}", [ProductDetailPage(self.page, product_id)])
-    
+
     def _settings_route(self, params=None):
         from app.presentation.pages.settings_page import SettingsPage
         return ft.View("/settings", [SettingsPage(self.page)])
-    
+
     def _not_found_route(self):
         from app.presentation.pages.not_found_page import NotFoundPage
         self.page.views.append(ft.View("/not-found", [NotFoundPage(self.page)]))
@@ -408,7 +408,7 @@ class ProductRepository:
     def __init__(self):
         self.products = []
         self._load_products()
-    
+
     def _load_products(self):
         # ローカルJSONファイルからデータを読み込む例
         try:
@@ -431,16 +431,16 @@ class ProductRepository:
             self.products = [
                 Product(1, "サンプル商品", "説明文", 1000, "https://example.com/img.jpg")
             ]
-    
+
     def get_all_products(self):
         return self.products
-    
+
     def get_product_by_id(self, id):
         for product in self.products:
             if product.id == id:
                 return product
         return None
-    
+
     def search_products(self, keyword):
         keyword = keyword.lower()
         return [p for p in self.products if keyword in p.name.lower() or keyword in p.description.lower()]
@@ -458,7 +458,7 @@ class AuthService:
     def __init__(self):
         self.base_url = API_BASE_URL
         self.token = None
-    
+
     def login(self, username, password):
         try:
             response = requests.post(
@@ -473,11 +473,11 @@ class AuthService:
                 return {"success": False, "message": "ログインに失敗しました"}
         except Exception as e:
             return {"success": False, "message": f"エラーが発生しました: {str(e)}"}
-    
+
     def get_user_profile(self):
         if not self.token:
             return {"success": False, "message": "ログインが必要です"}
-        
+
         try:
             response = requests.get(
                 f"{self.base_url}/user/profile",
@@ -501,10 +501,10 @@ class AuthService:
 class Container:
     def __init__(self):
         self._services = {}
-    
+
     def register(self, interface, implementation):
         self._services[interface] = implementation
-    
+
     def resolve(self, interface):
         if interface not in self._services:
             raise Exception(f"Service {interface} not registered")
@@ -513,22 +513,22 @@ class Container:
 # アプリケーションの依存関係を設定
 def setup_dependencies():
     container = Container()
-    
+
     # リポジトリの登録
     from app.data.repositories.product_repository import ProductRepository
     container.register("product_repository", ProductRepository())
-    
+
     # サービスの登録
     from app.data.services.auth_service import AuthService
     container.register("auth_service", AuthService())
-    
+
     return container
 
 # 依存関係の利用例
 class ProductController:
     def __init__(self, container):
         self.product_repository = container.resolve("product_repository")
-    
+
     def get_featured_products(self):
         products = self.product_repository.get_all_products()
         # 特集商品のみをフィルタリング
@@ -543,10 +543,10 @@ class ProductController:
 # プラットフォーム固有の実装を登録する例
 def setup_platform_dependencies(page):
     container = Container()
-    
+
     # プラットフォーム検出
     platform = page.platform
-    
+
     # ストレージサービスの登録（プラットフォーム固有の実装）
     if platform in ["android", "ios"]:
         from app.platform.storage.mobile_storage import MobileStorage
@@ -554,7 +554,7 @@ def setup_platform_dependencies(page):
     else:
         from app.platform.storage.web_storage import WebStorage
         container.register("storage_service", WebStorage(page))
-    
+
     # 通知サービスの登録（プラットフォーム固有の実装）
     if platform == "android":
         from app.platform.notification.android_notification import AndroidNotification
@@ -565,7 +565,7 @@ def setup_platform_dependencies(page):
     else:
         from app.platform.notification.web_notification import WebNotification
         container.register("notification_service", WebNotification(page))
-    
+
     return container
 ```
 
@@ -586,22 +586,22 @@ def main(page: ft.Page):
     # ページの初期設定
     page.title = "Flet Sample App"
     page.theme = get_app_theme(app_state.theme_mode)
-    
+
     # 依存関係の設定
     from app.core.di.container import setup_dependencies
     container = setup_dependencies()
-    
+
     # ルーターの初期化
     router = Router(page)
     router.initialize()
-    
+
     # テーマ切り替え機能
     def toggle_theme(e):
         new_mode = "dark" if app_state.theme_mode == "light" else "light"
         app_state.set_theme_mode(new_mode)
         page.theme = get_app_theme(new_mode)
         page.update()
-    
+
     # テーマ切り替えボタンをページに追加
     page.floating_action_button = ft.FloatingActionButton(
         icon=ft.icons.BRIGHTNESS_6,
@@ -629,20 +629,20 @@ class ProductListPage(ft.UserControl):
         self.controller = ProductController(container)
         self.products = []
         self.loading = True
-    
+
     def build(self):
         self.app_bar = ft.AppBar(
             title=ft.Text("商品一覧"),
             center_title=False,
             bgcolor=ft.colors.SURFACE_VARIANT
         )
-        
+
         self.search_field = ft.TextField(
             hint_text="商品を検索...",
             expand=True,
             on_change=self._on_search_change
         )
-        
+
         self.product_grid = ft.GridView(
             expand=True,
             runs_count=3,
@@ -651,12 +651,12 @@ class ProductListPage(ft.UserControl):
             spacing=10,
             run_spacing=10,
         )
-        
+
         self.loading_indicator = ft.ProgressRing()
-        
+
         # 初期データ読み込み
         self._load_products()
-        
+
         return ft.Column([
             self.app_bar,
             ft.Container(content=self.search_field, padding=10),
@@ -666,14 +666,14 @@ class ProductListPage(ft.UserControl):
                 padding=10
             )
         ])
-    
+
     def _load_products(self):
         self.loading = True
         self.update()
-        
+
         # 非同期データ読み込みをシミュレート
         import asyncio
-        
+
         async def load():
             # 実際のアプリではここでAPIコールなどを行う
             await asyncio.sleep(1)  # データ取得の遅延をシミュレート
@@ -681,9 +681,9 @@ class ProductListPage(ft.UserControl):
             self._update_product_grid()
             self.loading = False
             self.update()
-        
+
         asyncio.create_task(load())
-    
+
     def _update_product_grid(self):
         self.product_grid.controls = [
             ProductCard(
@@ -692,7 +692,7 @@ class ProductListPage(ft.UserControl):
             )
             for product in self.products
         ]
-    
+
     def _on_search_change(self, e):
         keyword = self.search_field.value
         if not keyword:
@@ -709,7 +709,7 @@ class ProductListPage(ft.UserControl):
                 for product in filtered_products
             ]
         self.product_grid.update()
-    
+
     def _on_product_click(self, product_id):
         # 商品詳細ページに遷移
         self.page.go(f"/product/{product_id}")

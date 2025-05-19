@@ -14,9 +14,7 @@ class DataUtils:
 
     @staticmethod
     def optimize_data_size(
-        data: List[Dict[str, Any]],
-        min_size: int = 10,
-        max_size: int = 100
+        data: List[Dict[str, Any]], min_size: int = 10, max_size: int = 100
     ) -> List[Dict[str, Any]]:
         """データサイズを最適化
 
@@ -45,8 +43,7 @@ class DataUtils:
 
     @staticmethod
     def optimize_data_quality(
-        data: List[Dict[str, Any]],
-        rules: Dict[str, List[Dict[str, Any]]]
+        data: List[Dict[str, Any]], rules: Dict[str, List[Dict[str, Any]]]
     ) -> List[Dict[str, Any]]:
         """データの品質を最適化
 
@@ -73,8 +70,7 @@ class DataUtils:
 
     @staticmethod
     def optimize_data_relationships(
-        data: List[Dict[str, Any]],
-        relationships: Dict[str, List[str]]
+        data: List[Dict[str, Any]], relationships: Dict[str, List[str]]
     ) -> List[Dict[str, Any]]:
         """データ間の関連性を最適化
 
@@ -106,8 +102,7 @@ class DataUtils:
 
     @staticmethod
     def optimize_data_distribution(
-        data: List[Dict[str, Any]],
-        distribution: Dict[str, Dict[str, Any]]
+        data: List[Dict[str, Any]], distribution: Dict[str, Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """データの分布を最適化
 
@@ -143,8 +138,7 @@ class DataUtils:
 
     @staticmethod
     def optimize_data_performance(
-        data: List[Dict[str, Any]],
-        performance_targets: Dict[str, Dict[str, Any]]
+        data: List[Dict[str, Any]], performance_targets: Dict[str, Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """パフォーマンスを考慮したデータの最適化
 
@@ -161,11 +155,13 @@ class DataUtils:
                 if field in item:
                     # データサイズの最適化
                     if "max_size" in targets:
-                        item[field] = item[field][:targets["max_size"]]
+                        item[field] = item[field][: targets["max_size"]]
 
                     # データ形式の最適化
                     if "format" in targets:
-                        item[field] = DataUtils.format_data(item[field], targets["format"])
+                        item[field] = DataUtils.format_data(
+                            item[field], targets["format"]
+                        )
 
         return data
 
@@ -182,6 +178,7 @@ class DataUtils:
         """
         if format_type == "json":
             import json
+
             return json.dumps(value)
         elif format_type == "datetime":
             if isinstance(value, datetime):
@@ -198,7 +195,7 @@ class DataUtils:
         data_type: str,
         count: int = 10,
         optimize: bool = True,
-        rules: Optional[Dict[str, List[Dict[str, Any]]]] = None
+        rules: Optional[Dict[str, List[Dict[str, Any]]]] = None,
     ) -> List[Dict[str, Any]]:
         """テストデータを生成
 

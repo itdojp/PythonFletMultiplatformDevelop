@@ -85,11 +85,9 @@ class AutoTest:
 
         # データをファイルに保存
         with open(self.results_dir / f"test_data_{test_type}.json", "w") as f:
-            json.dump({
-                "users": users,
-                "items": items,
-                "auth_data": auth_data
-            }, f, indent=2)
+            json.dump(
+                {"users": users, "items": items, "auth_data": auth_data}, f, indent=2
+            )
 
     def setup_test_environment(self, test_type: str):
         """テスト環境をセットアップ
@@ -106,11 +104,15 @@ class AutoTest:
 
         # テスト設定ファイルの作成
         with open(self.results_dir / f"test_config_{test_type}.json", "w") as f:
-            json.dump({
-                "test_type": test_type,
-                "data_size": len(test_data["users"]),
-                "timestamp": datetime.now().isoformat()
-            }, f, indent=2)
+            json.dump(
+                {
+                    "test_type": test_type,
+                    "data_size": len(test_data["users"]),
+                    "timestamp": datetime.now().isoformat(),
+                },
+                f,
+                indent=2,
+            )
 
     def execute_tests(self, test_type: str, parallel: bool):
         """テストを実行
@@ -164,11 +166,15 @@ class AutoTest:
         # テスト結果のサマリー
         summary_path = self.results_dir / test_type / "test_summary.json"
         with open(summary_path, "w") as f:
-            json.dump({
-                "test_type": test_type,
-                "timestamp": datetime.now().isoformat(),
-                "status": "completed"
-            }, f, indent=2)
+            json.dump(
+                {
+                    "test_type": test_type,
+                    "timestamp": datetime.now().isoformat(),
+                    "status": "completed",
+                },
+                f,
+                indent=2,
+            )
 
     def main(self):
         """メイン関数"""

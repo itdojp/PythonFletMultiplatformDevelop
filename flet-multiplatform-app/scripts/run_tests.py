@@ -34,16 +34,20 @@ def run_tests(test_type: str, parallel: bool = False):
 
     # テストタイプに応じた追加オプション
     if test_type == "unit" or test_type == "integration":
-        cmd.extend([
-            "--cov=src/backend",
-            "--cov-report=xml:coverage.xml",
-            "--cov-report=term-missing",
-        ])
+        cmd.extend(
+            [
+                "--cov=src/backend",
+                "--cov-report=xml:coverage.xml",
+                "--cov-report=term-missing",
+            ]
+        )
     elif test_type == "performance":
-        cmd.extend([
-            "--benchmark-autosave",
-            "--benchmark-json=benchmark.json",
-        ])
+        cmd.extend(
+            [
+                "--benchmark-autosave",
+                "--benchmark-json=benchmark.json",
+            ]
+        )
 
     # テストの実行
     try:

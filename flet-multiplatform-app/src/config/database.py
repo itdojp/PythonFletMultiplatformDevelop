@@ -1,11 +1,11 @@
 """データベースの設定を管理するモジュール"""
 
 import logging
-from typing import AsyncGenerator, Any
+from typing import Any, AsyncGenerator
 
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.engine import Engine
 
 from .settings import settings
 

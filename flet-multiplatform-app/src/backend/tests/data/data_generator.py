@@ -20,10 +20,7 @@ class DataGenerator:
         self._item_count = 0
 
     def generate_user_data(
-        self,
-        count: int = 1,
-        is_superuser: bool = False,
-        invalid: bool = False
+        self, count: int = 1, is_superuser: bool = False, invalid: bool = False
     ) -> List[UserCreate]:
         """ユーザーのテストデータを生成
 
@@ -41,8 +38,12 @@ class DataGenerator:
                 users.append(
                     UserCreate(
                         email=self.faker.email(),
-                        username="" if random.random() < 0.5 else self.faker.user_name(),
-                        password="short" if random.random() < 0.5 else self.faker.password(),
+                        username=(
+                            "" if random.random() < 0.5 else self.faker.user_name()
+                        ),
+                        password=(
+                            "short" if random.random() < 0.5 else self.faker.password()
+                        ),
                         full_name=self.faker.name(),
                     )
                 )
@@ -60,10 +61,7 @@ class DataGenerator:
         return users
 
     def generate_item_data(
-        self,
-        count: int = 1,
-        owner_id: Optional[int] = None,
-        invalid: bool = False
+        self, count: int = 1, owner_id: Optional[int] = None, invalid: bool = False
     ) -> List[ItemCreate]:
         """アイテムのテストデータを生成
 
@@ -82,7 +80,11 @@ class DataGenerator:
                     ItemCreate(
                         title="" if random.random() < 0.5 else self.faker.sentence(),
                         description=self.faker.text(),
-                        price=random.uniform(-100.0, 0.0) if random.random() < 0.5 else 0.0,
+                        price=(
+                            random.uniform(-100.0, 0.0)
+                            if random.random() < 0.5
+                            else 0.0
+                        ),
                     )
                 )
             else:
@@ -98,9 +100,7 @@ class DataGenerator:
         return items
 
     def generate_auth_data(
-        self,
-        count: int = 1,
-        invalid: bool = False
+        self, count: int = 1, invalid: bool = False
     ) -> List[Dict[str, str]]:
         """認証用のテストデータを生成
 
@@ -114,22 +114,23 @@ class DataGenerator:
         auth_data = []
         for _ in range(count):
             if invalid:
-                auth_data.append({
-                    "email": self.faker.email(),
-                    "password": "wrongpassword",
-                })
+                auth_data.append(
+                    {
+                        "email": self.faker.email(),
+                        "password": "wrongpassword",
+                    }
+                )
             else:
-                auth_data.append({
-                    "email": f"user{self._user_count}@example.com",
-                    "password": "password123",
-                })
+                auth_data.append(
+                    {
+                        "email": f"user{self._user_count}@example.com",
+                        "password": "password123",
+                    }
+                )
         return auth_data
 
     def generate_dates(
-        self,
-        count: int = 1,
-        past_days: int = 30,
-        future_days: int = 30
+        self, count: int = 1, past_days: int = 30, future_days: int = 30
     ) -> List[datetime]:
         """日付データを生成
 

@@ -11,22 +11,10 @@ from backend.api.endpoints import auth, items, users
 api_router = APIRouter()
 
 # 認証関連のルート
-api_router.include_router(
-    auth.router,
-    prefix="/auth",
-    tags=["auth"]
-)
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 # ユーザー関連のルート
-api_router.include_router(
-    users.router,
-    prefix="/users",
-    tags=["users"]
-)
+api_router.include_router(users.router, prefix="/users", tags=["users"])
 
 # アイテム関連のルート
-api_router.include_router(
-    items.router,
-    prefix="/items",
-    tags=["items"]
-)
+api_router.include_router(items.router, prefix="/items", tags=["items"])

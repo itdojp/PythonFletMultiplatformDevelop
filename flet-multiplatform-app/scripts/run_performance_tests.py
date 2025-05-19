@@ -38,24 +38,25 @@ TEST_CONFIG = {
     "load_test": {
         "test_file": "test_load.py",
         "report_file": "load-test-results.xml",
-        "metrics_file": "load-metrics.json"
+        "metrics_file": "load-metrics.json",
     },
     "stress_test": {
         "test_file": "test_stress.py",
         "report_file": "stress-test-results.xml",
-        "metrics_file": "stress-metrics.json"
+        "metrics_file": "stress-metrics.json",
     },
     "endurance_test": {
         "test_file": "test_endurance.py",
         "report_file": "endurance-test-results.xml",
-        "metrics_file": "endurance-metrics.json"
+        "metrics_file": "endurance-metrics.json",
     },
     "scalability_test": {
         "test_file": "test_scalability.py",
         "report_file": "scalability-test-results.xml",
-        "metrics_file": "scalability-metrics.json"
-    }
+        "metrics_file": "scalability-metrics.json",
+    },
 }
+
 
 class PerformanceTestRunner:
     """Run performance tests and generate reports."""
@@ -88,14 +89,16 @@ class PerformanceTestRunner:
             [
                 "uvicorn",
                 "src.backend.app.main:app",
-                "--host", "0.0.0.0",
-                "--port", "8000",
-                "--reload"  # Enable auto-reload for development
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000",
+                "--reload",  # Enable auto-reload for development
             ],
             env=env,
             cwd=str(PROJECT_ROOT),  # Set working directory to project root
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            stderr=subprocess.PIPE,
         )
 
         # Wait for the application to start
@@ -104,6 +107,7 @@ class PerformanceTestRunner:
             try:
                 # Try to connect to the application
                 import requests
+
                 response = requests.get("http://localhost:8000/health")
                 if response.status_code == 200:
                     print("✅ Application started successfully")
@@ -111,7 +115,7 @@ class PerformanceTestRunner:
             except Exception as e:
                 print(f"Waiting for application to start... ({e})")
                 await asyncio.sleep(2)
-        
+
         print("❌ Failed to start application")
         self._log_process_output()
         raise RuntimeError("Failed to start application")
@@ -135,10 +139,11 @@ class PerformanceTestRunner:
         """
         try:
             from src.backend.tests.performance.utils.config_loader import load_config
+
             return load_config(self.config_path)
         except ImportError:
             # Fallback to direct JSON loading if the module is not available
-            with open(self.config_path, encoding='utf-8') as f:
+            with open(self.config_path, encoding="utf-8") as f:
                 return json.load(f)
 
     def _get_test_config(self, test_type: str) -> dict:
@@ -180,31 +185,32 @@ class PerformanceTestRunner:
                 env=test_env,
                 cwd=str(PROJECT_ROOT),  # Set working directory to project root
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
-            
+
             # Wait for the process to complete with a timeout
             try:
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=3600)  # 1 hour timeout
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(), timeout=3600
+                )  # 1 hour timeout
             except asyncio.TimeoutError:
                 print(f"⚠️  {test_name} timed out after 1 hour")
                 process.terminate()
                 return False
-            
+
             # Log the output
             if stdout:
                 print(f"\n📝 {test_name} output:")
                 print(stdout.decode())
-            
+
             if process.returncode != 0:
                 print(f"❌ {test_name} failed with return code {process.returncode}")
                 if stderr:
                     print(f"STDERR: {stderr.decode()}")
                 return False
-                
+
             print(f"✅ {test_name} completed successfully")
             return True
-            
 
             status = "PASSED" if success else "FAILED"
             print(f"✅ {test_type.replace('_', ' ').title()} {status}")
@@ -229,12 +235,10 @@ class PerformanceTestRunner:
             await self.start_application()
 
             # Get the test execution order from config or use default
-            test_order = self.config.get('test_order', [
-                'load_test',
-                'stress_test',
-                'endurance_test',
-                'scalability_test'
-            ])
+            test_order = self.config.get(
+                "test_order",
+                ["load_test", "stress_test", "endurance_test", "scalability_test"],
+            )
 
             # Run each test type in the specified order
             for test_type in test_order:
@@ -249,7 +253,9 @@ class PerformanceTestRunner:
                         print(output)
                         all_success = False
                     else:
-                        print(f"✅ {test_type.replace('_', ' ').title()} completed successfully")
+                        print(
+                            f"✅ {test_type.replace('_', ' ').title()} completed successfully"
+                        )
 
             return all_success
 
@@ -271,9 +277,7 @@ class PerformanceTestRunner:
 
         try:
             subprocess.run(
-                [sys.executable, str(analyzer_script)],
-                check=True,
-                cwd=PROJECT_ROOT
+                [sys.executable, str(analyzer_script)], check=True, cwd=PROJECT_ROOT
             )
             print(f"✅ Report generated: {report_path}")
             return report_path
@@ -313,14 +317,14 @@ async def main():
         "--config",
         type=str,
         default=None,
-        help="Path to performance test configuration file"
+        help="Path to performance test configuration file",
     )
     parser.add_argument(
         "--test-type",
         type=str,
         choices=list(TEST_CONFIG.keys()) + ["all"],
         default="all",
-        help="Type of test to run (default: all)"
+        help="Type of test to run (default: all)",
     )
     args = parser.parse_args()
 

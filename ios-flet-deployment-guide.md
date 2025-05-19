@@ -119,7 +119,7 @@
   def main(page: ft.Page):
       page.title = "My Flet iOS App"
       page.theme_mode = ft.ThemeMode.LIGHT
-      
+
       # アプリの内容を追加
       page.add(
           ft.Text("Hello, iOS from Python Flet!", size=20)
@@ -137,10 +137,10 @@
   ```python
   def main(page: ft.Page):
       page.title = "My Flet iOS App"
-      
+
       # モバイル画面向けにパディングを調整
       page.padding = 10 if page.width < 600 else 20
-      
+
       # iOSスタイルの要素を追加
       page.add(
           ft.AppBar(
@@ -159,7 +159,7 @@
       if e.direction == "right":
           # 右スワイプの処理
           pass
-      
+
   container = ft.GestureDetector(
       on_horizontal_drag_end=on_swipe,
       content=ft.Container(

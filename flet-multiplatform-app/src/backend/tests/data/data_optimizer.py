@@ -13,9 +13,7 @@ class DataOptimizer:
 
     @staticmethod
     def optimize_user_data(
-        users: List[Dict[str, Any]],
-        max_users: int = 100,
-        min_users: int = 10
+        users: List[Dict[str, Any]], max_users: int = 100, min_users: int = 10
     ) -> List[Dict[str, Any]]:
         """ユーザーのデータを最適化
 
@@ -40,9 +38,7 @@ class DataOptimizer:
 
     @staticmethod
     def optimize_item_data(
-        items: List[Dict[str, Any]],
-        max_items: int = 500,
-        min_items: int = 50
+        items: List[Dict[str, Any]], max_items: int = 500, min_items: int = 50
     ) -> List[Dict[str, Any]]:
         """アイテムのデータを最適化
 
@@ -67,9 +63,7 @@ class DataOptimizer:
 
     @staticmethod
     def optimize_auth_data(
-        auth_data: List[Dict[str, str]],
-        max_auth: int = 50,
-        min_auth: int = 5
+        auth_data: List[Dict[str, str]], max_auth: int = 50, min_auth: int = 5
     ) -> List[Dict[str, str]]:
         """認証データを最適化
 
@@ -97,7 +91,7 @@ class DataOptimizer:
         dates: List[Dict[str, Any]],
         max_dates: int = 100,
         min_dates: int = 10,
-        time_range_days: int = 365
+        time_range_days: int = 365,
     ) -> List[Dict[str, Any]]:
         """日付データを最適化
 
@@ -117,9 +111,7 @@ class DataOptimizer:
             # 日付数が最小値を下回った場合、追加生成
             generator = DataGenerator()
             additional_dates = generator.generate_dates(
-                min_dates - len(dates),
-                -time_range_days,
-                time_range_days
+                min_dates - len(dates), -time_range_days, time_range_days
             )
             dates.extend(additional_dates)
 
@@ -130,7 +122,7 @@ class DataOptimizer:
         data: List[Dict[str, Any]],
         max_size: int = 1000,
         min_size: int = 100,
-        validator: callable = None
+        validator: callable = None,
     ) -> List[Dict[str, Any]]:
         """複数のデータを最適化
 

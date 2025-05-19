@@ -56,6 +56,7 @@ class Settings(BaseSettings):
         POSTGRES_PORT: PostgreSQLのポート番号。
         SQLALCHEMY_DATABASE_URI: SQLAlchemyのデータベースURI。
     """
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

@@ -87,19 +87,29 @@ class TestStressEndpoints:
             total_requests += result["total_requests"]
 
             if "response_times" in result:
-                response_times.extend([t for t in result["response_times"] if isinstance(t, (int, float))])
+                response_times.extend(
+                    [t for t in result["response_times"] if isinstance(t, (int, float))]
+                )
 
         success_rate = successful_requests / total_requests if total_requests > 0 else 0
 
         # Record metrics
         performance_metrics.record_test_metric("total_requests", total_requests)
-        performance_metrics.record_test_metric("successful_requests", successful_requests)
+        performance_metrics.record_test_metric(
+            "successful_requests", successful_requests
+        )
         performance_metrics.record_test_metric("success_rate", success_rate)
 
         if response_times:
-            performance_metrics.record_test_metric("avg_response_time", sum(response_times) / len(response_times))
-            performance_metrics.record_test_metric("max_response_time", max(response_times))
-            performance_metrics.record_test_metric("min_response_time", min(response_times))
+            performance_metrics.record_test_metric(
+                "avg_response_time", sum(response_times) / len(response_times)
+            )
+            performance_metrics.record_test_metric(
+                "max_response_time", max(response_times)
+            )
+            performance_metrics.record_test_metric(
+                "min_response_time", min(response_times)
+            )
 
         print(f"\n📊 Stress Test Results:")
         print(f"Total Requests: {total_requests}")
@@ -107,12 +117,16 @@ class TestStressEndpoints:
         print(f"Success Rate: {success_rate:.2%}")
 
         if response_times:
-            print(f"Average Response Time: {sum(response_times) / len(response_times):.3f}s")
+            print(
+                f"Average Response Time: {sum(response_times) / len(response_times):.3f}s"
+            )
             print(f"Max Response Time: {max(response_times):.3f}s")
             print(f"Min Response Time: {min(response_times):.3f}s")
 
         # Assert performance criteria (more lenient than load tests)
-        assert success_rate >= 0.80, f"Success rate too low under stress: {success_rate:.2%}"
+        assert (
+            success_rate >= 0.80
+        ), f"Success rate too low under stress: {success_rate:.2%}"
 
     async def test_system_under_extreme_load(
         self,
@@ -121,7 +135,9 @@ class TestStressEndpoints:
     ):
         """Test the system under extreme load conditions."""
         config = perf_test_config["stress_test"]
-        num_requests = config["users"] * 2  # Even more aggressive than standard stress test
+        num_requests = (
+            config["users"] * 2
+        )  # Even more aggressive than standard stress test
 
         # Test a mix of read and write operations
         endpoints = [
@@ -156,8 +172,7 @@ class TestStressEndpoints:
 
                 # Randomly select endpoints for this batch
                 batch_endpoints = random.choices(
-                    weighted_endpoints,
-                    k=current_batch_size
+                    weighted_endpoints, k=current_batch_size
                 )
 
                 # Create tasks for this batch
@@ -171,10 +186,14 @@ class TestStressEndpoints:
 
                 # Run batch
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
-                results.extend([r for r in batch_results if not isinstance(r, Exception)])
+                results.extend(
+                    [r for r in batch_results if not isinstance(r, Exception)]
+                )
 
                 # Print progress
-                print(f"  Processed {min(i + current_batch_size, num_requests)}/{num_requests} requests...")
+                print(
+                    f"  Processed {min(i + current_batch_size, num_requests)}/{num_requests} requests..."
+                )
 
         # Process results
         successful_requests = sum(1 for r in results if r.get("success", False))
@@ -184,12 +203,17 @@ class TestStressEndpoints:
         response_times = [r["response_time"] for r in results if "response_time" in r]
 
         # Record metrics
-        performance_metrics.record_test_metric("extreme_load_results", {
-            "total_requests": total_requests,
-            "successful_requests": successful_requests,
-            "success_rate": success_rate,
-            "avg_response_time": sum(response_times) / len(response_times) if response_times else 0,
-        })
+        performance_metrics.record_test_metric(
+            "extreme_load_results",
+            {
+                "total_requests": total_requests,
+                "successful_requests": successful_requests,
+                "success_rate": success_rate,
+                "avg_response_time": (
+                    sum(response_times) / len(response_times) if response_times else 0
+                ),
+            },
+        )
 
         print(f"\n📊 Extreme Load Test Results:")
         print(f"Total Requests: {total_requests}")
@@ -197,10 +221,14 @@ class TestStressEndpoints:
         print(f"Success Rate: {success_rate:.2%}")
 
         if response_times:
-            print(f"Average Response Time: {sum(response_times) / len(response_times):.3f}s")
+            print(
+                f"Average Response Time: {sum(response_times) / len(response_times):.3f}s"
+            )
 
         # Assert that the system didn't completely fail
-        assert success_rate > 0.5, f"System failed under extreme load: {success_rate:.2%} success rate"
+        assert (
+            success_rate > 0.5
+        ), f"System failed under extreme load: {success_rate:.2%} success rate"
 
 
 class TestResourceUtilization:
@@ -245,16 +273,23 @@ class TestResourceUtilization:
         # Record metrics
         performance_metrics.record_test_metric("memory_usage_mb", final_memory)
         performance_metrics.record_test_metric("memory_increase_mb", memory_increase)
-        performance_metrics.record_test_metric("memory_usage_per_request_mb", memory_increase / num_requests if num_requests > 0 else 0)
+        performance_metrics.record_test_metric(
+            "memory_usage_per_request_mb",
+            memory_increase / num_requests if num_requests > 0 else 0,
+        )
 
         print(f"\n💾 Memory Usage:")
         print(f"Initial: {initial_memory:.2f} MB")
         print(f"Final: {final_memory:.2f} MB")
         print(f"Increase: {memory_increase:.2f} MB")
-        print(f"Per request: {memory_increase / num_requests if num_requests > 0 else 0:.4f} MB")
+        print(
+            f"Per request: {memory_increase / num_requests if num_requests > 0 else 0:.4f} MB"
+        )
 
         # Assert that memory usage is within reasonable bounds
-        assert memory_increase < 100, f"Memory increase too high: {memory_increase:.2f} MB"
+        assert (
+            memory_increase < 100
+        ), f"Memory increase too high: {memory_increase:.2f} MB"
 
     async def test_cpu_usage_under_load(
         self,
@@ -296,15 +331,24 @@ class TestResourceUtilization:
         results = await load_task
 
         # Calculate average CPU usage
-        avg_cpu = sum(cpu_percent_during_test) / len(cpu_percent_during_test) if cpu_percent_during_test else 0
+        avg_cpu = (
+            sum(cpu_percent_during_test) / len(cpu_percent_during_test)
+            if cpu_percent_during_test
+            else 0
+        )
 
         # Record metrics
         performance_metrics.record_test_metric("avg_cpu_percent", avg_cpu)
-        performance_metrics.record_test_metric("max_cpu_percent", max(cpu_percent_during_test) if cpu_percent_during_test else 0)
+        performance_metrics.record_test_metric(
+            "max_cpu_percent",
+            max(cpu_percent_during_test) if cpu_percent_during_test else 0,
+        )
 
         print(f"\n💻 CPU Usage During Test:")
         print(f"Average: {avg_cpu:.1f}%")
-        print(f"Max: {max(cpu_percent_during_test) if cpu_percent_during_test else 0:.1f}%")
+        print(
+            f"Max: {max(cpu_percent_during_test) if cpu_percent_during_test else 0:.1f}%"
+        )
 
         # Assert that CPU usage is within reasonable bounds
         assert avg_cpu < 90, f"Average CPU usage too high: {avg_cpu:.1f}%"

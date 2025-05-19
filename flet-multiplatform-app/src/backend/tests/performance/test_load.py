@@ -31,11 +31,14 @@ class TestLoadEndpoints:
         self.client = test_client
         self.base_url = "http://testserver"
 
-    @pytest.mark.parametrize("endpoint,method,params", [
-        ("/api/health", "GET", None),
-        ("/api/users", "GET", None),
-        ("/api/users/1", "GET", None),
-    ])
+    @pytest.mark.parametrize(
+        "endpoint,method,params",
+        [
+            ("/api/health", "GET", None),
+            ("/api/users", "GET", None),
+            ("/api/users/1", "GET", None),
+        ],
+    )
     async def test_endpoint_load(
         self,
         performance_metrics,
@@ -64,10 +67,16 @@ class TestLoadEndpoints:
         performance_metrics.record_test_metric("load_test_results", results)
 
         # Assert performance criteria
-        assert results["success_rate"] >= 0.95, f"Success rate too low: {results['success_rate']}"
-        assert results["response_times"]["p95"] < 1.0, f"95th percentile response time too high: {results['response_times']['p95']}s"
+        assert (
+            results["success_rate"] >= 0.95
+        ), f"Success rate too low: {results['success_rate']}"
+        assert (
+            results["response_times"]["p95"] < 1.0
+        ), f"95th percentile response time too high: {results['response_times']['p95']}s"
 
-    async def test_mixed_workload(self, performance_metrics, perf_test_config: Dict[str, Any]):
+    async def test_mixed_workload(
+        self, performance_metrics, perf_test_config: Dict[str, Any]
+    ):
         """Test a mixed workload simulating real-world usage patterns."""
         config = perf_test_config["load_test"]
         num_users = config["users"]
@@ -107,17 +116,27 @@ class TestLoadEndpoints:
         # Calculate overall response times
         all_response_times = []
         for r in results:
-            all_response_times.extend([t for t in r.get("response_times", []) if isinstance(t, (int, float))])
+            all_response_times.extend(
+                [t for t in r.get("response_times", []) if isinstance(t, (int, float))]
+            )
 
         # Record metrics
         performance_metrics.record_test_metric("total_requests", total_requests)
-        performance_metrics.record_test_metric("successful_requests", successful_requests)
+        performance_metrics.record_test_metric(
+            "successful_requests", successful_requests
+        )
         performance_metrics.record_test_metric("success_rate", success_rate)
 
         if all_response_times:
-            performance_metrics.record_test_metric("avg_response_time", sum(all_response_times) / len(all_response_times))
-            performance_metrics.record_test_metric("max_response_time", max(all_response_times))
-            performance_metrics.record_test_metric("min_response_time", min(all_response_times))
+            performance_metrics.record_test_metric(
+                "avg_response_time", sum(all_response_times) / len(all_response_times)
+            )
+            performance_metrics.record_test_metric(
+                "max_response_time", max(all_response_times)
+            )
+            performance_metrics.record_test_metric(
+                "min_response_time", min(all_response_times)
+            )
 
         # Assert performance criteria
         assert success_rate >= 0.95, f"Overall success rate too low: {success_rate}"
@@ -150,8 +169,12 @@ class TestLoadEndpoints:
         performance_metrics.record_test_metric(test_metric_name, results)
 
         # Assert performance criteria
-        assert results["success_rate"] >= 0.95, f"Success rate too low for {concurrent_users} users: {results['success_rate']}"
-        assert results["response_times"]["p95"] < 1.5, f"95th percentile response time too high for {concurrent_users} users: {results['response_times']['p95']}s"
+        assert (
+            results["success_rate"] >= 0.95
+        ), f"Success rate too low for {concurrent_users} users: {results['success_rate']}"
+        assert (
+            results["response_times"]["p95"] < 1.5
+        ), f"95th percentile response time too high for {concurrent_users} users: {results['response_times']['p95']}s"
 
 
 class TestDatabasePerformance:
@@ -185,8 +208,12 @@ class TestDatabasePerformance:
         performance_metrics.record_test_metric("db_query_results", results)
 
         # Assert performance criteria
-        assert results["success_rate"] >= 0.99, f"Query success rate too low: {results['success_rate']}"
-        assert results["response_times"]["p99"] < 0.5, f"99th percentile query time too high: {results['response_times']['p99']}s"
+        assert (
+            results["success_rate"] >= 0.99
+        ), f"Query success rate too low: {results['success_rate']}"
+        assert (
+            results["response_times"]["p99"] < 0.5
+        ), f"99th percentile query time too high: {results['response_times']['p99']}s"
 
     async def test_database_write_performance(
         self,
@@ -195,7 +222,9 @@ class TestDatabasePerformance:
     ):
         """Test performance of database write operations under load."""
         config = perf_test_config["load_test"]
-        num_writes = min(100, config["users"])  # Limit number of writes to avoid filling up the database
+        num_writes = min(
+            100, config["users"]
+        )  # Limit number of writes to avoid filling up the database
 
         # Generate unique user data for each request
         def generate_user_data(index: int) -> Dict[str, Any]:
@@ -220,5 +249,9 @@ class TestDatabasePerformance:
         performance_metrics.record_test_metric("db_write_results", results)
 
         # Assert performance criteria
-        assert results["success_rate"] >= 0.95, f"Write success rate too low: {results['success_rate']}"
-        assert results["response_times"]["p95"] < 1.0, f"95th percentile write time too high: {results['response_times']['p95']}s"
+        assert (
+            results["success_rate"] >= 0.95
+        ), f"Write success rate too low: {results['success_rate']}"
+        assert (
+            results["response_times"]["p95"] < 1.0
+        ), f"95th percentile write time too high: {results['response_times']['p95']}s"

@@ -22,11 +22,7 @@ class TestUsers:
         }
 
         # ユーザー作成
-        response = client.post(
-            "/api/v1/users/",
-            json=user_data,
-            headers=headers
-        )
+        response = client.post("/api/v1/users/", json=user_data, headers=headers)
         assert response.status_code == status.HTTP_201_CREATED
 
         # レスポンスの検証
@@ -77,9 +73,7 @@ class TestUsers:
 
         # ユーザー情報を更新
         response = client.put(
-            f"/api/v1/users/{test_user.id}",
-            json=update_data,
-            headers=headers
+            f"/api/v1/users/{test_user.id}", json=update_data, headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -89,11 +83,7 @@ class TestUsers:
         assert updated_user.full_name == update_data["full_name"]
 
         # 自分以外のユーザーは更新できない
-        response = client.put(
-            "/api/v1/users/9999",
-            json=update_data,
-            headers=headers
-        )
+        response = client.put("/api/v1/users/9999", json=update_data, headers=headers)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_delete_user(self, client, test_user, test_token):
@@ -101,10 +91,7 @@ class TestUsers:
         headers = {"Authorization": f"Bearer {test_token}"}
 
         # ユーザーを削除
-        response = client.delete(
-            f"/api/v1/users/{test_user.id}",
-            headers=headers
-        )
+        response = client.delete(f"/api/v1/users/{test_user.id}", headers=headers)
         assert response.status_code == status.HTTP_200_OK
 
         # 削除されたユーザーは取得できない
@@ -112,8 +99,5 @@ class TestUsers:
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
         # 自分以外のユーザーは削除できない
-        response = client.delete(
-            "/api/v1/users/9999",
-            headers=headers
-        )
+        response = client.delete("/api/v1/users/9999", headers=headers)
         assert response.status_code == status.HTTP_403_FORBIDDEN

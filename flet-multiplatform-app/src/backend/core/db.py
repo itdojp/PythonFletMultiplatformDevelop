@@ -16,6 +16,7 @@ from backend.core.config import settings
 mapper_registry = registry()
 Base = mapper_registry.generate_base()
 
+
 # 非同期エンジンの作成
 def get_engine():
     """データベースエンジンを取得"""
@@ -26,6 +27,7 @@ def get_engine():
         pool_pre_ping=True,
     )
     return engine
+
 
 # エンジンの初期化
 engine = get_engine()

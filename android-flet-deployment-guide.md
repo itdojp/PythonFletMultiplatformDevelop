@@ -62,7 +62,7 @@
   def main(page: ft.Page):
       page.title = "My Flet App"
       page.theme_mode = ft.ThemeMode.LIGHT
-      
+
       # アプリの内容を追加
       page.add(
           ft.Text("Hello, Android from Python Flet!", size=20)
@@ -80,10 +80,10 @@
   ```python
   def main(page: ft.Page):
       page.title = "My Flet App"
-      
+
       # モバイル画面向けにパディングを調整
       page.padding = 10 if page.width < 600 else 20
-      
+
       # レスポンシブコンテンツを追加
       # ...
   ```

@@ -26,6 +26,7 @@ TEMPLATES_DIR = Path("tests/performance/templates")
 for directory in [RESULTS_DIR, REPORTS_DIR, TEMPLATES_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
+
 class PerformanceAnalyzer:
     """Analyze performance test results and generate reports."""
 
@@ -59,7 +60,7 @@ class PerformanceAnalyzer:
                     "name": testcase.get("name"),
                     "classname": testcase.get("classname"),
                     "time": float(testcase.get("time", 0)),
-                    "status": "passed"
+                    "status": "passed",
                 }
 
                 # Check for failures or errors
@@ -126,7 +127,9 @@ class PerformanceAnalyzer:
     def analyze_endurance_test(self) -> Dict[str, Any]:
         """Analyze endurance test results."""
         results = {
-            "test_cases": self.parse_junit_xml(RESULTS_DIR / "endurance-test-results.xml"),
+            "test_cases": self.parse_junit_xml(
+                RESULTS_DIR / "endurance-test-results.xml"
+            ),
             "metrics": self.parse_performance_metrics("endurance"),
         }
         self.results["endurance_test"] = results
@@ -135,7 +138,9 @@ class PerformanceAnalyzer:
     def analyze_scalability_test(self) -> Dict[str, Any]:
         """Analyze scalability test results."""
         results = {
-            "test_cases": self.parse_junit_xml(RESULTS_DIR / "scalability-test-results.xml"),
+            "test_cases": self.parse_junit_xml(
+                RESULTS_DIR / "scalability-test-results.xml"
+            ),
             "metrics": self.parse_performance_metrics("scalability"),
         }
         self.results["scalability_test"] = results
@@ -151,18 +156,23 @@ class PerformanceAnalyzer:
             plt.plot(
                 self.metrics["concurrent_users"],
                 self.metrics["response_time"],
-                marker='o',
-                label='Response Time (s)'
+                marker="o",
+                label="Response Time (s)",
             )
-            plt.title('Response Time vs Concurrent Users')
-            plt.xlabel('Concurrent Users')
-            plt.ylabel('Response Time (s)')
+            plt.title("Response Time vs Concurrent Users")
+            plt.xlabel("Concurrent Users")
+            plt.ylabel("Response Time (s)")
             plt.grid(True)
 
-            plot_path = REPORTS_DIR / 'response_time_plot.png'
+            plot_path = REPORTS_DIR / "response_time_plot.png"
             plt.savefig(plot_path)
             plt.close()
-            plots.append({"title": "Response Time vs Load", "path": str(plot_path.relative_to(REPORTS_DIR))})
+            plots.append(
+                {
+                    "title": "Response Time vs Load",
+                    "path": str(plot_path.relative_to(REPORTS_DIR)),
+                }
+            )
 
         # Create throughput plot
         if self.metrics["throughput"] and self.metrics["concurrent_users"]:
@@ -170,19 +180,24 @@ class PerformanceAnalyzer:
             plt.plot(
                 self.metrics["concurrent_users"],
                 self.metrics["throughput"],
-                marker='o',
-                color='green',
-                label='Throughput (req/s)'
+                marker="o",
+                color="green",
+                label="Throughput (req/s)",
             )
-            plt.title('Throughput vs Concurrent Users')
-            plt.xlabel('Concurrent Users')
-            plt.ylabel('Throughput (req/s)')
+            plt.title("Throughput vs Concurrent Users")
+            plt.xlabel("Concurrent Users")
+            plt.ylabel("Throughput (req/s)")
             plt.grid(True)
 
-            plot_path = REPORTS_DIR / 'throughput_plot.png'
+            plot_path = REPORTS_DIR / "throughput_plot.png"
             plt.savefig(plot_path)
             plt.close()
-            plots.append({"title": "Throughput vs Load", "path": str(plot_path.relative_to(REPORTS_DIR))})
+            plots.append(
+                {
+                    "title": "Throughput vs Load",
+                    "path": str(plot_path.relative_to(REPORTS_DIR)),
+                }
+            )
 
         # Create success/error rate plot
         if self.metrics["success_rate"] and self.metrics["concurrent_users"]:
@@ -190,30 +205,35 @@ class PerformanceAnalyzer:
             plt.plot(
                 self.metrics["concurrent_users"],
                 [r * 100 for r in self.metrics["success_rate"]],
-                marker='o',
-                color='blue',
-                label='Success Rate (%)'
+                marker="o",
+                color="blue",
+                label="Success Rate (%)",
             )
 
             if self.metrics["error_rate"]:
                 plt.plot(
                     self.metrics["concurrent_users"],
                     [r * 100 for r in self.metrics["error_rate"]],
-                    marker='x',
-                    color='red',
-                    label='Error Rate (%)'
+                    marker="x",
+                    color="red",
+                    label="Error Rate (%)",
                 )
 
-            plt.title('Success/Error Rate vs Concurrent Users')
-            plt.xlabel('Concurrent Users')
-            plt.ylabel('Rate (%)')
+            plt.title("Success/Error Rate vs Concurrent Users")
+            plt.xlabel("Concurrent Users")
+            plt.ylabel("Rate (%)")
             plt.legend()
             plt.grid(True)
 
-            plot_path = REPORTS_DIR / 'success_rate_plot.png'
+            plot_path = REPORTS_DIR / "success_rate_plot.png"
             plt.savefig(plot_path)
             plt.close()
-            plots.append({"title": "Success/Error Rate vs Load", "path": str(plot_path.relative_to(REPORTS_DIR))})
+            plots.append(
+                {
+                    "title": "Success/Error Rate vs Load",
+                    "path": str(plot_path.relative_to(REPORTS_DIR)),
+                }
+            )
 
         return plots
 
@@ -238,7 +258,7 @@ class PerformanceAnalyzer:
 
         # Save report
         report_path = REPORTS_DIR / "performance_report.html"
-        with open(report_path, 'w') as f:
+        with open(report_path, "w") as f:
             f.write(report_content)
 
         return str(report_path)
@@ -277,10 +297,18 @@ def main():
 
     # Print summary
     print("\nTest Summary:")
-    print(f"- Load Tests: {results['results']['load_test'].get('test_cases', {}).get('passed_tests', 0)} passed")
-    print(f"- Stress Tests: {results['results']['stress_test'].get('test_cases', {}).get('passed_tests', 0)} passed")
-    print(f"- Endurance Tests: {results['results']['endurance_test'].get('test_cases', {}).get('passed_tests', 0)} passed")
-    print(f"- Scalability Tests: {results['results']['scalability_test'].get('test_cases', {}).get('passed_tests', 0)} passed")
+    print(
+        f"- Load Tests: {results['results']['load_test'].get('test_cases', {}).get('passed_tests', 0)} passed"
+    )
+    print(
+        f"- Stress Tests: {results['results']['stress_test'].get('test_cases', {}).get('passed_tests', 0)} passed"
+    )
+    print(
+        f"- Endurance Tests: {results['results']['endurance_test'].get('test_cases', {}).get('passed_tests', 0)} passed"
+    )
+    print(
+        f"- Scalability Tests: {results['results']['scalability_test'].get('test_cases', {}).get('passed_tests', 0)} passed"
+    )
 
 
 if __name__ == "__main__":

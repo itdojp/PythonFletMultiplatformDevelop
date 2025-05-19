@@ -13,6 +13,7 @@ from ..schemas import ItemCreate, UserCreate
 
 class ValidationRule(Enum):
     """バリデーションルールの種類"""
+
     REQUIRED = "required"
     MIN_LENGTH = "min_length"
     MAX_LENGTH = "max_length"
@@ -29,8 +30,7 @@ class AdvancedValidator:
 
     @staticmethod
     def validate_with_rules(
-        data: Dict[str, Any],
-        rules: Dict[str, List[Dict[str, Any]]]
+        data: Dict[str, Any], rules: Dict[str, List[Dict[str, Any]]]
     ) -> Dict[str, Any]:
         """複数のバリデーションルールを適用
 
@@ -85,7 +85,9 @@ class AdvancedValidator:
             ValueError: バリデーションエラー
         """
         if isinstance(value, str) and len(value) < rule.get("length", 0):
-            raise ValueError(f"{field} must be at least {rule['length']} characters long")
+            raise ValueError(
+                f"{field} must be at least {rule['length']} characters long"
+            )
 
     @staticmethod
     def validate_max_length(field: str, value: Any, rule: Dict[str, Any]):
@@ -99,8 +101,10 @@ class AdvancedValidator:
         Raises:
             ValueError: バリデーションエラー
         """
-        if isinstance(value, str) and len(value) > rule.get("length", float('inf')):
-            raise ValueError(f"{field} must be at most {rule['length']} characters long")
+        if isinstance(value, str) and len(value) > rule.get("length", float("inf")):
+            raise ValueError(
+                f"{field} must be at most {rule['length']} characters long"
+            )
 
     @staticmethod
     def validate_min_value(field: str, value: Any, rule: Dict[str, Any]):
@@ -114,7 +118,7 @@ class AdvancedValidator:
         Raises:
             ValueError: バリデーションエラー
         """
-        if isinstance(value, (int, float)) and value < rule.get("value", float('-inf')):
+        if isinstance(value, (int, float)) and value < rule.get("value", float("-inf")):
             raise ValueError(f"{field} must be at least {rule['value']}")
 
     @staticmethod
@@ -129,7 +133,7 @@ class AdvancedValidator:
         Raises:
             ValueError: バリデーションエラー
         """
-        if isinstance(value, (int, float)) and value > rule.get("value", float('inf')):
+        if isinstance(value, (int, float)) and value > rule.get("value", float("inf")):
             raise ValueError(f"{field} must be at most {rule['value']}")
 
     @staticmethod
@@ -145,6 +149,7 @@ class AdvancedValidator:
             ValueError: バリデーションエラー
         """
         import re
+
         pattern = rule.get("pattern")
         if pattern and not re.match(pattern, str(value)):
             raise ValueError(f"{field} does not match pattern: {pattern}")
@@ -201,8 +206,7 @@ class AdvancedValidator:
 
     @staticmethod
     def validate_batch(
-        data_list: List[Dict[str, Any]],
-        rules: Dict[str, List[Dict[str, Any]]]
+        data_list: List[Dict[str, Any]], rules: Dict[str, List[Dict[str, Any]]]
     ) -> List[Dict[str, Any]]:
         """複数のデータを一括でバリデーション
 
@@ -226,10 +230,7 @@ class AdvancedValidator:
         return validated_data
 
     @staticmethod
-    def validate_user_data(
-        data: Dict[str, Any],
-        strict: bool = True
-    ) -> Dict[str, Any]:
+    def validate_user_data(data: Dict[str, Any], strict: bool = True) -> Dict[str, Any]:
         """ユーザーのデータをバリデーション
 
         Args:
@@ -245,27 +246,30 @@ class AdvancedValidator:
         rules = {
             "email": [
                 {"type": ValidationRule.REQUIRED.value},
-                {"type": ValidationRule.PATTERN.value, "pattern": r"^[^@]+@[^@]+\.[^@]+$"}
+                {
+                    "type": ValidationRule.PATTERN.value,
+                    "pattern": r"^[^@]+@[^@]+\.[^@]+$",
+                },
             ],
             "username": [
                 {"type": ValidationRule.REQUIRED.value},
                 {"type": ValidationRule.MIN_LENGTH.value, "length": 3},
-                {"type": ValidationRule.MAX_LENGTH.value, "length": 50}
+                {"type": ValidationRule.MAX_LENGTH.value, "length": 50},
             ],
             "password": [
                 {"type": ValidationRule.REQUIRED.value},
                 {"type": ValidationRule.MIN_LENGTH.value, "length": 8},
-                {"type": ValidationRule.PATTERN.value, "pattern": r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$"}
-            ]
+                {
+                    "type": ValidationRule.PATTERN.value,
+                    "pattern": r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$",
+                },
+            ],
         }
 
         return AdvancedValidator.validate_with_rules(data, rules)
 
     @staticmethod
-    def validate_item_data(
-        data: Dict[str, Any],
-        strict: bool = True
-    ) -> Dict[str, Any]:
+    def validate_item_data(data: Dict[str, Any], strict: bool = True) -> Dict[str, Any]:
         """アイテムのデータをバリデーション
 
         Args:
@@ -282,16 +286,16 @@ class AdvancedValidator:
             "title": [
                 {"type": ValidationRule.REQUIRED.value},
                 {"type": ValidationRule.MIN_LENGTH.value, "length": 1},
-                {"type": ValidationRule.MAX_LENGTH.value, "length": 100}
+                {"type": ValidationRule.MAX_LENGTH.value, "length": 100},
             ],
             "price": [
                 {"type": ValidationRule.REQUIRED.value},
-                {"type": ValidationRule.MIN_VALUE.value, "value": 0.0}
+                {"type": ValidationRule.MIN_VALUE.value, "value": 0.0},
             ],
             "owner_id": [
                 {"type": ValidationRule.REQUIRED.value},
-                {"type": ValidationRule.UNIQUE.value}
-            ]
+                {"type": ValidationRule.UNIQUE.value},
+            ],
         }
 
         return AdvancedValidator.validate_with_rules(data, rules)

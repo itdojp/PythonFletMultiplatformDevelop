@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class TestEnvironment(str, Enum):
     """テスト環境の種類"""
+
     LOCAL = "local"
     CI = "ci"
     PRODUCTION = "production"
@@ -17,6 +18,7 @@ class TestEnvironment(str, Enum):
 
 class TestConfig(BaseModel):
     """テスト設定モデル"""
+
     environment: TestEnvironment = Field(default=TestEnvironment.LOCAL)
     database_url: str = Field(default="sqlite+aiosqlite:///:memory:")
     test_data_path: str = Field(default="test-data/")
@@ -29,6 +31,7 @@ class TestConfig(BaseModel):
 
     class Config:
         """Pydantic設定"""
+
         use_enum_values = True
 
 

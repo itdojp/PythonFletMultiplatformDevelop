@@ -3,6 +3,7 @@ Pytest configuration for performance tests.
 
 This module contains fixtures and configuration for performance testing.
 """
+
 import json
 import os
 import time
@@ -163,7 +164,9 @@ def performance_metrics(request) -> Generator[PerformanceMetrics, None, None]:
 @pytest.fixture(scope="session")
 def perf_test_config() -> Dict[str, Any]:
     """Load performance test configuration."""
-    config_path = settings.BASE_DIR / "tests" / "performance" / "config" / "perf_config.json"
+    config_path = (
+        settings.BASE_DIR / "tests" / "performance" / "config" / "perf_config.json"
+    )
     if config_path.exists():
         with open(config_path) as f:
             return {**PERF_TEST_CONFIG, **json.load(f)}
@@ -173,25 +176,19 @@ def perf_test_config() -> Dict[str, Any]:
 def pytest_addoption(parser):
     """Add command line options for performance tests."""
     parser.addoption(
-        "--perf-test",
-        action="store_true",
-        default=False,
-        help="Run performance tests"
+        "--perf-test", action="store_true", default=False, help="Run performance tests"
     )
     parser.addoption(
         "--perf-config",
         type=str,
         default=None,
-        help="Path to performance test configuration file"
+        help="Path to performance test configuration file",
     )
 
 
 def pytest_configure(config):
     """Configure pytest for performance testing."""
-    config.addinivalue_line(
-        "markers",
-        "performance: mark test as a performance test"
-    )
+    config.addinivalue_line("markers", "performance: mark test as a performance test")
 
 
 def pytest_collection_modifyitems(config, items):

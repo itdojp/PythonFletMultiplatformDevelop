@@ -20,6 +20,7 @@ from ..data.quality_manager import QualityManager
 
 class SecurityLevel(Enum):
     """セキュリティレベル"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -28,6 +29,7 @@ class SecurityLevel(Enum):
 
 class SecurityProtocol(Enum):
     """セキュリティプロトコル"""
+
     TLS = "tls"
     SSL = "ssl"
     HTTPS = "https"
@@ -36,6 +38,7 @@ class SecurityProtocol(Enum):
 
 class SecurityRisk(Enum):
     """セキュリティリスク"""
+
     INJECTION = "injection"
     XSS = "xss"
     CSRF = "csrf"
@@ -46,6 +49,7 @@ class SecurityRisk(Enum):
 @dataclass
 class SecurityVulnerability:
     """セキュリティ脆弱性データクラス"""
+
     risk: SecurityRisk
     description: str
     severity: SecurityLevel
@@ -72,8 +76,7 @@ class SecurityEnhancer:
 
         # RSAキーの生成
         self.private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=2048
+            public_exponent=65537, key_size=2048
         )
         self.public_key = self.private_key.public_key()
 
@@ -92,7 +95,7 @@ class SecurityEnhancer:
             "encryption": self._get_encryption_settings(),
             "authentication": self._get_auth_settings(),
             "authorization": self._get_authz_settings(),
-            "network": self._get_network_settings()
+            "network": self._get_network_settings(),
         }
 
         # セキュリティチェックの実行
@@ -107,7 +110,7 @@ class SecurityEnhancer:
             "key_length": 32,
             "mode": "GCM",
             "padding": "PKCS7",
-            "key": base64.b64encode(self.fernet_key).decode('utf-8')
+            "key": base64.b64encode(self.fernet_key).decode("utf-8"),
         }
 
     def _get_auth_settings(self) -> Dict[str, Any]:
@@ -117,22 +120,15 @@ class SecurityEnhancer:
             "secret_key": secrets.token_hex(32),
             "algorithm": "HS256",
             "token_lifetime": "1h",
-            "refresh_lifetime": "24h"
+            "refresh_lifetime": "24h",
         }
 
     def _get_authz_settings(self) -> Dict[str, Any]:
         """認可設定を取得"""
         return {
             "policy": "RBAC",
-            "roles": {
-                "admin": ["*"],
-                "user": ["read", "write"],
-                "guest": ["read"]
-            },
-            "permissions": {
-                "read": ["GET"],
-                "write": ["POST", "PUT", "DELETE"]
-            }
+            "roles": {"admin": ["*"], "user": ["read", "write"], "guest": ["read"]},
+            "permissions": {"read": ["GET"], "write": ["POST", "PUT", "DELETE"]},
         }
 
     def _get_network_settings(self) -> Dict[str, Any]:
@@ -143,9 +139,9 @@ class SecurityEnhancer:
             "cipher_suites": [
                 "TLS_AES_256_GCM_SHA384",
                 "TLS_CHACHA20_POLY1305_SHA256",
-                "TLS_AES_128_GCM_SHA256"
+                "TLS_AES_128_GCM_SHA256",
             ],
-            "compression": False
+            "compression": False,
         }
 
     def _check_environment_security(self, env: Dict[str, Any]):
@@ -160,7 +156,7 @@ class SecurityEnhancer:
             self._check_xss_risks(env),
             self._check_csrf_risks(env),
             self._check_buffer_overflow_risks(env),
-            self._check_auth_bypass_risks(env)
+            self._check_auth_bypass_risks(env),
         ]
 
         # 脆弱性の記録
@@ -168,7 +164,9 @@ class SecurityEnhancer:
             if vuln:
                 self.vulnerabilities.append(vuln)
 
-    def _check_injection_risks(self, env: Dict[str, Any]) -> Optional[SecurityVulnerability]:
+    def _check_injection_risks(
+        self, env: Dict[str, Any]
+    ) -> Optional[SecurityVulnerability]:
         """インジェクションリスクをチェック
 
         Args:
@@ -184,7 +182,7 @@ class SecurityEnhancer:
                 severity=SecurityLevel.HIGH,
                 affected_components=["input_validation"],
                 timestamp=datetime.now(),
-                suggested_fix="Enable input validation and sanitization"
+                suggested_fix="Enable input validation and sanitization",
             )
         return None
 
@@ -204,7 +202,7 @@ class SecurityEnhancer:
                 severity=SecurityLevel.HIGH,
                 affected_components=["output_encoding"],
                 timestamp=datetime.now(),
-                suggested_fix="Enable HTML output encoding"
+                suggested_fix="Enable HTML output encoding",
             )
         return None
 
@@ -224,11 +222,13 @@ class SecurityEnhancer:
                 severity=SecurityLevel.HIGH,
                 affected_components=["csrf_protection"],
                 timestamp=datetime.now(),
-                suggested_fix="Enable CSRF token protection"
+                suggested_fix="Enable CSRF token protection",
             )
         return None
 
-    def _check_buffer_overflow_risks(self, env: Dict[str, Any]) -> Optional[SecurityVulnerability]:
+    def _check_buffer_overflow_risks(
+        self, env: Dict[str, Any]
+    ) -> Optional[SecurityVulnerability]:
         """バッファオーバーフローリスクをチェック
 
         Args:
@@ -244,11 +244,13 @@ class SecurityEnhancer:
                 severity=SecurityLevel.HIGH,
                 affected_components=["input_length_limit"],
                 timestamp=datetime.now(),
-                suggested_fix="Set input length limits"
+                suggested_fix="Set input length limits",
             )
         return None
 
-    def _check_auth_bypass_risks(self, env: Dict[str, Any]) -> Optional[SecurityVulnerability]:
+    def _check_auth_bypass_risks(
+        self, env: Dict[str, Any]
+    ) -> Optional[SecurityVulnerability]:
         """認証バイパスリスクをチェック
 
         Args:
@@ -264,7 +266,7 @@ class SecurityEnhancer:
                 severity=SecurityLevel.CRITICAL,
                 affected_components=["auth_validation"],
                 timestamp=datetime.now(),
-                suggested_fix="Enable strict authentication validation"
+                suggested_fix="Enable strict authentication validation",
             )
         return None
 
@@ -287,10 +289,9 @@ class SecurityEnhancer:
         signature = self.private_key.sign(
             encrypted_data,
             padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
+                mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH
             ),
-            hashes.SHA256()
+            hashes.SHA256(),
         )
 
         # セキュアなデータの構築
@@ -298,7 +299,7 @@ class SecurityEnhancer:
             "data": base64.b64encode(encrypted_data).decode(),
             "hash": hash_data,
             "signature": base64.b64encode(signature).decode(),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         return json.dumps(secure_data)
@@ -324,9 +325,9 @@ class SecurityEnhancer:
                 encrypted_data,
                 padding.PSS(
                     mgf=padding.MGF1(hashes.SHA256()),
-                    salt_length=padding.PSS.MAX_LENGTH
+                    salt_length=padding.PSS.MAX_LENGTH,
                 ),
-                hashes.SHA256()
+                hashes.SHA256(),
             )
 
             # データの復号化
@@ -339,14 +340,16 @@ class SecurityEnhancer:
             return decrypted_data.decode()
 
         except Exception as e:
-            self.vulnerabilities.append(SecurityVulnerability(
-                risk=SecurityRisk.AUTH_BYPASS,
-                description=str(e),
-                severity=SecurityLevel.CRITICAL,
-                affected_components=["data_verification"],
-                timestamp=datetime.now(),
-                suggested_fix="Verify data integrity and authenticity"
-            ))
+            self.vulnerabilities.append(
+                SecurityVulnerability(
+                    risk=SecurityRisk.AUTH_BYPASS,
+                    description=str(e),
+                    severity=SecurityLevel.CRITICAL,
+                    affected_components=["data_verification"],
+                    timestamp=datetime.now(),
+                    suggested_fix="Verify data integrity and authenticity",
+                )
+            )
             return None
 
     def generate_security_report(self) -> Dict[str, Any]:
@@ -359,19 +362,21 @@ class SecurityEnhancer:
             "timestamp": datetime.now().isoformat(),
             "security_level": self.settings.security_level,
             "vulnerabilities": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
         # 脆弱性の集計
         for vuln in self.vulnerabilities:
-            report["vulnerabilities"].append({
-                "risk": vuln.risk.value,
-                "description": vuln.description,
-                "severity": vuln.severity.value,
-                "affected_components": vuln.affected_components,
-                "timestamp": vuln.timestamp.isoformat(),
-                "suggested_fix": vuln.suggested_fix
-            })
+            report["vulnerabilities"].append(
+                {
+                    "risk": vuln.risk.value,
+                    "description": vuln.description,
+                    "severity": vuln.severity.value,
+                    "affected_components": vuln.affected_components,
+                    "timestamp": vuln.timestamp.isoformat(),
+                    "suggested_fix": vuln.suggested_fix,
+                }
+            )
 
         # 推奨事項の生成
         for vuln in self.vulnerabilities:

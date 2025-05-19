@@ -16,9 +16,7 @@ class TestUtils:
 
     @staticmethod
     async def create_test_user(
-        db: AsyncSession,
-        user_data: UserCreate,
-        is_superuser: bool = False
+        db: AsyncSession, user_data: UserCreate, is_superuser: bool = False
     ) -> User:
         """テスト用のユーザーを作成"""
         user = User(
@@ -36,9 +34,7 @@ class TestUtils:
 
     @staticmethod
     async def create_test_item(
-        db: AsyncSession,
-        item_data: ItemCreate,
-        owner_id: int
+        db: AsyncSession, item_data: ItemCreate, owner_id: int
     ) -> Item:
         """テスト用のアイテムを作成"""
         item = Item(
@@ -54,9 +50,7 @@ class TestUtils:
 
     @staticmethod
     async def get_test_token(
-        client: TestClient,
-        email: str,
-        password: str
+        client: TestClient, email: str, password: str
     ) -> Optional[str]:
         """テスト用のアクセストークンを取得"""
         response = client.post(

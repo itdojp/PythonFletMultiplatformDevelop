@@ -38,12 +38,19 @@ class TestEndurance:
     ):
         """Test the system under sustained load for an extended period."""
         config = perf_test_config["endurance_test"]
-        duration_minutes = 5  # Shorter for testing, should be 60+ for real endurance test
+        duration_minutes = (
+            5  # Shorter for testing, should be 60+ for real endurance test
+        )
 
         # Define test scenarios with different weights
         scenarios = [
             {"method": "GET", "endpoint": "/api/health", "weight": 3, "params": None},
-            {"method": "GET", "endpoint": "/api/users", "weight": 2, "params": {"limit": 20}},
+            {
+                "method": "GET",
+                "endpoint": "/api/users",
+                "weight": 2,
+                "params": {"limit": 20},
+            },
             {"method": "GET", "endpoint": "/api/users/1", "weight": 1, "params": None},
         ]
 
@@ -66,7 +73,9 @@ class TestEndurance:
         async with LoadGenerator(self.base_url) as loader:
             while datetime.now() < end_time:
                 iteration += 1
-                print(f"\n🔄 Iteration {iteration} - {datetime.now().strftime('%H:%M:%S')}")
+                print(
+                    f"\n🔄 Iteration {iteration} - {datetime.now().strftime('%H:%M:%S')}"
+                )
 
                 # Randomly select a scenario for this iteration
                 scenario = random.choice(weighted_scenarios)
@@ -87,13 +96,25 @@ class TestEndurance:
                     successful_requests += results["successful_requests"]
 
                     if "response_times" in results:
-                        response_times.extend([t for t in results["response_times"] if isinstance(t, (int, float))])
+                        response_times.extend(
+                            [
+                                t
+                                for t in results["response_times"]
+                                if isinstance(t, (int, float))
+                            ]
+                        )
 
                     # Print progress
-                    success_rate = (successful_requests / total_requests) * 100 if total_requests > 0 else 0
-                    print(f"  Requests: {total_requests} | "
-                          f"Success: {success_rate:.1f}% | "
-                          f"Avg. Response: {results['response_times']['avg']:.3f}s")
+                    success_rate = (
+                        (successful_requests / total_requests) * 100
+                        if total_requests > 0
+                        else 0
+                    )
+                    print(
+                        f"  Requests: {total_requests} | "
+                        f"Success: {success_rate:.1f}% | "
+                        f"Avg. Response: {results['response_times']['avg']:.3f}s"
+                    )
 
                     # Record metrics periodically
                     if iteration % 5 == 0:
@@ -102,9 +123,9 @@ class TestEndurance:
                             {
                                 "total_requests": total_requests,
                                 "success_rate": success_rate / 100,
-                                "avg_response_time": results['response_times']['avg'],
+                                "avg_response_time": results["response_times"]["avg"],
                                 "timestamp": datetime.now().isoformat(),
-                            }
+                            },
                         )
 
                 except Exception as e:
@@ -114,17 +135,24 @@ class TestEndurance:
                 await asyncio.sleep(1)
 
         # Calculate final metrics
-        success_rate = (successful_requests / total_requests) * 100 if total_requests > 0 else 0
-        avg_response_time = sum(response_times) / len(response_times) if response_times else 0
+        success_rate = (
+            (successful_requests / total_requests) * 100 if total_requests > 0 else 0
+        )
+        avg_response_time = (
+            sum(response_times) / len(response_times) if response_times else 0
+        )
 
         # Record final metrics
-        performance_metrics.record_test_metric("endurance_final", {
-            "total_requests": total_requests,
-            "successful_requests": successful_requests,
-            "success_rate": success_rate / 100,
-            "avg_response_time": avg_response_time,
-            "duration_minutes": duration_minutes,
-        })
+        performance_metrics.record_test_metric(
+            "endurance_final",
+            {
+                "total_requests": total_requests,
+                "successful_requests": successful_requests,
+                "success_rate": success_rate / 100,
+                "avg_response_time": avg_response_time,
+                "duration_minutes": duration_minutes,
+            },
+        )
 
         print("\n🏁 Endurance Test Complete!")
         print(f"Total Requests: {total_requests}")
@@ -133,7 +161,9 @@ class TestEndurance:
         print(f"Average Response Time: {avg_response_time:.3f}s")
 
         # Assert that success rate remained high throughout the test
-        assert success_rate >= 95.0, f"Success rate dropped below 95%: {success_rate:.2f}%"
+        assert (
+            success_rate >= 95.0
+        ), f"Success rate dropped below 95%: {success_rate:.2f}%"
 
     async def test_memory_leaks(
         self,
@@ -196,7 +226,7 @@ class TestEndurance:
                             "iteration": iteration,
                             "memory_mb": memory_mb,
                             "timestamp": datetime.now().isoformat(),
-                        }
+                        },
                     )
 
                 # Small delay between iterations
@@ -207,7 +237,9 @@ class TestEndurance:
             # Calculate memory increase per minute
             duration_hours = duration_minutes / 60
             total_increase = memory_samples[-1] - memory_samples[0]
-            increase_per_hour = (total_increase / duration_hours) if duration_hours > 0 else 0
+            increase_per_hour = (
+                (total_increase / duration_hours) if duration_hours > 0 else 0
+            )
 
             print(f"\n📊 Memory Analysis:")
             print(f"Initial: {memory_samples[0]:.2f} MB")
@@ -216,16 +248,21 @@ class TestEndurance:
             print(f"Increase per Hour: {increase_per_hour:.2f} MB/hour")
 
             # Record metrics
-            performance_metrics.record_test_metric("memory_leak_test", {
-                "initial_mb": memory_samples[0],
-                "final_mb": memory_samples[-1],
-                "total_increase_mb": total_increase,
-                "increase_per_hour_mb": increase_per_hour,
-                "duration_minutes": duration_minutes,
-            })
+            performance_metrics.record_test_metric(
+                "memory_leak_test",
+                {
+                    "initial_mb": memory_samples[0],
+                    "final_mb": memory_samples[-1],
+                    "total_increase_mb": total_increase,
+                    "increase_per_hour_mb": increase_per_hour,
+                    "duration_minutes": duration_minutes,
+                },
+            )
 
             # Check for significant memory leaks
-            assert increase_per_hour < 10, f"Possible memory leak: {increase_per_hour:.2f} MB/hour increase"
+            assert (
+                increase_per_hour < 10
+            ), f"Possible memory leak: {increase_per_hour:.2f} MB/hour increase"
 
     async def test_connection_pool_stability(
         self,
@@ -236,7 +273,9 @@ class TestEndurance:
         config = perf_test_config["endurance_test"]
         duration_minutes = 5  # Shorter for testing, should be 30+ for real test
 
-        print(f"\n🔌 Testing connection pool stability for {duration_minutes} minutes...")
+        print(
+            f"\n🔌 Testing connection pool stability for {duration_minutes} minutes..."
+        )
 
         end_time = datetime.now() + timedelta(minutes=duration_minutes)
         iteration = 0
@@ -273,10 +312,16 @@ class TestEndurance:
 
                     # Print status
                     if iteration % 5 == 0:
-                        success_rate = (successful_requests / total_requests) * 100 if total_requests > 0 else 0
-                        print(f"  Iteration {iteration}: "
-                              f"Success Rate: {success_rate:.1f}% | "
-                              f"Avg. Response: {results['response_times']['avg']:.3f}s")
+                        success_rate = (
+                            (successful_requests / total_requests) * 100
+                            if total_requests > 0
+                            else 0
+                        )
+                        print(
+                            f"  Iteration {iteration}: "
+                            f"Success Rate: {success_rate:.1f}% | "
+                            f"Avg. Response: {results['response_times']['avg']:.3f}s"
+                        )
 
                     # Record metrics periodically
                     if iteration % 10 == 0:
@@ -284,11 +329,15 @@ class TestEndurance:
                             "connection_pool_checkpoint",
                             {
                                 "iteration": iteration,
-                                "success_rate": successful_requests / total_requests if total_requests > 0 else 0,
-                                "avg_response_time": results['response_times']['avg'],
+                                "success_rate": (
+                                    successful_requests / total_requests
+                                    if total_requests > 0
+                                    else 0
+                                ),
+                                "avg_response_time": results["response_times"]["avg"],
                                 "active_connections": 0,  # Would need DB-specific code to get actual count
                                 "timestamp": datetime.now().isoformat(),
-                            }
+                            },
                         )
 
                 except Exception as e:
@@ -298,7 +347,9 @@ class TestEndurance:
                 await asyncio.sleep(1)
 
         # Calculate final success rate
-        success_rate = (successful_requests / total_requests) * 100 if total_requests > 0 else 0
+        success_rate = (
+            (successful_requests / total_requests) * 100 if total_requests > 0 else 0
+        )
 
         print("\n🏁 Connection Pool Test Complete!")
         print(f"Total Requests: {total_requests}")
@@ -306,4 +357,6 @@ class TestEndurance:
         print(f"Success Rate: {success_rate:.2f}%")
 
         # Assert that success rate remained high throughout the test
-        assert success_rate >= 99.0, f"Success rate dropped below 99%: {success_rate:.2f}%"
+        assert (
+            success_rate >= 99.0
+        ), f"Success rate dropped below 99%: {success_rate:.2f}%"

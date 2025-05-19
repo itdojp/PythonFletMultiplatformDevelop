@@ -51,15 +51,15 @@
   def main(page: ft.Page):
       page.title = "My Flet Web App"
       page.theme_mode = ft.ThemeMode.LIGHT
-      
+
       # レスポンシブ設定
       page.on_resize = page_resize
-      
+
       # アプリの内容を追加
       page.add(
           ft.Text("Hello, Web from Python Flet!", size=20)
       )
-  
+
   def page_resize(e):
       e.page.update()
 
@@ -98,15 +98,15 @@
   ```python
   def route_change(e):
       route = e.route if e.route else "/"
-      
+
       if route == "/":
           page.views.clear()
           page.views.append(home_view())
       elif route == "/about":
           page.views.append(about_view())
-      
+
       page.update()
-  
+
   page.on_route_change = route_change
   ```
 
@@ -350,16 +350,16 @@
 - [ ] Dockerfileの作成
   ```Dockerfile
   FROM python:3.10-slim
-  
+
   WORKDIR /app
-  
+
   COPY requirements.txt .
   RUN pip install --no-cache-dir -r requirements.txt
-  
+
   COPY . .
-  
+
   ENV PORT 8080
-  
+
   CMD python main.py
   ```
 - [ ] Cloud Runへのデプロイ

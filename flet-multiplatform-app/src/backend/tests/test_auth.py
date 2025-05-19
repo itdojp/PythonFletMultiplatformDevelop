@@ -21,10 +21,7 @@ class TestAuth:
         }
 
         # ユーザー登録
-        response = client.post(
-            "/api/v1/auth/register",
-            json=user_data
-        )
+        response = client.post("/api/v1/auth/register", json=user_data)
         assert response.status_code == status.HTTP_201_CREATED
 
         # レスポンスの検証
@@ -36,10 +33,7 @@ class TestAuth:
         assert created_user.is_superuser is False
 
         # 同じメールアドレスでの登録はできない
-        response = client.post(
-            "/api/v1/auth/register",
-            json=user_data
-        )
+        response = client.post("/api/v1/auth/register", json=user_data)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     @pytest.mark.asyncio
@@ -53,7 +47,7 @@ class TestAuth:
         response = client.post(
             "/api/v1/auth/login",
             data=form_data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"}
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert response.status_code == status.HTTP_200_OK
 
@@ -67,7 +61,7 @@ class TestAuth:
         response = client.post(
             "/api/v1/auth/login",
             data=form_data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"}
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 

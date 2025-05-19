@@ -4,34 +4,46 @@
 レスポンシブデザインに対応しており、様々な画面サイズに適応します。
 """
 
-from flet import Card, Column, Container, Image, Text, UserControl, alignment, colors, padding
-from flet import ImageFit, FontWeight
-from typing import Optional, Callable, Any
 import math
+from typing import Any, Callable, Optional
+
+from flet import (
+    Card,
+    Column,
+    Container,
+    FontWeight,
+    Image,
+    ImageFit,
+    Text,
+    UserControl,
+    alignment,
+    colors,
+    padding,
+)
 
 
 class AppCard(UserControl):
     """アプリケーション内で使用するカード形式のUIコンポーネント。
-    
+
     画像、タイトル、説明文を含むカードを表示します。クリック可能で、
     クリック時のコールバック関数を指定できます。
-    
+
     Attributes:
         title (str): カードに表示するタイトル
         description (str): カードに表示する説明文
         image_url (str): カードの上部に表示する画像のURL
         on_click (Optional[Callable[[Any], None]]): カードがクリックされたときに呼び出されるコールバック関数
     """
-    
+
     def __init__(
-        self, 
-        title: str, 
-        description: str, 
-        image_url: str, 
-        on_click: Optional[Callable[[Any], None]] = None
+        self,
+        title: str,
+        description: str,
+        image_url: str,
+        on_click: Optional[Callable[[Any], None]] = None,
     ) -> None:
         """AppCard インスタンスを初期化します。
-        
+
         Args:
             title: カードに表示するタイトル
             description: カードに表示する説明文
@@ -46,10 +58,10 @@ class AppCard(UserControl):
 
     def build(self) -> Card:
         """カードコンポーネントを構築します。
-        
+
         Returns:
             Card: 構築されたカードコンポーネント
-            
+
         Example:
             ```python
             # シンプルなカードの作成
@@ -68,7 +80,7 @@ class AppCard(UserControl):
                     [
                         Image(
                             src=self.image_url,
-                            width=float('inf'),
+                            width=float("inf"),
                             height=160,
                             fit=ImageFit.COVER,
                         ),

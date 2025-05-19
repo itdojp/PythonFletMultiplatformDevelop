@@ -27,10 +27,7 @@ class DataValidator:
         try:
             return UserCreate(**data)
         except ValidationError as e:
-            raise HTTPException(
-                status_code=422,
-                detail=str(e)
-            )
+            raise HTTPException(status_code=422, detail=str(e))
 
     @staticmethod
     def validate_item_data(data: Dict[str, Any]) -> ItemCreate:
@@ -48,10 +45,7 @@ class DataValidator:
         try:
             return ItemCreate(**data)
         except ValidationError as e:
-            raise HTTPException(
-                status_code=422,
-                detail=str(e)
-            )
+            raise HTTPException(status_code=422, detail=str(e))
 
     @staticmethod
     def validate_auth_data(data: Dict[str, str]) -> Dict[str, str]:
@@ -68,8 +62,7 @@ class DataValidator:
         """
         if not all(key in data for key in ["email", "password"]):
             raise HTTPException(
-                status_code=422,
-                detail="Missing required fields: email, password"
+                status_code=422, detail="Missing required fields: email, password"
             )
         return data
 
@@ -92,15 +85,11 @@ class DataValidator:
                 raise ValueError("Date is required")
             return data
         except ValueError as e:
-            raise HTTPException(
-                status_code=422,
-                detail=str(e)
-            )
+            raise HTTPException(status_code=422, detail=str(e))
 
     @staticmethod
     def validate_batch_data(
-        data_list: List[Dict[str, Any]],
-        validator: callable
+        data_list: List[Dict[str, Any]], validator: callable
     ) -> List[Dict[str, Any]]:
         """複数のデータを一括でバリデーション
 
@@ -122,6 +111,6 @@ class DataValidator:
             except HTTPException as e:
                 raise HTTPException(
                     status_code=e.status_code,
-                    detail=f"Validation failed for data: {data}. Error: {e.detail}"
+                    detail=f"Validation failed for data: {data}. Error: {e.detail}",
                 )
         return validated_data

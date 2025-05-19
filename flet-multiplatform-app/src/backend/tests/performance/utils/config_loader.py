@@ -11,7 +11,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, Optional, Type, TypeVar, Union, overload
 
-T = TypeVar('T', str, int, float, bool, list, dict)
+T = TypeVar("T", str, int, float, bool, list, dict)
 
 
 def get_env_value(env_name: str, default: T, value_type: Type[T] = str) -> T:
@@ -35,7 +35,7 @@ def get_env_value(env_name: str, default: T, value_type: Type[T] = str) -> T:
         if value_type is bool:
             # Handle boolean values (true/false, yes/no, 1/0)
             if isinstance(value, str):
-                return value.lower() in ('true', 'yes', '1')
+                return value.lower() in ("true", "yes", "1")
             return bool(value)
         elif value_type is int:
             return int(value)
@@ -45,7 +45,7 @@ def get_env_value(env_name: str, default: T, value_type: Type[T] = str) -> T:
             return str(value)
         elif value_type is list:
             if isinstance(value, str):
-                return [item.strip() for item in value.split(',')]
+                return [item.strip() for item in value.split(",")]
             return list(value)
         elif value_type is dict:
             if isinstance(value, str):
@@ -54,6 +54,7 @@ def get_env_value(env_name: str, default: T, value_type: Type[T] = str) -> T:
         return value
     except (ValueError, TypeError, json.JSONDecodeError):
         return default
+
 
 def resolve_env_vars(config_section: Dict[str, Any]) -> Dict[str, Any]:
     """Resolve environment variables in a configuration section.
@@ -71,7 +72,7 @@ def resolve_env_vars(config_section: Dict[str, Any]) -> Dict[str, Any]:
 
     for key, value in config_section.items():
         # Skip environment variable definitions
-        if key == 'env_vars':
+        if key == "env_vars":
             continue
 
         if isinstance(value, dict):
@@ -82,14 +83,14 @@ def resolve_env_vars(config_section: Dict[str, Any]) -> Dict[str, Any]:
             result[key] = value
 
     # Apply environment variable overrides if defined
-    if 'env_vars' in config_section and isinstance(config_section['env_vars'], dict):
-        for var_name, var_config in config_section['env_vars'].items():
-            if not isinstance(var_config, dict) or 'env' not in var_config:
+    if "env_vars" in config_section and isinstance(config_section["env_vars"], dict):
+        for var_name, var_config in config_section["env_vars"].items():
+            if not isinstance(var_config, dict) or "env" not in var_config:
                 continue
 
-            env_name = var_config['env']
-            default_value = var_config.get('default')
-            value_type = type(default_value) if 'default' in var_config else str
+            env_name = var_config["env"]
+            default_value = var_config.get("default")
+            value_type = type(default_value) if "default" in var_config else str
 
             # Get the value from environment or use the default
             env_value = get_env_value(env_name, default_value, value_type)
@@ -102,10 +103,14 @@ def resolve_env_vars(config_section: Dict[str, Any]) -> Dict[str, Any]:
 
 
 @overload
-def load_config(file_path: Union[str, Path], *, resolve_env: bool = True) -> Dict[str, Any]:
-    ...
+def load_config(
+    file_path: Union[str, Path], *, resolve_env: bool = True
+) -> Dict[str, Any]: ...
 
-def load_config(file_path: Union[str, Path], resolve_env: bool = True) -> Dict[str, Any]:
+
+def load_config(
+    file_path: Union[str, Path], resolve_env: bool = True
+) -> Dict[str, Any]:
     """Load configuration from a JSON file with environment variable support.
 
     Args:
@@ -124,7 +129,7 @@ def load_config(file_path: Union[str, Path], resolve_env: bool = True) -> Dict[s
         raise FileNotFoundError(f"Configuration file not found: {file_path}")
 
     # Read and parse the JSON content
-    with file_path.open('r', encoding='utf-8') as f:
+    with file_path.open("r", encoding="utf-8") as f:
         config = json.load(f)
 
     # Resolve environment variables if requested
@@ -145,7 +150,7 @@ def get_nested_value(config: Dict[str, Any], key_path: str, default: Any = None)
     Returns:
         The configuration value or the default if not found
     """
-    keys = key_path.split('.')
+    keys = key_path.split(".")
     value = config
 
     try:
@@ -167,7 +172,7 @@ def set_nested_value(config: Dict[str, Any], key_path: str, value: Any) -> None:
         key_path: Dot-separated path to the configuration value (e.g., 'database.host')
         value: The value to set
     """
-    keys = key_path.split('.')
+    keys = key_path.split(".")
     current = config
 
     for i, key in enumerate(keys[:-1]):

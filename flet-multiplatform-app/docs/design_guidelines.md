@@ -2,7 +2,7 @@
 
 このガイドラインは、Python Fletを使用して開発するアプリケーションにおいて、Android、iOS、Webの各プラットフォームで一貫性のある優れたユーザー体験を提供するための指針を提供します。
 
-> **関連ガイド**: 
+> **関連ガイド**:
 > - [プラットフォーム共通コード管理ガイド](./cross-platform-code-management-guide.md) - レスポンシブデザインとアダプティブUIの実装
 > - [アーキテクチャ設計ガイド](./architecture-design-guide.md) - コンポーネント設計と状態管理
 > - [Androidデプロイガイド](./android-flet-deployment-guide.md) - Androidプラットフォーム固有の考慮事項

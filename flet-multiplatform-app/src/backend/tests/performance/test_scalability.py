@@ -68,7 +68,16 @@ class TestScalability:
         results = {}
 
         # Define load levels (concurrent users)
-        load_levels = [1, 5, 10, 20, 50, 100, 200, 500]  # Adjust based on expected capacity
+        load_levels = [
+            1,
+            5,
+            10,
+            20,
+            50,
+            100,
+            200,
+            500,
+        ]  # Adjust based on expected capacity
 
         print(f"\n🚀 Starting scalability test for {endpoint}")
 
@@ -90,12 +99,19 @@ class TestScalability:
                 results[users] = {
                     "success_rate": test_results["success_rate"],
                     "response_times": test_results["response_times"],
-                    "throughput": test_results["successful_requests"] / test_results["response_times"]["avg"] if test_results["response_times"]["avg"] > 0 else 0,
+                    "throughput": (
+                        test_results["successful_requests"]
+                        / test_results["response_times"]["avg"]
+                        if test_results["response_times"]["avg"] > 0
+                        else 0
+                    ),
                 }
 
                 # Print summary
                 print(f"  Success Rate: {results[users]['success_rate']:.1%}")
-                print(f"  Avg. Response Time: {results[users]['response_times']['avg']:.3f}s")
+                print(
+                    f"  Avg. Response Time: {results[users]['response_times']['avg']:.3f}s"
+                )
                 print(f"  Throughput: {results[users]['throughput']:.1f} req/s")
 
                 # Stop if success rate drops below 95%
@@ -125,18 +141,25 @@ class TestScalability:
         max_throughput = max(r["throughput"] for r in results.values())
 
         # Record metrics
-        performance_metrics.record_test_metric("read_scalability_results", {
-            "max_concurrent_users": max_users,
-            "max_throughput": max_throughput,
-            "response_times": {users: r["response_times"] for users, r in results.items()},
-        })
+        performance_metrics.record_test_metric(
+            "read_scalability_results",
+            {
+                "max_concurrent_users": max_users,
+                "max_throughput": max_throughput,
+                "response_times": {
+                    users: r["response_times"] for users, r in results.items()
+                },
+            },
+        )
 
         print("\n📈 Read Scalability Test Complete!")
         print(f"Maximum Concurrent Users: {max_users}")
         print(f"Maximum Throughput: {max_throughput:.1f} requests/second")
 
         # Assert that the system can handle at least 100 concurrent users
-        assert max_users >= 100, f"System failed to scale to 100 concurrent users (max: {max_users})"
+        assert (
+            max_users >= 100
+        ), f"System failed to scale to 100 concurrent users (max: {max_users})"
 
     async def test_write_scalability(
         self,
@@ -169,18 +192,25 @@ class TestScalability:
         max_throughput = max(r["throughput"] for r in results.values())
 
         # Record metrics
-        performance_metrics.record_test_metric("write_scalability_results", {
-            "max_concurrent_users": max_users,
-            "max_throughput": max_throughput,
-            "response_times": {users: r["response_times"] for users, r in results.items()},
-        })
+        performance_metrics.record_test_metric(
+            "write_scalability_results",
+            {
+                "max_concurrent_users": max_users,
+                "max_throughput": max_throughput,
+                "response_times": {
+                    users: r["response_times"] for users, r in results.items()
+                },
+            },
+        )
 
         print("\n📈 Write Scalability Test Complete!")
         print(f"Maximum Concurrent Users: {max_users}")
         print(f"Maximum Throughput: {max_throughput:.1f} requests/second")
 
         # Assert that the system can handle at least 50 concurrent users for writes
-        assert max_users >= 50, f"System failed to scale to 50 concurrent users for writes (max: {max_users})"
+        assert (
+            max_users >= 50
+        ), f"System failed to scale to 50 concurrent users for writes (max: {max_users})"
 
     async def test_mixed_workload_scalability(
         self,
@@ -192,7 +222,12 @@ class TestScalability:
 
         # Define a mix of read and write operations
         operations = [
-            {"method": "GET", "endpoint": "/api/users", "params": {"limit": 20}, "weight": 3},
+            {
+                "method": "GET",
+                "endpoint": "/api/users",
+                "params": {"limit": 20},
+                "weight": 3,
+            },
             {"method": "GET", "endpoint": "/api/users/1", "params": None, "weight": 2},
             {"method": "POST", "endpoint": "/api/users/", "params": None, "weight": 1},
         ]
@@ -230,7 +265,9 @@ class TestScalability:
                     op = random.choice(weighted_operations)
 
                     # Prepare request data
-                    json_data = generate_user_data(i) if op["method"] == "POST" else None
+                    json_data = (
+                        generate_user_data(i) if op["method"] == "POST" else None
+                    )
 
                     # Create task
                     task = loader.make_request(
@@ -259,7 +296,9 @@ class TestScalability:
                 # Calculate metrics
                 total_requests = len(responses)
                 success_rate = successful / total_requests if total_requests > 0 else 0
-                avg_response_time = statistics.mean(response_times) if response_times else 0
+                avg_response_time = (
+                    statistics.mean(response_times) if response_times else 0
+                )
                 throughput = successful / duration if duration > 0 else 0
 
                 # Store results
@@ -286,15 +325,20 @@ class TestScalability:
         max_throughput = max(r["throughput"] for r in results.values())
 
         # Record metrics
-        performance_metrics.record_test_metric("mixed_workload_scalability_results", {
-            "max_concurrent_users": max_users,
-            "max_throughput": max_throughput,
-            "results": results,
-        })
+        performance_metrics.record_test_metric(
+            "mixed_workload_scalability_results",
+            {
+                "max_concurrent_users": max_users,
+                "max_throughput": max_throughput,
+                "results": results,
+            },
+        )
 
         print("\n📈 Mixed Workload Scalability Test Complete!")
         print(f"Maximum Concurrent Users: {max_users}")
         print(f"Maximum Throughput: {max_throughput:.1f} requests/second")
 
         # Assert that the system can handle at least 50 concurrent users with mixed workload
-        assert max_users >= 50, f"System failed to scale to 50 concurrent users with mixed workload (max: {max_users})"
+        assert (
+            max_users >= 50
+        ), f"System failed to scale to 50 concurrent users with mixed workload (max: {max_users})"

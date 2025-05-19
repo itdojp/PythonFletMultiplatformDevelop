@@ -1,0 +1,129 @@
+# Performance Test Configuration
+
+# Base URL for the API under test
+base_url: "http://localhost:8000"
+
+# Test scenarios
+scenarios:
+  smoke:
+    description: "Quick smoke test to verify basic functionality"
+    users: 1
+    spawn_rate: 1
+    run_time: "30s"
+    thresholds:
+      response_time_p95: 1000  # ms
+      error_rate: 0.01  # 1%
+      throughput: 5  # req/s
+
+  load:
+    description: "Standard load test with moderate traffic"
+    users: 10
+    spawn_rate: 2
+    run_time: "5m"
+    thresholds:
+      response_time_p95: 1500
+      error_rate: 0.01
+      throughput: 20
+
+  stress:
+    description: "Stress test with high load"
+    users: 100
+    spawn_rate: 10
+    run_time: "10m"
+    thresholds:
+      response_time_p95: 3000
+      error_rate: 0.05  # 5% allowed for stress tests
+      throughput: 50
+
+# Alerting configuration
+alerting:
+  enabled: true
+  email:
+    enabled: true
+    smtp_server: "smtp.example.com"
+    smtp_port: 587
+    use_tls: true
+    username: "user@example.com"
+    password: "your-password"
+    from_addr: "perf-tests@example.com"
+    to_addrs:
+      - "team@example.com"
+
+  slack:
+    enabled: false
+    webhook_url: "https://hooks.slack.com/services/..."
+    channel: "#alerts"
+
+# Test data configuration
+test_data:
+  users:
+    count: 1000
+    filename: "test_users.json"
+
+  items:
+    count: 10000
+    filename: "test_items.json"
+
+# Reporting
+reporting:
+  html_report: true
+  json_report: true
+  output_dir: "reports/performance"
+
+  # Performance thresholds for reporting
+  thresholds:
+    response_time:
+      warning: 500  # ms
+      critical: 1000  # ms
+
+    error_rate:
+      warning: 0.01  # 1%
+      critical: 0.05  # 5%
+
+    throughput:
+      warning: 10  # req/s
+      critical: 5  # req/s
+
+# Locust configuration
+locust:
+  host: "http://localhost:8000"
+  web_port: 8089
+  headless: true
+  only_summary: false
+  loglevel: "INFO"
+  logfile: "logs/locust.log"
+  csv_prefix: "results/performance_test"
+  html_report: "reports/performance_report.html"
+
+  # Advanced settings
+  reset_stats: true
+  stop_timeout: 300  # seconds
+  expect_workers: 1
+  master: false
+  worker: false
+  master_host: "127.0.0.1"
+  master_port: 5557
+
+  # Custom tags for test filtering
+  tags: []
+  exclude_tags: []
+
+# Environment-specific overrides
+environments:
+  development:
+    base_url: "http://localhost:8000"
+    users: 5
+    spawn_rate: 1
+    run_time: "1m"
+
+  staging:
+    base_url: "https://staging.example.com"
+    users: 20
+    spawn_rate: 2
+    run_time: "5m"
+
+  production:
+    base_url: "https://api.example.com"
+    users: 100
+    spawn_rate: 10
+    run_time: "10m"

@@ -76,7 +76,9 @@ def generate_coverage_report() -> int:
     COVERAGE_DIR.mkdir(exist_ok=True)
 
     # Generate HTML report
-    html_cmd = f"coverage html --directory={COVERAGE_DIR} --title='Test Coverage Report'"
+    html_cmd = (
+        f"coverage html --directory={COVERAGE_DIR} --title='Test Coverage Report'"
+    )
     if run_command(html_cmd) != 0:
         return 1
 
@@ -98,14 +100,14 @@ def print_coverage_summary() -> int:
         return 1
 
     try:
-        with open(COVERAGE_JSON, encoding='utf-8') as f:
+        with open(COVERAGE_JSON, encoding="utf-8") as f:
             data = json.load(f)
 
         print("\n📋 Coverage Summary:")
         print("=" * 50)
 
         # Overall coverage
-        total = data['totals']
+        total = data["totals"]
         print(f"📊 Overall Coverage: {total['percent_covered']:.2f}%")
         print(f"✅ Covered: {total['covered_lines']} lines")
         print(f"❌ Missing: {total['missing_lines']} lines")
@@ -114,11 +116,11 @@ def print_coverage_summary() -> int:
         # Coverage by file
         print("\n📁 File-wise Coverage:")
         print("-" * 50)
-        for file_path, file_data in data['files'].items():
-            percent = file_data['summary']['percent_covered']
-            covered = file_data['summary']['covered_lines']
-            missing = file_data['summary']['missing_lines']
-            total_lines = file_data['summary']['num_statements']
+        for file_path, file_data in data["files"].items():
+            percent = file_data["summary"]["percent_covered"]
+            covered = file_data["summary"]["covered_lines"]
+            missing = file_data["summary"]["missing_lines"]
+            total_lines = file_data["summary"]["num_statements"]
 
             # Skip files with 100% coverage for brevity
             if percent < 100:

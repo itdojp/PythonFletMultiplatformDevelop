@@ -13,6 +13,7 @@ from ..validation.validation_rules import ValidationRuleBuilder
 
 class QualityMetric(Enum):
     """品質メトリクス"""
+
     DATA_ACCURACY = "data_accuracy"
     DATA_CONSISTENCY = "data_consistency"
     DATA_COMPLETENESS = "data_completeness"
@@ -22,6 +23,7 @@ class QualityMetric(Enum):
 
 class QualityIssueSeverity(Enum):
     """品質問題の深刻度"""
+
     CRITICAL = "critical"
     HIGH = "high"
     MEDIUM = "medium"
@@ -32,6 +34,7 @@ class QualityIssueSeverity(Enum):
 @dataclass
 class QualityIssue:
     """品質問題データクラス"""
+
     metric: QualityMetric
     description: str
     severity: QualityIssueSeverity
@@ -51,9 +54,7 @@ class QualityManager:
         self.issues = []
 
     def validate_data_quality(
-        self,
-        data: List[Dict[str, Any]],
-        rules: Dict[str, List[Dict[str, Any]]]
+        self, data: List[Dict[str, Any]], rules: Dict[str, List[Dict[str, Any]]]
     ) -> List[QualityIssue]:
         """データ品質を検証
 
@@ -104,18 +105,22 @@ class QualityManager:
                 for field in item1.keys():
                     if field in item2:
                         if item1[field] != item2[field]:
-                            issues.append(QualityIssue(
-                                metric=QualityMetric.DATA_CONSISTENCY,
-                                description=f"Inconsistent values for {field} between items",
-                                severity=QualityIssueSeverity.MEDIUM,
-                                affected_fields=[field],
-                                timestamp=datetime.now(),
-                                suggested_fix="Review and correct inconsistent values"
-                            ))
+                            issues.append(
+                                QualityIssue(
+                                    metric=QualityMetric.DATA_CONSISTENCY,
+                                    description=f"Inconsistent values for {field} between items",
+                                    severity=QualityIssueSeverity.MEDIUM,
+                                    affected_fields=[field],
+                                    timestamp=datetime.now(),
+                                    suggested_fix="Review and correct inconsistent values",
+                                )
+                            )
 
         return issues
 
-    def _check_data_completeness(self, data: List[Dict[str, Any]]) -> List[QualityIssue]:
+    def _check_data_completeness(
+        self, data: List[Dict[str, Any]]
+    ) -> List[QualityIssue]:
         """データ完全性をチェック
 
         Args:
@@ -135,18 +140,22 @@ class QualityManager:
         for item in data:
             missing_fields = required_fields - set(item.keys())
             if missing_fields:
-                issues.append(QualityIssue(
-                    metric=QualityMetric.DATA_COMPLETENESS,
-                    description=f"Missing required fields: {', '.join(missing_fields)}",
-                    severity=QualityIssueSeverity.HIGH,
-                    affected_fields=list(missing_fields),
-                    timestamp=datetime.now(),
-                    suggested_fix="Add missing required fields"
-                ))
+                issues.append(
+                    QualityIssue(
+                        metric=QualityMetric.DATA_COMPLETENESS,
+                        description=f"Missing required fields: {', '.join(missing_fields)}",
+                        severity=QualityIssueSeverity.HIGH,
+                        affected_fields=list(missing_fields),
+                        timestamp=datetime.now(),
+                        suggested_fix="Add missing required fields",
+                    )
+                )
 
         return issues
 
-    def _check_data_validity(self, data: List[Dict[str, Any]], rules: Dict[str, List[Dict[str, Any]]]) -> List[QualityIssue]:
+    def _check_data_validity(
+        self, data: List[Dict[str, Any]], rules: Dict[str, List[Dict[str, Any]]]
+    ) -> List[QualityIssue]:
         """データ有効性をチェック
 
         Args:
@@ -167,14 +176,16 @@ class QualityManager:
                         try:
                             self.validation_builder.validate(field, value)
                         except ValueError as e:
-                            issues.append(QualityIssue(
-                                metric=QualityMetric.DATA_VALIDITY,
-                                description=str(e),
-                                severity=QualityIssueSeverity.HIGH,
-                                affected_fields=[field],
-                                timestamp=datetime.now(),
-                                suggested_fix="Correct invalid data values"
-                            ))
+                            issues.append(
+                                QualityIssue(
+                                    metric=QualityMetric.DATA_VALIDITY,
+                                    description=str(e),
+                                    severity=QualityIssueSeverity.HIGH,
+                                    affected_fields=[field],
+                                    timestamp=datetime.now(),
+                                    suggested_fix="Correct invalid data values",
+                                )
+                            )
 
         return issues
 
@@ -193,26 +204,30 @@ class QualityManager:
         for item in data:
             for field, value in item.items():
                 if not isinstance(value, type(value)):
-                    issues.append(QualityIssue(
-                        metric=QualityMetric.DATA_ACCURACY,
-                        description=f"Type mismatch for {field}",
-                        severity=QualityIssueSeverity.HIGH,
-                        affected_fields=[field],
-                        timestamp=datetime.now(),
-                        suggested_fix="Correct data types"
-                    ))
+                    issues.append(
+                        QualityIssue(
+                            metric=QualityMetric.DATA_ACCURACY,
+                            description=f"Type mismatch for {field}",
+                            severity=QualityIssueSeverity.HIGH,
+                            affected_fields=[field],
+                            timestamp=datetime.now(),
+                            suggested_fix="Correct data types",
+                        )
+                    )
 
                 # 数値データの範囲チェック
                 if isinstance(value, (int, float)):
                     if value < 0:
-                        issues.append(QualityIssue(
-                            metric=QualityMetric.DATA_ACCURACY,
-                            description=f"Negative value for {field}",
-                            severity=QualityIssueSeverity.MEDIUM,
-                            affected_fields=[field],
-                            timestamp=datetime.now(),
-                            suggested_fix="Review and correct negative values"
-                        ))
+                        issues.append(
+                            QualityIssue(
+                                metric=QualityMetric.DATA_ACCURACY,
+                                description=f"Negative value for {field}",
+                                severity=QualityIssueSeverity.MEDIUM,
+                                affected_fields=[field],
+                                timestamp=datetime.now(),
+                                suggested_fix="Review and correct negative values",
+                            )
+                        )
 
         return issues
 
@@ -233,30 +248,32 @@ class QualityManager:
                 if isinstance(value, datetime):
                     now = datetime.now()
                     if value > now + timedelta(days=30):
-                        issues.append(QualityIssue(
-                            metric=QualityMetric.DATA_TIMELINESS,
-                            description=f"Future date for {field}",
-                            severity=QualityIssueSeverity.HIGH,
-                            affected_fields=[field],
-                            timestamp=datetime.now(),
-                            suggested_fix="Review and correct future dates"
-                        ))
+                        issues.append(
+                            QualityIssue(
+                                metric=QualityMetric.DATA_TIMELINESS,
+                                description=f"Future date for {field}",
+                                severity=QualityIssueSeverity.HIGH,
+                                affected_fields=[field],
+                                timestamp=datetime.now(),
+                                suggested_fix="Review and correct future dates",
+                            )
+                        )
                     elif value < now - timedelta(days=365):
-                        issues.append(QualityIssue(
-                            metric=QualityMetric.DATA_TIMELINESS,
-                            description=f"Stale date for {field}",
-                            severity=QualityIssueSeverity.MEDIUM,
-                            affected_fields=[field],
-                            timestamp=datetime.now(),
-                            suggested_fix="Review and update stale dates"
-                        ))
+                        issues.append(
+                            QualityIssue(
+                                metric=QualityMetric.DATA_TIMELINESS,
+                                description=f"Stale date for {field}",
+                                severity=QualityIssueSeverity.MEDIUM,
+                                affected_fields=[field],
+                                timestamp=datetime.now(),
+                                suggested_fix="Review and update stale dates",
+                            )
+                        )
 
         return issues
 
     def optimize_data_quality(
-        self,
-        data: List[Dict[str, Any]],
-        rules: Dict[str, List[Dict[str, Any]]]
+        self, data: List[Dict[str, Any]], rules: Dict[str, List[Dict[str, Any]]]
     ) -> List[Dict[str, Any]]:
         """データ品質を最適化
 
@@ -305,15 +322,16 @@ class QualityManager:
         # 関連フィールドの整合性チェックと修正
         for field in item.keys():
             related_values = [
-                other[field] for other in data
-                if field in other and other != item
+                other[field] for other in data if field in other and other != item
             ]
 
             if related_values:
                 mode_value = max(set(related_values), key=related_values.count)
                 item[field] = mode_value
 
-    def _optimize_completeness(self, item: Dict[str, Any], rules: Dict[str, List[Dict[str, Any]]]):
+    def _optimize_completeness(
+        self, item: Dict[str, Any], rules: Dict[str, List[Dict[str, Any]]]
+    ):
         """データ完全性を最適化
 
         Args:
@@ -326,10 +344,12 @@ class QualityManager:
                 if any(rule["type"] == "required" for rule in field_rules):
                     item[field] = self.data_generator.generate_field(
                         type=type(item.get(field, str)),
-                        strategy=DataGenerationType.RANDOM
+                        strategy=DataGenerationType.RANDOM,
                     )
 
-    def _optimize_validity(self, item: Dict[str, Any], rules: Dict[str, List[Dict[str, Any]]]):
+    def _optimize_validity(
+        self, item: Dict[str, Any], rules: Dict[str, List[Dict[str, Any]]]
+    ):
         """データ有効性を最適化
 
         Args:
@@ -340,25 +360,31 @@ class QualityManager:
         for field, value in item.items():
             if field in rules:
                 for rule in rules[field]:
-                    if rule["type"] == "min_length" and len(str(value)) < rule["min_length"]:
+                    if (
+                        rule["type"] == "min_length"
+                        and len(str(value)) < rule["min_length"]
+                    ):
                         item[field] = self.data_generator.generate_field(
                             type=type(value),
                             strategy=DataGenerationType.RANDOM,
-                            length=rule["min_length"]
+                            length=rule["min_length"],
                         )
-                    elif rule["type"] == "max_length" and len(str(value)) > rule["max_length"]:
-                        item[field] = str(value)[:rule["max_length"]]
+                    elif (
+                        rule["type"] == "max_length"
+                        and len(str(value)) > rule["max_length"]
+                    ):
+                        item[field] = str(value)[: rule["max_length"]]
                     elif rule["type"] == "min_value" and value < rule["min_value"]:
                         item[field] = self.data_generator.generate_field(
                             type=type(value),
                             strategy=DataGenerationType.RANDOM,
-                            min_value=rule["min_value"]
+                            min_value=rule["min_value"],
                         )
                     elif rule["type"] == "max_value" and value > rule["max_value"]:
                         item[field] = self.data_generator.generate_field(
                             type=type(value),
                             strategy=DataGenerationType.RANDOM,
-                            max_value=rule["max_value"]
+                            max_value=rule["max_value"],
                         )
 
     def _optimize_accuracy(self, item: Dict[str, Any]):
@@ -391,9 +417,7 @@ class QualityManager:
                     item[field] = now - timedelta(days=365)
 
     def generate_quality_report(
-        self,
-        data: List[Dict[str, Any]],
-        rules: Dict[str, List[Dict[str, Any]]]
+        self, data: List[Dict[str, Any]], rules: Dict[str, List[Dict[str, Any]]]
     ) -> Dict[str, Any]:
         """品質レポートを生成
 
@@ -408,7 +432,7 @@ class QualityManager:
             "timestamp": datetime.now().isoformat(),
             "metrics": {},
             "issues": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
         # 品質問題の検出
@@ -420,20 +444,20 @@ class QualityManager:
                 report["metrics"][issue.metric.value] = 0
             report["metrics"][issue.metric.value] += 1
 
-            report["issues"].append({
-                "metric": issue.metric.value,
-                "description": issue.description,
-                "severity": issue.severity.value,
-                "affected_fields": issue.affected_fields,
-                "timestamp": issue.timestamp.isoformat(),
-                "suggested_fix": issue.suggested_fix
-            })
+            report["issues"].append(
+                {
+                    "metric": issue.metric.value,
+                    "description": issue.description,
+                    "severity": issue.severity.value,
+                    "affected_fields": issue.affected_fields,
+                    "timestamp": issue.timestamp.isoformat(),
+                    "suggested_fix": issue.suggested_fix,
+                }
+            )
 
         # 推奨事項の生成
         for metric, count in report["metrics"].items():
             if count > 0:
-                report["recommendations"].append(
-                    f"Address {count} {metric} issues"
-                )
+                report["recommendations"].append(f"Address {count} {metric} issues")
 
         return report

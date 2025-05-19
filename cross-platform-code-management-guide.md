@@ -1,14 +1,14 @@
 # Python Flet - プラットフォーム共通コード管理ガイド
 
 > **対象Fletバージョン**: 0.19.0以上
-> 
+>
 > **最終更新日**: 2025年5月10日
 >
 > **注意**: Fletは活発に開発が進んでいるフレームワークです。最新の情報は[Flet公式ドキュメント](https://flet.dev/docs/)を参照してください。
 
 このガイドでは、Python Fletを使用したマルチプラットフォーム開発において、効率的にコードを共有し、プラットフォーム固有の実装を管理するための戦略と手法を解説します。
 
-> **関連ガイド**: 
+> **関連ガイド**:
 > - [マルチプラットフォームアーキテクチャ設計ガイド](./architecture-design-guide.md) - アプリ全体のアーキテクチャと依存性注入の設計
 > - [UI/UXデザインガイドライン](./ui-ux-design-guidelines.md) - レスポンシブデザインとアダプティブUIの実装
 > - [マルチプラットフォーム開発の流れ](./python-flet-multiplatform-guide.md) - 開発プロセス全体の概要
@@ -56,7 +56,7 @@ Fletでは、`page.platform`プロパティを使用して現在実行中のプ�
 def main(page: ft.Page):
     platform = page.platform
     print(f"Running on platform: {platform}")
-    
+
     # プラットフォームに基づいた処理
     if platform == "android" or platform == "ios":
         # モバイル向け処理
@@ -191,12 +191,12 @@ class StorageInterface(ABC):
     def save(self, key: str, value: str) -> bool:
         """データを保存する"""
         pass
-    
+
     @abstractmethod
     def load(self, key: str) -> str:
         """データを読み込む"""
         pass
-    
+
     @abstractmethod
     def delete(self, key: str) -> bool:
         """データを削除する"""
@@ -211,7 +211,7 @@ class WebStorage(StorageInterface):
     """Web版のストレージ実装（localStorage使用）"""
     def __init__(self, page):
         self.page = page
-    
+
     def save(self, key: str, value: str) -> bool:
         try:
             # JavaScriptのlocalStorageを使用
@@ -221,7 +221,7 @@ class WebStorage(StorageInterface):
         except Exception as e:
             print(f"WebStorage save error: {e}")
             return False
-    
+
     def load(self, key: str) -> str:
         try:
             js_code = f"localStorage.getItem('{key}')"
@@ -230,7 +230,7 @@ class WebStorage(StorageInterface):
         except Exception as e:
             print(f"WebStorage load error: {e}")
             return ""
-    
+
     def delete(self, key: str) -> bool:
         try:
             js_code = f"localStorage.removeItem('{key}')"
@@ -251,10 +251,10 @@ class MobileStorage(StorageInterface):
         self.page = page
         self.storage_dir = os.path.join(os.path.expanduser("~"), ".my_app")
         os.makedirs(self.storage_dir, exist_ok=True)
-    
+
     def _get_file_path(self, key):
         return os.path.join(self.storage_dir, f"{key}.dat")
-    
+
     def save(self, key: str, value: str) -> bool:
         try:
             with open(self._get_file_path(key), "w") as f:
@@ -263,7 +263,7 @@ class MobileStorage(StorageInterface):
         except Exception as e:
             print(f"MobileStorage save error: {e}")
             return False
-    
+
     def load(self, key: str) -> str:
         try:
             file_path = self._get_file_path(key)
@@ -274,7 +274,7 @@ class MobileStorage(StorageInterface):
         except Exception as e:
             print(f"MobileStorage load error: {e}")
             return ""
-    
+
     def delete(self, key: str) -> bool:
         try:
             file_path = self._get_file_path(key)
@@ -303,11 +303,11 @@ class StorageFactory:
 # 使用例
 def main(page: ft.Page):
     storage = StorageFactory.get_storage(page)
-    
+
     # プラットフォームに関係なく同じインターフェースで使用
     storage.save("user_settings", json.dumps({"theme": "dark"}))
     settings = json.loads(storage.load("user_settings") or "{}")
-    
+
     # UIの構築
     # ...
 ```
@@ -318,11 +318,11 @@ def main(page: ft.Page):
 # /app/core/di/service_locator.py
 class ServiceLocator:
     _services = {}
-    
+
     @classmethod
     def register(cls, interface_name, implementation):
         cls._services[interface_name] = implementation
-    
+
     @classmethod
     def get(cls, interface_name):
         return cls._services.get(interface_name)
@@ -331,7 +331,7 @@ class ServiceLocator:
 def setup_platform_services(page):
     from app.platform.storage.storage_factory import StorageFactory
     from app.platform.notification.notification_factory import NotificationFactory
-    
+
     # プラットフォーム固有のサービスを登録
     ServiceLocator.register("storage", StorageFactory.get_storage(page))
     ServiceLocator.register("notification", NotificationFactory.get_notification(page))
@@ -341,10 +341,10 @@ class SettingsController:
     def __init__(self):
         # 必要なサービスを取得
         self.storage = ServiceLocator.get("storage")
-    
+
     def save_settings(self, settings):
         return self.storage.save("settings", json.dumps(settings))
-    
+
     def load_settings(self):
         settings_json = self.storage.load("settings")
         return json.loads(settings_json) if settings_json else {}
@@ -367,26 +367,26 @@ class AppStateWithPlatformSync:
         self.storage = ServiceLocator.get("storage")
         self.theme_mode = self._load_setting("theme_mode", "light")
         self._listeners = []
-    
+
     def _load_setting(self, key, default_value):
         # プラットフォーム固有のストレージから設定を読み込む
         stored_value = self.storage.load(key)
         return stored_value if stored_value else default_value
-    
+
     def _save_setting(self, key, value):
         # プラットフォーム固有のストレージに設定を保存
         self.storage.save(key, value)
-    
+
     def add_listener(self, listener):
         self._listeners.append(listener)
-    
+
     def remove_listener(self, listener):
         self._listeners.remove(listener)
-    
+
     def notify_listeners(self):
         for listener in self._listeners:
             listener()
-    
+
     def set_theme_mode(self, mode):
         self.theme_mode = mode
         # プラットフォーム固有のストレージに保存
@@ -413,7 +413,7 @@ class CameraInterface(ABC):
     def take_photo(self, on_capture: Callable[[str], None]) -> bool:
         """写真を撮影する"""
         pass
-    
+
     @abstractmethod
     def is_available(self) -> bool:
         """カメラが利用可能かチェック"""
@@ -429,12 +429,12 @@ import os
 class AndroidCamera(CameraInterface):
     def __init__(self, page):
         self.page = page
-    
+
     def is_available(self) -> bool:
         # 実際のアプリではFlutterのメソッドチャネルを通じて
         # ネイティブコードでチェックする必要があります
         return True
-    
+
     def take_photo(self, on_capture: Callable[[str], None]) -> bool:
         # Androidのカメラ機能を呼び出す擬似コード
         # 実際にはFlutterのメソッドチャネルを使用して
@@ -443,12 +443,12 @@ class AndroidCamera(CameraInterface):
             # このコードは実際には動作しませんが、
             # Flutter/Androidネイティブコードとの連携概念を示しています
             temp_file = os.path.join(tempfile.gettempdir(), "camera_photo.jpg")
-            
+
             # 擬似コード: ネイティブカメラAPIを呼び出す
             # result = self.page.invoke_method("takePhoto", {"save_path": temp_file})
-            
+
             # 実際には上記の代わりにFletの機能を使ってFlutterのカメラプラグインを呼び出す
-            
+
             # 成功したと仮定
             if os.path.exists(temp_file):
                 on_capture(temp_file)
@@ -467,7 +467,7 @@ import base64
 class WebCamera(CameraInterface):
     def __init__(self, page):
         self.page = page
-    
+
     def is_available(self) -> bool:
         # WebブラウザでMediaDevicesをチェック
         js_code = """
@@ -478,7 +478,7 @@ class WebCamera(CameraInterface):
         }
         """
         return self.page.eval_js(js_code) == True
-    
+
     def take_photo(self, on_capture: Callable[[str], None]) -> bool:
         # Web用のカメラアクセスコード
         js_code = """
@@ -491,7 +491,7 @@ class WebCamera(CameraInterface):
                     // 処理を実装
                     // 実際にはここでカメラのUIを表示し、写真を撮影、
                     // Base64エンコードされた画像を返す処理を実装
-                    
+
                     // 仮の成功レスポンス
                     return "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD...";
                 });
@@ -504,20 +504,20 @@ class WebCamera(CameraInterface):
         try:
             # 実際には上記のコードを実行し、結果のBase64データを取得
             # base64_data = self.page.eval_js(js_code)
-            
+
             # テスト用の擬似レスポンス
             base64_data = "仮のBase64データ"
-            
+
             # Base64データをファイルに保存
             if base64_data and base64_data.startswith("data:image/jpeg;base64,"):
                 # Base64部分を抽出
                 base64_str = base64_data.replace("data:image/jpeg;base64,", "")
-                
+
                 # 一時ファイルに保存
                 temp_file = os.path.join(tempfile.gettempdir(), "web_camera_photo.jpg")
                 with open(temp_file, "wb") as f:
                     f.write(base64.b64decode(base64_str))
-                
+
                 on_capture(temp_file)
                 return True
             return False
@@ -555,16 +555,16 @@ class PlatformInfo:
     def __init__(self, page):
         self.page = page
         self.platform = page.platform
-    
+
     def is_mobile(self):
         return self.platform in ["android", "ios"]
-    
+
     def is_desktop(self):
         return self.platform in ["windows", "macos", "linux"]
-    
+
     def is_web(self):
         return not (self.is_mobile() or self.is_desktop())
-    
+
     def has_feature(self, feature_name):
         # 機能の利用可能性チェック
         features = {
@@ -573,33 +573,33 @@ class PlatformInfo:
             "notification": self._has_notification,
             "biometric": self._has_biometric,
         }
-        
+
         checker = features.get(feature_name)
         if checker:
             return checker()
         return False
-    
+
     def _has_camera(self):
         # カメラ機能チェック
         if self.is_web():
             js_code = "!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)"
             return self.page.eval_js(js_code) == True
         return self.is_mobile()  # モバイルデバイスならカメラありと仮定
-    
+
     def _has_gps(self):
         # GPS機能チェック
         if self.is_web():
             js_code = "!!(navigator.geolocation)"
             return self.page.eval_js(js_code) == True
         return self.is_mobile()  # モバイルデバイスならGPSありと仮定
-    
+
     def _has_notification(self):
         # 通知機能チェック
         if self.is_web():
             js_code = "!!(window.Notification)"
             return self.page.eval_js(js_code) == True
         return True  # その他のプラットフォームでは通知可能と仮定
-    
+
     def _has_biometric(self):
         # 生体認証チェック
         return self.is_mobile()  # 単純化: モバイルのみ対応と仮定
@@ -607,11 +607,11 @@ class PlatformInfo:
 # 使用例
 def main(page: ft.Page):
     platform_info = PlatformInfo(page)
-    
+
     # 機能によってUIを調整
     if platform_info.has_feature("camera"):
         page.add(ft.ElevatedButton("写真を撮る", on_click=take_photo))
-    
+
     if platform_info.is_mobile():
         # モバイル向け特殊UIを表示
         pass
@@ -631,18 +631,18 @@ class ResponsiveLayout:
     # 画面サイズの境界値
     MOBILE_BREAKPOINT = 600
     TABLET_BREAKPOINT = 960
-    
+
     def __init__(self, page: ft.Page):
         self.page = page
         page.on_resize = self._handle_resize
         self._update_layout()
-    
+
     def _handle_resize(self, e):
         self._update_layout()
-    
+
     def _update_layout(self):
         width = self.page.width
-        
+
         # 画面サイズのカテゴリを判定
         if width < self.MOBILE_BREAKPOINT:
             self.screen_category = "mobile"
@@ -650,11 +650,11 @@ class ResponsiveLayout:
             self.screen_category = "tablet"
         else:
             self.screen_category = "desktop"
-        
+
         # レイアウトアップデートイベントをディスパッチ
         if hasattr(self, "on_layout_change"):
             self.on_layout_change(self.screen_category)
-    
+
     def get_column_count(self):
         """現在の画面サイズに適したグリッドカラム数を返す"""
         if self.screen_category == "mobile":
@@ -663,7 +663,7 @@ class ResponsiveLayout:
             return 2
         else:
             return 4
-    
+
     def get_container_width(self):
         """コンテンツコンテナの適切な幅を返す"""
         if self.screen_category == "mobile":
@@ -672,7 +672,7 @@ class ResponsiveLayout:
             return self.page.width * 0.85  # 85%幅
         else:
             return min(1200, self.page.width * 0.75)  # 最大1200px
-    
+
     def get_padding(self):
         """画面サイズに適したパディングを返す"""
         if self.screen_category == "mobile":
@@ -681,7 +681,7 @@ class ResponsiveLayout:
             return 16
         else:
             return 24
-    
+
     def create_responsive_row(self, controls):
         """画面サイズに応じて行または列に変換するコンテナを返す"""
         if self.screen_category == "mobile":
@@ -694,7 +694,7 @@ class ResponsiveLayout:
 # 使用例
 def main(page: ft.Page):
     responsive = ResponsiveLayout(page)
-    
+
     # レイアウト変更時の処理
     def on_layout_change(screen_category):
         # 画面カテゴリに基づいてUIを更新
@@ -707,28 +707,28 @@ def main(page: ft.Page):
             navigation.visible = True
             app_bar.leading = None
         page.update()
-    
+
     responsive.on_layout_change = on_layout_change
-    
+
     # レスポンシブなコンテナの作成
     def create_content():
         container_width = responsive.get_container_width()
         padding = responsive.get_padding()
-        
+
         # 画面サイズに応じたコンテンツレイアウト
         content_layout = responsive.create_responsive_row([
             ft.Container(content=ft.Text("サイドバー"), width=200),
             ft.VerticalDivider(),
             ft.Container(content=ft.Text("メインコンテンツ"), expand=True)
         ])
-        
+
         return ft.Container(
             content=content_layout,
             width=container_width,
             padding=padding,
             bgcolor=ft.colors.BACKGROUND
         )
-    
+
     # アプリケーションUI
     app_bar = ft.AppBar(title=ft.Text("レスポンシブアプリ"))
     navigation = ft.NavigationRail(
@@ -738,7 +738,7 @@ def main(page: ft.Page):
             ft.NavigationRailDestination(icon=ft.icons.SETTINGS, label="設定")
         ]
     )
-    
+
     def show_drawer(e):
         page.show_drawer(ft.Drawer(
             content=ft.Column([
@@ -746,9 +746,9 @@ def main(page: ft.Page):
                 ft.ListTile(title=ft.Text("設定"), leading=ft.Icon(ft.icons.SETTINGS))
             ])
         ))
-    
+
     content = create_content()
-    
+
     # 画面レイアウトを構築
     page.add(
         app_bar,
@@ -770,7 +770,7 @@ class AdaptiveComponents:
     def __init__(self, page: ft.Page):
         self.page = page
         self.platform = page.platform
-    
+
     def create_list_item(self, title, subtitle=None, leading=None, trailing=None):
         """プラットフォーム固有のリストアイテムを作成"""
         if self.platform == "android":
@@ -786,7 +786,7 @@ class AdaptiveComponents:
             # iOS風スタイル
             # トレーリングアイコンを矢印に変更
             ios_trailing = ft.Icon(ft.icons.ARROW_FORWARD_IOS, size=16) if trailing is None else trailing
-            
+
             return ft.Container(
                 content=ft.Row([
                     leading if leading else ft.Container(width=0),
@@ -807,7 +807,7 @@ class AdaptiveComponents:
                 leading=leading,
                 trailing=trailing
             )
-    
+
     def create_app_bar(self, title, actions=None):
         """プラットフォーム固有のアプリバーを作成"""
         if self.platform == "android":
@@ -837,7 +837,7 @@ class AdaptiveComponents:
                 bgcolor=ft.colors.BLUE_700,
                 actions=actions
             )
-    
+
     def create_bottom_navigation(self, items):
         """プラットフォーム固有のボトムナビゲーションを作成"""
         if self.platform == "android":
@@ -877,7 +877,7 @@ class AdaptiveComponents:
 # 使用例
 def main(page: ft.Page):
     adaptive = AdaptiveComponents(page)
-    
+
     # プラットフォーム固有のリストアイテム
     list_item = adaptive.create_list_item(
         "タイトル",
@@ -885,7 +885,7 @@ def main(page: ft.Page):
         leading=ft.Icon(ft.icons.PERSON),
         trailing=ft.Icon(ft.icons.DELETE)
     )
-    
+
     # プラットフォーム固有のアプリバー
     app_bar = adaptive.create_app_bar(
         "マイアプリ",
@@ -894,14 +894,14 @@ def main(page: ft.Page):
             ft.IconButton(ft.icons.MORE_VERT)
         ]
     )
-    
+
     # プラットフォーム固有のボトムナビゲーション
     bottom_nav = adaptive.create_bottom_navigation([
         {"icon": ft.icons.HOME, "label": "ホーム"},
         {"icon": ft.icons.SEARCH, "label": "検索"},
         {"icon": ft.icons.PERSON, "label": "プロフィール"}
     ])
-    
+
     # アプリケーションUIを構築
     page.add(
         app_bar,
@@ -925,18 +925,18 @@ class AssetResolver:
     def __init__(self, page: ft.Page):
         self.page = page
         self.platform = page.platform
-        
+
         # ディレクトリ構造
         self.base_dir = "assets"
         self.image_dir = "images"
         self.fonts_dir = "fonts"
         self.data_dir = "data"
-    
+
     def get_image_path(self, image_name, density=None):
         """プラットフォームとディスプレイ密度に適した画像パスを返す"""
         # 基本パス
         base_path = f"{self.base_dir}/{self.image_dir}"
-        
+
         # プラットフォーム固有のディレクトリ
         platform_specific = None
         if self.platform == "android":
@@ -947,12 +947,12 @@ class AssetResolver:
             platform_specific = "desktop"
         else:
             platform_specific = "web"
-        
+
         # 密度別ディレクトリ
         density_dir = ""
         if density:
             density_dir = f"/{density}"
-        
+
         # パスの優先順位:
         # 1. プラットフォーム+密度固有 (/android/2x/image.png)
         # 2. プラットフォーム固有 (/android/image.png)
@@ -964,15 +964,15 @@ class AssetResolver:
             f"{base_path}{density_dir}/{image_name}",
             f"{base_path}/{image_name}"
         ]
-        
+
         # 最初に見つかったパスを返す
         for path in paths_to_check:
             if self._asset_exists(path):
                 return path
-        
+
         # デフォルトパス
         return f"{base_path}/{image_name}"
-    
+
     def get_font(self, font_name):
         """プラットフォームに適したフォントを返す"""
         # プラットフォーム別フォントマッピング
@@ -994,29 +994,29 @@ class AssetResolver:
                 "serif": "Times New Roman, serif"
             }
         }
-        
+
         # プラットフォームカテゴリを取得
         platform_category = self.platform
         if platform_category not in platform_fonts:
             platform_category = "web"  # デフォルト
-        
+
         # フォントマッピングを取得
         font_map = platform_fonts[platform_category]
-        
+
         # マッピングされたフォントを返す
         return font_map.get(font_name, font_name)
-    
+
     def get_data_file(self, file_name):
         """データファイルのパスを返す"""
         # プラットフォーム固有のファイルがあるか確認
         platform_specific = f"{self.base_dir}/{self.data_dir}/{self.platform}/{file_name}"
         default_path = f"{self.base_dir}/{self.data_dir}/{file_name}"
-        
+
         if self._asset_exists(platform_specific):
             return platform_specific
-        
+
         return default_path
-    
+
     def _asset_exists(self, path):
         """アセットが存在するか確認（実際のアプリでは実装が必要）"""
         # Fletアプリにバンドルされたアセットの存在チェックロジック
@@ -1027,16 +1027,16 @@ class AssetResolver:
 # 使用例
 def main(page: ft.Page):
     resolver = AssetResolver(page)
-    
+
     # 画像パスを解決
     logo_path = resolver.get_image_path("logo.png", density="2x")
-    
+
     # フォントの解決
     system_font = resolver.get_font("sans")
-    
+
     # データファイルの解決
     config_path = resolver.get_data_file("config.json")
-    
+
     # 解決されたアセットを使用
     page.add(
         ft.Image(src=logo_path),
@@ -1052,7 +1052,7 @@ class ResourceValues:
     def __init__(self, platform):
         self.platform = platform
         self._init_resources()
-    
+
     def _init_resources(self):
         # 基本リソース値
         self.base_values = {
@@ -1083,7 +1083,7 @@ class ResourceValues:
                 "error_message": "エラーが発生しました"
             }
         }
-        
+
         # プラットフォーム固有のオーバーライド
         self.platform_values = {
             "android": {
@@ -1110,24 +1110,24 @@ class ResourceValues:
                 }
             }
         }
-    
+
     def get(self, resource_type, resource_name):
         """リソース値を取得"""
         # プラットフォーム固有の値があるか確認
         platform_category = self._get_platform_category()
-        
+
         if (platform_category in self.platform_values and
             resource_type in self.platform_values[platform_category] and
             resource_name in self.platform_values[platform_category][resource_type]):
             return self.platform_values[platform_category][resource_type][resource_name]
-        
+
         # なければ基本値を返す
         if resource_type in self.base_values and resource_name in self.base_values[resource_type]:
             return self.base_values[resource_type][resource_name]
-        
+
         # どちらも見つからない場合はNoneを返す
         return None
-    
+
     def _get_platform_category(self):
         """プラットフォームのカテゴリを返す"""
         if self.platform == "android":
@@ -1142,12 +1142,12 @@ class ResourceValues:
 # 使用例
 def main(page: ft.Page):
     resources = ResourceValues(page.platform)
-    
+
     # リソース値を取得
     primary_color = resources.get("colors", "primary")
     padding = resources.get("dimensions", "padding_medium")
     welcome_text = resources.get("strings", "welcome_message")
-    
+
     # リソースを使用
     page.add(
         ft.Container(
@@ -1183,7 +1183,7 @@ class ShareInterface(ABC):
     def share_text(self, text: str, title: Optional[str] = None) -> bool:
         """テキストを共有"""
         pass
-    
+
     @abstractmethod
     def share_file(self, file_path: str, title: Optional[str] = None) -> bool:
         """ファイルを共有"""
@@ -1193,7 +1193,7 @@ class ShareInterface(ABC):
 class WebGPS(GPSInterface):
     def __init__(self, page):
         self.page = page
-    
+
     def get_location(self, on_location: Callable[[dict], None], on_error: Optional[Callable[[str], None]] = None):
         # JavaScript経由でGeolocation APIにアクセス
         js_code = """
@@ -1215,10 +1215,10 @@ class WebGPS(GPSInterface):
             return { error: "Geolocation is not supported by this browser." };
         }
         """
-        
+
         try:
             result = self.page.eval_js(js_code)
-            
+
             # 結果の処理
             if isinstance(result, dict) and "error" not in result:
                 on_location(result)
@@ -1234,7 +1234,7 @@ class WebGPS(GPSInterface):
 class AndroidGPS(GPSInterface):
     def __init__(self, page):
         self.page = page
-    
+
     def get_location(self, on_location: Callable[[dict], None], on_error: Optional[Callable[[str], None]] = None):
         # ここでは擬似的な実装
         # 実際にはFlutterのメソッドチャネルを使用してネイティブコードを呼び出す
@@ -1262,7 +1262,7 @@ class DeviceFeatureFactory:
             return iOSGPS(page)  # 別途実装
         else:
             return WebGPS(page)
-    
+
     @staticmethod
     def get_share(page) -> ShareInterface:
         platform = page.platform
@@ -1276,24 +1276,24 @@ class DeviceFeatureFactory:
 # 使用例
 def main(page: ft.Page):
     gps = DeviceFeatureFactory.get_gps(page)
-    
+
     def on_location_received(location):
         # 位置情報を表示
         lat_lng_text.value = f"緯度: {location['latitude']}, 経度: {location['longitude']}"
         page.update()
-    
+
     def on_location_error(error):
         lat_lng_text.value = f"位置情報の取得に失敗しました: {error}"
         page.update()
-    
+
     lat_lng_text = ft.Text("位置情報を取得中...")
-    
+
     # 位置情報を取得するボタン
     get_location_button = ft.ElevatedButton(
         "現在地を取得",
         on_click=lambda e: gps.get_location(on_location_received, on_location_error)
     )
-    
+
     page.add(
         get_location_button,
         lat_lng_text
@@ -1318,7 +1318,7 @@ class OptimizedList(ft.UserControl):
         self.items = items
         self.visible_items = []
         self.scroll_container = None
-        
+
         # プラットフォームに基づいて最適化設定を決定
         if self.platform in ["android", "ios"]:
             self.buffer_size = 10  # モバイルでは少なめ
@@ -1326,23 +1326,23 @@ class OptimizedList(ft.UserControl):
         else:
             self.buffer_size = 20  # デスクトップ/Webではより多く
             self.render_threshold = 100  # msec
-    
+
     def build(self):
         # スクロール可能なコンテナを作成
         self.list_view = ft.ListView(spacing=2, padding=10, expand=True)
-        
+
         # 初期表示アイテムを設定
         self._update_visible_items(0)
-        
+
         # スクロールイベントの設定
         self.scroll_container = ft.Container(
             content=self.list_view,
             expand=True,
             on_scroll=self._on_scroll
         )
-        
+
         return self.scroll_container
-    
+
     def _create_list_item(self, item):
         """アイテム表示用のウィジェットを作成"""
         return ft.Container(
@@ -1351,28 +1351,28 @@ class OptimizedList(ft.UserControl):
             padding=10,
             border_radius=5
         )
-    
+
     def _update_visible_items(self, start_index):
         """表示するアイテムを更新"""
         end_index = min(start_index + self.buffer_size, len(self.items))
-        
+
         # 表示アイテムを設定
         self.visible_items = self.items[start_index:end_index]
-        
+
         # リストビューを更新
         self.list_view.controls = [self._create_list_item(item) for item in self.visible_items]
         self.update()
-    
+
     def _on_scroll(self, e):
         """スクロールイベントハンドラ"""
         # スクロール位置から表示すべきアイテムを計算
         # 実際のアプリでは、スクロール位置からインデックスを適切に計算する必要があります
         # ここでは簡略化のため、スクロール位置を使って新しい開始インデックスを計算
         scroll_y = e.scroll_y if hasattr(e, "scroll_y") else 0
-        
+
         # スクロール位置から表示開始インデックスを算出（擬似コード）
         new_start_index = int(max(0, scroll_y / 50))  # 1アイテムの高さを50pxと仮定
-        
+
         # 表示アイテムの範囲が変更された場合、更新
         current_start_index = self.items.index(self.visible_items[0]) if self.visible_items else 0
         if abs(new_start_index - current_start_index) > self.buffer_size / 2:
@@ -1382,10 +1382,10 @@ class OptimizedList(ft.UserControl):
 def main(page: ft.Page):
     # サンプルデータ
     items = [{"id": i, "title": f"Item {i}"} for i in range(1000)]
-    
+
     # 最適化されたリストを作成
     optimized_list = OptimizedList(page, items)
-    
+
     page.add(
         ft.Text("最適化されたリスト", size=20),
         ft.Container(content=optimized_list, height=400, expand=True)
@@ -1404,40 +1404,40 @@ class LazyLoader:
         self.page = page
         self.platform = page.platform
         self.is_mobile = self.platform in ["android", "ios"]
-    
+
     async def load_components(self, components_dict, loading_indicator=None):
         """コンポーネントを優先度順に非同期で読み込む"""
         # 読み込み中表示
         if loading_indicator:
             loading_indicator.visible = True
             self.page.update()
-        
+
         # 優先度でソート
         sorted_components = sorted(
             components_dict.items(),
             key=lambda x: x[1]["priority"]
         )
-        
+
         # モバイルではより長い間隔で遅延読み込み
         delay_ms = 50 if not self.is_mobile else 100
-        
+
         for component_id, config in sorted_components:
             # 優先度の高いコンポーネントから順に読み込み
             control = config["create_fn"]()
-            
+
             # コンテナに追加
             target_container = config["container"]
             if hasattr(target_container, "controls"):
                 target_container.controls.append(control)
             else:
                 target_container.content = control
-            
+
             # 画面更新
             self.page.update()
-            
+
             # 次のコンポーネント読み込み前に少し待機
             await asyncio.sleep(delay_ms / 1000.0)
-        
+
         # 読み込み完了
         if loading_indicator:
             loading_indicator.visible = False
@@ -1446,13 +1446,13 @@ class LazyLoader:
 # 使用例
 def main(page: ft.Page):
     lazy_loader = LazyLoader(page)
-    
+
     # メインコンテンツコンテナ
     main_container = ft.Column([], spacing=10)
-    
+
     # ローディングインジケーター
     loading = ft.ProgressRing()
-    
+
     # 各コンポーネントの生成関数
     def create_header():
         return ft.Container(
@@ -1461,7 +1461,7 @@ def main(page: ft.Page):
             padding=10,
             border_radius=5
         )
-    
+
     def create_chart():
         # 重いチャートコンポーネント
         return ft.Container(
@@ -1471,7 +1471,7 @@ def main(page: ft.Page):
             height=200,
             border_radius=5
         )
-    
+
     def create_list():
         # 大きなリスト
         list_items = [
@@ -1479,7 +1479,7 @@ def main(page: ft.Page):
             for i in range(20)
         ]
         return ft.Column(list_items, scroll=ft.ScrollMode.AUTO, height=300)
-    
+
     def create_footer():
         return ft.Container(
             content=ft.Text("フッター"),
@@ -1487,7 +1487,7 @@ def main(page: ft.Page):
             padding=10,
             border_radius=5
         )
-    
+
     # 読み込むコンポーネントの定義（優先度付き）
     components = {
         "header": {
@@ -1511,14 +1511,14 @@ def main(page: ft.Page):
             "priority": 4  # 最低優先度
         }
     }
-    
+
     # 初期UIを構築
     page.add(
         ft.Text("遅延読み込みデモ", size=20),
         loading,
         main_container
     )
-    
+
     # コンポーネントの非同期読み込みを開始
     asyncio.create_task(lazy_loader.load_components(components, loading))
 ```
@@ -1533,35 +1533,35 @@ class PlatformService:
     def __init__(self, page):
         self.page = page
         self.platform = page.platform
-    
+
     def is_android(self):
         return self.platform == "android"
-    
+
     def is_ios(self):
         return self.platform == "ios"
-    
+
     def is_mobile(self):
         return self.is_android() or self.is_ios()
-    
+
     def is_web(self):
         return not (self.is_mobile() or self.is_desktop())
-    
+
     def is_desktop(self):
         return self.platform in ["windows", "macos", "linux"]
-    
+
     def is_windows(self):
         return self.platform == "windows"
-    
+
     def is_macos(self):
         return self.platform == "macos"
-    
+
     def is_linux(self):
         return self.platform == "linux"
-    
+
     def should_use_touch_ui(self):
         """タッチUI向けかどうかを判断"""
         return self.is_mobile() or (self.is_web() and self._is_touch_device())
-    
+
     def get_platform_group(self):
         """プラットフォームのグループを返す（設定などで使用）"""
         if self.is_android():
@@ -1572,7 +1572,7 @@ class PlatformService:
             return "desktop"
         else:
             return "web"
-    
+
     def _is_touch_device(self):
         """Webブラウザがタッチデバイスかどうかを判断"""
         js_code = """
@@ -1597,31 +1597,31 @@ class NavigationManager:
         self.platform_service = PlatformService(page)
         self.views = {}
         self.current_route = "/"
-        
+
         # ナビゲーション履歴
         self.history = ["/"]
-        
+
         # プラットフォームに適したナビゲーションスタイルを設定
         self._setup_navigation()
-    
+
     def _setup_navigation(self):
         """プラットフォームに適したナビゲーション構造を設定"""
         self.page.on_route_change = self._handle_route_change
-        
+
         # モバイルの場合はAppBarに戻るボタンを表示
         if self.platform_service.is_mobile():
             self.show_back_button = True
         else:
             self.show_back_button = False
-    
+
     def register_view(self, route, build_fn):
         """ルートとビルド関数を登録"""
         self.views[route] = build_fn
-    
+
     def navigate(self, route):
         """指定されたルートに移動"""
         self.page.go(route)
-    
+
     def go_back(self):
         """履歴の前のページに戻る"""
         if len(self.history) > 1:
@@ -1632,31 +1632,31 @@ class NavigationManager:
             # 直接ナビゲーション（履歴に追加せず）
             self.page.route = previous_route
             self._handle_route_change(ft.RouteChangeEvent(route=previous_route))
-    
+
     def _handle_route_change(self, e):
         """ルート変更ハンドラ"""
         new_route = e.route
-        
+
         # ルートが変わった場合のみ履歴に追加
         if new_route != self.current_route:
             self.history.append(new_route)
             self.current_route = new_route
-        
+
         # パラメータを含むルートのパターンマッチ
         route_parts = new_route.split("/")
         params = {}
         matched_route = None
         matched_build_fn = None
-        
+
         for route_pattern, build_fn in self.views.items():
             pattern_parts = route_pattern.split("/")
-            
+
             if len(route_parts) != len(pattern_parts):
                 continue
-            
+
             match = True
             current_params = {}
-            
+
             for i, part in enumerate(pattern_parts):
                 if part.startswith(":"):
                     # パラメータをキャプチャ
@@ -1665,28 +1665,28 @@ class NavigationManager:
                 elif part != route_parts[i]:
                     match = False
                     break
-            
+
             if match:
                 matched_route = route_pattern
                 matched_build_fn = build_fn
                 params = current_params
                 break
-        
+
         # ルートが見つかった場合、ビューを構築
         if matched_build_fn:
             self._build_view(matched_build_fn, params)
         else:
             # 一致するルートがない場合は404ページ
             self._show_404_page()
-    
+
     def _build_view(self, build_fn, params):
         """ビューを構築してページに設定"""
         # 現在のビューをクリア
         self.page.views.clear()
-        
+
         # 新しいビューを構築
         view = build_fn(params)
-        
+
         # モバイルの場合、AppBarに戻るボタンを追加
         if self.platform_service.is_mobile() and len(self.history) > 1:
             # AppBarがある場合、戻るボタンを追加
@@ -1695,11 +1695,11 @@ class NavigationManager:
                     icon=ft.icons.ARROW_BACK if self.platform_service.is_android() else ft.icons.ARROW_BACK_IOS,
                     on_click=lambda e: self.go_back()
                 )
-        
+
         # ビューをページに追加
         self.page.views.append(view)
         self.page.update()
-    
+
     def _show_404_page(self):
         """404ページを表示"""
         self.page.views.clear()
@@ -1720,7 +1720,7 @@ class NavigationManager:
 # 使用例
 def main(page: ft.Page):
     navigation = NavigationManager(page)
-    
+
     # ビュー構築関数
     def home_view(params):
         return ft.View(
@@ -1734,7 +1734,7 @@ def main(page: ft.Page):
                 ])
             ]
         )
-    
+
     def products_view(params):
         return ft.View(
             "/products",
@@ -1752,7 +1752,7 @@ def main(page: ft.Page):
                 ])
             ]
         )
-    
+
     def product_detail_view(params):
         product_id = params.get("id", "unknown")
         return ft.View(
@@ -1765,7 +1765,7 @@ def main(page: ft.Page):
                 ])
             ]
         )
-    
+
     def settings_view(params):
         return ft.View(
             "/settings",
@@ -1777,13 +1777,13 @@ def main(page: ft.Page):
                 ])
             ]
         )
-    
+
     # ルートを登録
     navigation.register_view("/", home_view)
     navigation.register_view("/products", products_view)
     navigation.register_view("/product/:id", product_detail_view)
     navigation.register_view("/settings", settings_view)
-    
+
     # 初期ルートに移動
     navigation.navigate("/")
 ```

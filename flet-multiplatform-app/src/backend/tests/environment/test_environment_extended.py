@@ -11,6 +11,7 @@ from ..validation.validation_rules import ValidationManager, ValidationRuleBuild
 
 class TestEnvironmentType(Enum):
     """テスト環境タイプ"""
+
     LOCAL = "local"
     CI = "ci"
     PRODUCTION = "production"
@@ -41,7 +42,7 @@ class TestEnvironment:
             "environment": self.env_type.value,
             "database": self.setup_database(),
             "test_data": self.setup_test_data(),
-            "resources": self.setup_resources()
+            "resources": self.setup_resources(),
         }
         return setup_result
 
@@ -55,7 +56,7 @@ class TestEnvironment:
         db_setup = {
             "url": db_url,
             "status": "initialized",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         return db_setup
 
@@ -72,7 +73,7 @@ class TestEnvironment:
             data_type="user",
             count=self.get_data_count("user"),
             optimize=True,
-            rules=self.get_validation_rules("user")
+            rules=self.get_validation_rules("user"),
         )
         data_setup["users"] = user_data
 
@@ -81,7 +82,7 @@ class TestEnvironment:
             data_type="item",
             count=self.get_data_count("item"),
             optimize=True,
-            rules=self.get_validation_rules("item")
+            rules=self.get_validation_rules("item"),
         )
         data_setup["items"] = item_data
 
@@ -96,7 +97,7 @@ class TestEnvironment:
         resources = {
             "mocks": self.setup_mocks(),
             "clients": self.setup_clients(),
-            "fixtures": self.setup_fixtures()
+            "fixtures": self.setup_fixtures(),
         }
         return resources
 
@@ -107,10 +108,11 @@ class TestEnvironment:
             Dict[str, Any]: モックセットアップ結果
         """
         from ..mocks.test_mocks import TestMocks
+
         mocks = {
             "user": TestMocks.get_mock_user_data(),
             "item": TestMocks.get_mock_item_data(),
-            "auth": TestMocks.get_mock_auth_data()
+            "auth": TestMocks.get_mock_auth_data(),
         }
         return mocks
 
@@ -120,10 +122,7 @@ class TestEnvironment:
         Returns:
             Dict[str, Any]: クライアントセットアップ結果
         """
-        clients = {
-            "test": self.setup_test_client(),
-            "mock": self.setup_mock_client()
-        }
+        clients = {"test": self.setup_test_client(), "mock": self.setup_mock_client()}
         return clients
 
     def setup_fixtures(self) -> Dict[str, Any]:
@@ -135,7 +134,7 @@ class TestEnvironment:
         fixtures = {
             "session": self.setup_session_fixture(),
             "user": self.setup_user_fixture(),
-            "item": self.setup_item_fixture()
+            "item": self.setup_item_fixture(),
         }
         return fixtures
 
@@ -148,6 +147,7 @@ class TestEnvironment:
         from fastapi.testclient import TestClient
 
         from ..app import app
+
         return TestClient(app)
 
     def setup_mock_client(self) -> Any:
@@ -157,6 +157,7 @@ class TestEnvironment:
             Any: モッククライアント
         """
         from ..mocks.test_mocks import TestMocks
+
         return TestMocks.get_mock_test_client()
 
     def setup_session_fixture(self) -> Any:
@@ -166,6 +167,7 @@ class TestEnvironment:
             Any: セッションフィクスチャ
         """
         from ..data.test_data import TestSession
+
         return TestSession()
 
     def setup_user_fixture(self) -> Any:
@@ -175,6 +177,7 @@ class TestEnvironment:
             Any: ユーザーフィクスチャ
         """
         from ..data.test_data import TestUser
+
         return TestUser()
 
     def setup_item_fixture(self) -> Any:
@@ -184,6 +187,7 @@ class TestEnvironment:
             Any: アイテムフィクスチャ
         """
         from ..data.test_data import TestItem
+
         return TestItem()
 
     def get_data_count(self, data_type: str) -> int:
@@ -216,15 +220,24 @@ class TestEnvironment:
 
         if data_type == "user":
             return {
-                "email": [builder.required("email"), builder.pattern("email", r"^[^@]+@[^@]+\.[^@]+$")],
-                "username": [builder.required("username"), builder.length("username", 3, 50)],
-                "password": [builder.required("password"), builder.length("password", 8, None)]
+                "email": [
+                    builder.required("email"),
+                    builder.pattern("email", r"^[^@]+@[^@]+\.[^@]+$"),
+                ],
+                "username": [
+                    builder.required("username"),
+                    builder.length("username", 3, 50),
+                ],
+                "password": [
+                    builder.required("password"),
+                    builder.length("password", 8, None),
+                ],
             }
         elif data_type == "item":
             return {
                 "title": [builder.required("title"), builder.length("title", 1, 100)],
                 "price": [builder.required("price"), builder.value("price", 0.0, None)],
-                "owner_id": [builder.required("owner_id"), builder.unique("owner_id")]
+                "owner_id": [builder.required("owner_id"), builder.unique("owner_id")],
             }
         return {}
 
@@ -237,12 +250,11 @@ class TestEnvironment:
         rules = {
             "database": [ValidationRuleBuilder.required("database")],
             "test_data": [ValidationRuleBuilder.required("test_data")],
-            "resources": [ValidationRuleBuilder.required("resources")]
+            "resources": [ValidationRuleBuilder.required("resources")],
         }
 
         result, errors = self.validation_manager.validate_data(
-            self.setup_environment(),
-            rules
+            self.setup_environment(), rules
         )
 
         if not result:
@@ -265,7 +277,7 @@ class TestEnvironment:
             "type": test_type,
             "parallel": parallel,
             "status": "running",
-            "start_time": datetime.now().isoformat()
+            "start_time": datetime.now().isoformat(),
         }
 
         try:
@@ -291,7 +303,7 @@ class TestEnvironment:
             "timestamp": datetime.now().isoformat(),
             "test_results": self.get_test_results(),
             "coverage": self.get_coverage_report(),
-            "performance": self.get_performance_metrics()
+            "performance": self.get_performance_metrics(),
         }
         return results
 

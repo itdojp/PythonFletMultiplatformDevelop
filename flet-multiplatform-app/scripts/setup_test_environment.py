@@ -26,15 +26,12 @@ def setup_logging():
     log_file = log_dir / "test_environment_setup.log"
 
     # ログフォーマット
-    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    log_format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     formatter = logging.Formatter(log_format)
 
     # ファイルハンドラ
     file_handler = RotatingFileHandler(
-        log_file,
-        maxBytes=10*1024*1024,  # 10MB
-        backupCount=5,
-        encoding='utf-8'
+        log_file, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"  # 10MB
     )
     file_handler.setFormatter(formatter)
 
@@ -56,13 +53,17 @@ def setup_logging():
 
     return logger
 
+
 logger = setup_logging()
+
 
 class OSName(Enum):
     """OS名"""
+
     WINDOWS = "windows"
     LINUX = "linux"
     DARWIN = "darwin"
+
 
 class EnvironmentManager:
     """環境マネージャークラス"""
@@ -75,7 +76,7 @@ class EnvironmentManager:
         self.requirements_files = {
             "base": "requirements.txt",
             "dev": "requirements-dev.txt",
-            "test": "requirements-test.txt"
+            "test": "requirements-test.txt",
         }
 
         # プラットフォーム固有の設定
@@ -106,7 +107,7 @@ class EnvironmentManager:
                 "venv_activate": str(self.venv_path / "Scripts" / "activate"),
                 "venv_python": str(self.venv_path / "Scripts" / "python.exe"),
                 "venv_pip": str(self.venv_path / "Scripts" / "pip.exe"),
-                "path_separator": ";"
+                "path_separator": ";",
             },
             OSName.LINUX: {
                 "python": "python3",
@@ -114,7 +115,7 @@ class EnvironmentManager:
                 "venv_activate": f"source {self.venv_path}/bin/activate",
                 "venv_python": str(self.venv_path / "bin" / "python"),
                 "venv_pip": str(self.venv_path / "bin" / "pip"),
-                "path_separator": ":"
+                "path_separator": ":",
             },
             OSName.DARWIN: {
                 "python": "python3",
@@ -122,8 +123,8 @@ class EnvironmentManager:
                 "venv_activate": f"source {self.venv_path}/bin/activate",
                 "venv_python": str(self.venv_path / "bin" / "python"),
                 "venv_pip": str(self.venv_path / "bin" / "pip"),
-                "path_separator": ":"
-            }
+                "path_separator": ":",
+            },
         }[self.os_name]
 
     def run_command(
@@ -131,7 +132,7 @@ class EnvironmentManager:
         command: Union[str, List[str]],
         cwd: Optional[Union[str, Path]] = None,
         env: Optional[Dict[str, str]] = None,
-        check: bool = True
+        check: bool = True,
     ) -> subprocess.CompletedProcess:
         """コマンドを実行
 
@@ -154,12 +155,7 @@ class EnvironmentManager:
 
         try:
             result = subprocess.run(
-                command,
-                cwd=cwd,
-                env=env,
-                check=check,
-                text=True,
-                capture_output=True
+                command, cwd=cwd, env=env, check=check, text=True, capture_output=True
             )
             logger.debug(f"Command output: {result.stdout}")
             if result.stderr:
@@ -209,7 +205,7 @@ class EnvironmentManager:
             self.platform_config["venv_pip"],
             "install",
             "-r",
-            str(requirements_path)
+            str(requirements_path),
         ]
 
         self.run_command(pip_cmd)
@@ -217,17 +213,29 @@ class EnvironmentManager:
     def setup_pre_commit_hooks(self) -> None:
         """pre-commitフックをセットアップ"""
         if not (self.project_root / ".pre-commit-config.yaml").exists():
-            logger.warning("pre-commit config file not found. Skipping pre-commit setup.")
+            logger.warning(
+                "pre-commit config file not found. Skipping pre-commit setup."
+            )
             return
 
         # pre-commitをインストール
         self.run_command([self.platform_config["venv_pip"], "install", "pre-commit"])
 
         # pre-commitフックをインストール
-        self.run_command([self.platform_config["venv_python"], "-m", "pre_commit", "install"])
+        self.run_command(
+            [self.platform_config["venv_python"], "-m", "pre_commit", "install"]
+        )
 
         # pre-commitフックを実行
-        self.run_command([self.platform_config["venv_python"], "-m", "pre_commit", "run", "--all-files"])
+        self.run_command(
+            [
+                self.platform_config["venv_python"],
+                "-m",
+                "pre_commit",
+                "run",
+                "--all-files",
+            ]
+        )
 
     def setup_git_hooks(self) -> None:
         """Gitフックをセットアップ"""
@@ -245,7 +253,9 @@ class EnvironmentManager:
         pre_commit_hook = hooks_dir / "pre-commit"
         with open(pre_commit_hook, "w", encoding="utf-8") as f:
             f.write("#!/bin/sh\n")
-            f.write(f"{self.platform_config['venv_python']} -m pre_commit run --hook-stage pre-commit\n")
+            f.write(
+                f"{self.platform_config['venv_python']} -m pre_commit run --hook-stage pre-commit\n"
+            )
 
         # 実行権限を付与 (Unix系OSのみ)
         if self.os_name != OSName.WINDOWS:
@@ -256,7 +266,14 @@ class EnvironmentManager:
     def setup_test_database(self) -> None:
         """テスト用データベースをセットアップ"""
         # テスト用の設定ファイルをロード
-        test_config_path = self.project_root / "src" / "backend" / "tests" / "config" / "test_config.py"
+        test_config_path = (
+            self.project_root
+            / "src"
+            / "backend"
+            / "tests"
+            / "config"
+            / "test_config.py"
+        )
 
         if not test_config_path.exists():
             logger.warning("Test config file not found. Skipping test database setup.")
@@ -267,9 +284,13 @@ class EnvironmentManager:
             # テスト用のデータベース初期化スクリプトを実行
             init_script = self.project_root / "scripts" / "init_test_db.py"
             if init_script.exists():
-                self.run_command([self.platform_config["venv_python"], str(init_script)])
+                self.run_command(
+                    [self.platform_config["venv_python"], str(init_script)]
+                )
             else:
-                logger.warning(f"Test database initialization script not found: {init_script}")
+                logger.warning(
+                    f"Test database initialization script not found: {init_script}"
+                )
         except Exception as e:
             logger.error(f"Failed to set up test database: {e}")
             raise
@@ -280,9 +301,13 @@ class EnvironmentManager:
         try:
             test_data_script = self.project_root / "scripts" / "generate_test_data.py"
             if test_data_script.exists():
-                self.run_command([self.platform_config["venv_python"], str(test_data_script)])
+                self.run_command(
+                    [self.platform_config["venv_python"], str(test_data_script)]
+                )
             else:
-                logger.warning(f"Test data generation script not found: {test_data_script}")
+                logger.warning(
+                    f"Test data generation script not found: {test_data_script}"
+                )
         except Exception as e:
             logger.error(f"Failed to generate test data: {e}")
             raise

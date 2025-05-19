@@ -1,163 +1,230 @@
-# Performance Testing
+# Performance Testing Framework
 
-This directory contains performance tests for the application, including load testing, stress testing, endurance testing, and scalability testing.
+This directory contains a comprehensive performance testing framework for the application, built on top of Locust. The framework supports various types of performance tests including load testing, stress testing, and endurance testing.
+
+## Features
+
+- **Multiple Test Types**: Support for load, stress, and endurance testing
+- **Detailed Reporting**: HTML and JSON reports with visualizations
+- **Alerting**: Configurable alerts for performance degradation
+- **Test Data Management**: Tools for generating and managing test data
+- **Configuration Management**: YAML-based configuration for test scenarios
+- **Extensible**: Easy to add new test scenarios and metrics
 
 ## Test Types
 
 ### 1. Load Testing
-- **Purpose**: Verify system behavior under expected load
+- **Purpose**: Verify system behavior under expected load conditions
 - **Location**: `test_load.py`
-- **Key Metrics**: Response time, throughput, error rate
-- **Configuration**: Environment variables or `config/perf_config.json`
-- **Parameters**:
-  - `PERF_LOAD_USERS`: Number of concurrent users (default: 10)
-  - `PERF_LOAD_SPAWN_RATE`: Users spawned per second (default: 2)
-  - `PERF_LOAD_DURATION`: Test duration (default: 30s)
-  - `PERF_LOAD_WARM_UP`: Warm-up time in seconds (default: 5)
+- **Key Metrics**:
+  - Response time (p50, p90, p95, p99)
+  - Requests per second (RPS)
+  - Error rate
+  - Concurrent users
+- **Configuration**: `config/performance_config.yaml`
 
 ### 2. Stress Testing
 - **Purpose**: Determine system limits and breaking points
 - **Location**: `test_stress.py`
-- **Key Metrics**: Maximum concurrent users, failure points, recovery time
-- **Parameters**:
-  - `PERF_STRESS_USERS`: Maximum users (default: 20)
-  - `PERF_STRESS_SPAWN_RATE`: Spawn rate (default: 5)
-  - `PERF_STRESS_DURATION`: Test duration (default: 1m)
-  - `PERF_STRESS_WARM_UP`: Warm-up time (default: 5s)
+- **Key Metrics**:
+  - Maximum sustainable throughput
+  - Failure points
+  - System recovery time
+  - Resource utilization at peak load
 
 ### 3. Endurance Testing
 - **Purpose**: Verify system stability over extended periods
 - **Location**: `test_endurance.py`
-- **Key Metrics**: Memory usage, response time consistency, error rates over time
-- **Parameters**:
-  - `PERF_ENDURANCE_USERS`: Concurrent users (default: 5)
-  - `PERF_ENDURANCE_SPAWN_RATE`: Spawn rate (default: 1)
-  - `PERF_ENDURANCE_DURATION`: Test duration (default: 2m)
-  - `PERF_ENDURANCE_WARM_UP`: Warm-up time (default: 10s)
+- **Key Metrics**:
+  - Memory usage over time
+  - Response time consistency
+  - Error rates over time
+  - Database connection pool usage
 
-### 4. Scalability Testing
-- **Purpose**: Measure how the system scales with increasing load
-- **Location**: `test_scalability.py`
-- **Key Metrics**: Throughput vs. users, response time vs. load
-- **Parameters**:
-  - `PERF_SCALE_START_USERS`: Starting users (default: 1)
-  - `PERF_SCALE_MAX_USERS`: Maximum users (default: 5)
-  - `PERF_SCALE_STEP_SIZE`: User increment per step (default: 1)
-  - `PERF_SCALE_STEP_DURATION`: Duration per step (default: 30s)
-  - `PERF_SCALE_WARM_UP`: Warm-up time (default: 5s)
+## Getting Started
+
+### Prerequisites
+
+- Python 3.8+
+- pip
+- Locust
+- Required Python packages (install via `pip install -r requirements-test.txt`)
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd flet-multiplatform-app
+   ```
+
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install the required packages:
+   ```bash
+   pip install -r requirements-test.txt
+   ```
 
 ## Running Tests
 
-### Prerequisites
-- Python 3.10+
-- Dependencies from `tests/performance/requirements-test.txt`
-- Running instance of the application
-- PostgreSQL database (for application data)
+### Running a Specific Test
 
-### Running Tests with the Test Runner
-
-The recommended way to run performance tests is using the test runner script:
+To run a specific test scenario, use the `run_perf_tests.py` script:
 
 ```bash
-# Install dependencies
-pip install -r tests/performance/requirements-test.txt
-
-# Run all performance tests
-python scripts/run_performance_tests.py
-
-# Run specific test type
-python scripts/run_performance_tests.py --test-type load
+python scripts/run_perf_tests.py --config tests/performance/config/performance_config.yaml --scenario load
 ```
 
-### Running Tests Directly with Locust
+### Running All Tests
 
-You can also run tests directly using Locust:
+To run all test scenarios defined in the configuration file:
 
 ```bash
-# Run load test
-locust -f tests/performance/test_load.py --headless --users 10 --spawn-rate 2 -H http://localhost:8000
-
-# Run stress test
-locust -f tests/performance/test_stress.py --headless --users 20 --spawn-rate 5 -H http://localhost:8000
-
-# Run endurance test
-locust -f tests/performance/test_endurance.py --headless --users 5 --spawn-rate 1 -H http://localhost:8000 --run-time 2m
-
-# Run scalability test
-locust -f tests/performance/test_scalability.py --headless --users 5 --spawn-rate 1 -H http://localhost:8000 --run-time 2m
+python scripts/run_perf_tests.py --config tests/performance/config/performance_config.yaml
 ```
 
-### Running in CI/CD
+### Running with Custom Parameters
 
-The performance tests are integrated into the CI/CD pipeline and will run automatically on pushes to the main branch. The pipeline will:
+You can override configuration parameters using command-line arguments:
 
-1. Set up the test environment
-2. Start the application
-3. Run all performance tests
-4. Generate and upload test reports
-5. Clean up resources
+```bash
+python scripts/run_perf_tests.py --scenario load --users 20 --spawn-rate 5 --run-time 5m
+```
+
+## Analyzing Results
+
+After running tests, you can generate detailed reports using the `analyze_perf_results.py` script:
+
+```bash
+python scripts/analyze_perf_results.py --results-dir reports/performance
+```
+
+This will generate:
+- HTML report at `reports/performance/reports/performance_report.html`
+- Plots in the `reports/performance/reports/plots/` directory
+- JSON report with raw data
 
 ## Configuration
 
-### Environment Variables
+The performance testing framework is configured using YAML files. The main configuration file is located at `tests/performance/config/performance_config.yaml`.
 
-All test parameters can be configured using environment variables:
+### Configuration Options
 
-```bash
-# Example: Configure load test
-PERF_LOAD_USERS=20 \
-PERF_LOAD_SPAWN_RATE=5 \
-PERF_LOAD_DURATION=1m \
-PERF_LOAD_WARM_UP=5 \
-python scripts/run_performance_tests.py --test-type load
+- `base_url`: The base URL of the application under test
+- `scenarios`: Test scenarios with their parameters
+- `alerting`: Configuration for alerts (email, Slack)
+- `test_data`: Configuration for test data generation
+- `reporting`: Report generation settings
+- `locust`: Locust-specific settings
+
+Example configuration:
+
+```yaml
+base_url: "http://localhost:8000"
+
+scenarios:
+  smoke:
+    description: "Quick smoke test"
+    users: 1
+    spawn_rate: 1
+    run_time: "30s"
+    thresholds:
+      response_time_p95: 1000  # ms
+      error_rate: 0.01  # 1%
+      throughput: 5  # req/s
+
+alerting:
+  enabled: true
+  email:
+    enabled: true
+    smtp_server: "smtp.example.com"
+    smtp_port: 587
+    username: "user@example.com"
+    password: "your-password"
+    from_addr: "perf-tests@example.com"
+    to_addrs:
+      - "team@example.com"
 ```
 
-### Configuration File
+## Creating Custom Tests
 
-You can also use a JSON configuration file (default: `tests/performance/config/perf_config.json`):
+To create a new performance test, follow these steps:
 
-```json
-{
-  "load_test": {
-    "users": 10,
-    "spawn_rate": 2,
-    "duration": "30s",
-    "warm_up_time": 5
-  },
-  "stress_test": {
-    "users": 20,
-    "spawn_rate": 5,
-    "duration": "1m",
-    "warm_up_time": 5
-  },
-  "endurance_test": {
-    "users": 5,
-    "spawn_rate": 1,
-    "duration": "2m",
-    "warm_up_time": 10
-  },
-  "scalability_test": {
-    "start_users": 1,
-    "max_users": 5,
-    "step_size": 1,
-    "step_duration": "30s",
-    "warm_up_time": 5
-  }
-}
+1. Create a new test file in the `tests/performance/` directory (e.g., `test_custom.py`)
+2. Define your test class by extending `BaseLocustTest` or `HttpUser`
+3. Add your test methods with the `@task` decorator
+4. Update the configuration file to include your new test scenario
+
+Example test:
+
+```python
+from locust import task, between
+from .base_test import BaseLocustTest
+
+class CustomTestUser(BaseLocustTest):
+    wait_time = between(1, 3)
+
+    @task(3)
+    def get_items(self):
+        self.client.get("/api/items/")
+
+    @task(1)
+    def create_item(self):
+        self.client.post(
+            "/api/items/",
+            json={"name": "test", "value": 42},
+            headers={"Content-Type": "application/json"}
+        )
 ```
 
-## Test Results
+## Alerting
 
-Test results are saved in the following directories:
+The performance testing framework includes an alerting system that can notify you when performance degrades beyond configured thresholds.
 
-- **Raw Results**: `flet-multiplatform-app/results/`
-  - CSV files with detailed metrics
-  - JSON files with aggregated results
-  - HTML reports
+### Email Alerts
 
-- **Reports**: `flet-multiplatform-app/reports/`
-  - HTML reports with visualizations
-  - Summary statistics
+To enable email alerts, update the `alerting` section in the configuration file:
+
+```yaml
+alerting:
+  enabled: true
+  email:
+    enabled: true
+    smtp_server: "smtp.example.com"
+    smtp_port: 587
+    use_tls: true
+    username: "user@example.com"
+    password: "your-password"
+    from_addr: "perf-tests@example.com"
+    to_addrs:
+      - "team@example.com"
+```
+
+### Slack Alerts
+
+To enable Slack alerts, update the `alerting` section in the configuration file:
+
+```yaml
+alerting:
+  enabled: true
+  slack:
+    enabled: true
+    webhook_url: "https://hooks.slack.com/services/..."
+    channel: "#alerts"
+```
+
+## Best Practices
+
+1. **Start Small**: Begin with a small number of users and gradually increase the load
+2. **Monitor Resources**: Keep an eye on system resources during tests
+3. **Use Realistic Data**: Generate test data that closely resembles production data
+4. **Run Tests Regularly**: Include performance tests in your CI/CD pipeline
+5. **Analyze Trends**: Look for patterns and trends in the test results over time
+6. **Document Findings**: Keep records of test configurations and results for future reference
 
 ## Troubleshooting
 
@@ -168,175 +235,32 @@ Test results are saved in the following directories:
    - Verify the database connection string
    - Check application logs for errors
 
-2. **Connection Errors**
+2. **Connection Refused**
    - Ensure the application is running and accessible
-   - Check network connectivity
-   - Verify the base URL in test configuration
+   - Check for firewall rules blocking the connection
 
-3. **Performance Issues**
+3. **High Error Rates**
+   - Check application logs for errors
+   - Verify that the test data is valid
+   - Check for rate limiting
+
+4. **Performance Degradation**
    - Monitor system resources (CPU, memory, disk I/O)
-   - Check database performance
-   - Review application logs for bottlenecks
+   - Check for database locks or slow queries
+   - Look for memory leaks
 
-### Debugging
-
-Enable debug logging:
-
-```bash
-LOG_LEVEL=DEBUG python scripts/run_performance_tests.py
-```
-
-## Best Practices
-
-1. **Start Small**: Begin with a small number of users and gradually increase
-2. **Monitor Resources**: Keep an eye on system resources during tests
-3. **Run Tests in Isolation**: Ensure no other processes are affecting the results
-4. **Document Results**: Save test configurations and results for comparison
-5. **Automate**: Integrate performance tests into your CI/CD pipeline
+5. **Test Timeout**
+   - Increase the test timeout in the configuration
+   - Check for long-running operations in the application
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
-pytest tests/performance/test_stress.py -v --perf-test
 
-# Run only endurance tests
-pytest tests/performance/test_endurance.py -v --perf-test
+## Contributing
 
-# Run only scalability tests
-pytest tests/performance/test_scalability.py -v --perf-test
-```
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Configuration
+## Support
 
-Performance test settings can be configured in `config/perf_config.json`:
-
-```json
-{
-  "load_test": {
-    "users": 100,
-    "spawn_rate": 10,
-    "duration": "30s",
-    "warm_up_time": 5
-  },
-  "stress_test": {
-    "users": 1000,
-    "spawn_rate": 100,
-    "duration": "5m",
-    "warm_up_time": 10
-  },
-  "endurance_test": {
-    "users": 100,
-    "spawn_rate": 10,
-    "duration": "1h",
-    "warm_up_time": 30
-  },
-  "scalability_test": {
-    "start_users": 1,
-    "max_users": 500,
-    "step_size": 10,
-    "step_duration": "30s",
-    "warm_up_time": 10
-  }
-}
-```
-
-## Test Results
-
-Test results are saved in the `results/performance` directory with timestamps in the filenames.
-
-### Analyzing Results
-
-Use the `analyze_performance_results` function to generate a summary of test results:
-
-```python
-from src.backend.tests.performance.utils import analyze_performance_results
-
-summary = analyze_performance_results("results/performance")
-print(summary)
-```
-
-## CI/CD Integration
-
-Performance tests can be integrated into your CI/CD pipeline. Example GitHub Actions workflow:
-
-```yaml
-name: Performance Tests
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  schedule:
-    - cron: '0 0 * * 0'  # Weekly
-
-jobs:
-  performance-tests:
-    runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-test.txt
-
-    - name: Run performance tests
-      run: |
-        pytest tests/performance/ -v --perf-test
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: performance-test-results
-        path: results/performance/
-```
-
-## Best Practices
-
-1. **Start Small**: Begin with small load tests and gradually increase the load.
-2. **Monitor Resources**: Keep an eye on CPU, memory, and I/O during tests.
-3. **Baseline**: Establish performance baselines for future comparison.
-4. **Isolate Tests**: Run performance tests in an isolated environment.
-5. **Document**: Keep detailed records of test configurations and results.
-6. **Automate**: Integrate performance tests into your CI/CD pipeline.
-7. **Analyze**: Regularly review test results to identify trends and potential issues.
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Connection Errors**: Ensure the application is running and accessible.
-2. **Resource Exhaustion**: Monitor system resources and adjust test parameters.
-3. **Timeout Errors**: Increase timeouts in the test configuration if needed.
-4. **Inconsistent Results**: Run tests multiple times to account for variability.
-
-### Debugging
-
-To enable debug logging, set the `LOG_LEVEL` environment variable:
-
-```bash
-LOG_LEVEL=DEBUG pytest tests/performance/ -v --perf-test
-```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+For support, please open an issue in the GitHub repository or contact the maintainers.

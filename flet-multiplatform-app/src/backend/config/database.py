@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 # settingsのimportは関数内で遅延実行
 
+
 def get_engine_and_session():
     import os
 
@@ -27,6 +28,7 @@ def get_engine_and_session():
         expire_on_commit=False,
     )
     return engine, AsyncSessionLocal
+
 
 # Get database engine and session
 engine, AsyncSessionLocal = get_engine_and_session()

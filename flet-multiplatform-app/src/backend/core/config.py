@@ -77,7 +77,9 @@ class Settings(BaseSettings):
         return None
 
     # 管理者ユーザー設定
-    FIRST_SUPERUSER_EMAIL: EmailStr = os.getenv("FIRST_SUPERUSER_EMAIL", "admin@example.com")
+    FIRST_SUPERUSER_EMAIL: EmailStr = os.getenv(
+        "FIRST_SUPERUSER_EMAIL", "admin@example.com"
+    )
     FIRST_SUPERUSER_PASSWORD: str = os.getenv("FIRST_SUPERUSER_PASSWORD", "admin")
 
 

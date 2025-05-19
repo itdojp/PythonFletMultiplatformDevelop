@@ -19,8 +19,12 @@ def test_page() -> Generator[Page, None, None]:
         Page: テスト用のFletページ
     """
     os.environ["TESTING"] = "True"
-    os.environ["TEST_FRONTEND_WINDOW_WIDTH"] = str(frontend_test_settings.TEST_WINDOW_WIDTH)
-    os.environ["TEST_FRONTEND_WINDOW_HEIGHT"] = str(frontend_test_settings.TEST_WINDOW_HEIGHT)
+    os.environ["TEST_FRONTEND_WINDOW_WIDTH"] = str(
+        frontend_test_settings.TEST_WINDOW_WIDTH
+    )
+    os.environ["TEST_FRONTEND_WINDOW_HEIGHT"] = str(
+        frontend_test_settings.TEST_WINDOW_HEIGHT
+    )
     os.environ["TEST_FRONTEND_THEME_MODE"] = frontend_test_settings.TEST_THEME_MODE
 
     from frontend.flet_app import main

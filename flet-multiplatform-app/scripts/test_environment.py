@@ -49,13 +49,14 @@ class TestEnvironment:
             data_type=test_type,
             count=self.get_data_count(test_type),
             optimize=True,
-            rules=rules
+            rules=rules,
         )
 
         # データをファイルに保存
         data_path = self.data_dir / f"test_data_{test_type}.json"
         with open(data_path, "w") as f:
             import json
+
             json.dump(data, f, indent=2)
 
     def get_validation_rules(self, test_type: str) -> Dict[str, List[Dict[str, Any]]]:
@@ -71,25 +72,22 @@ class TestEnvironment:
             return {
                 "email": [
                     {"type": "required"},
-                    {"type": "pattern", "pattern": r"^[^@]+@[^@]+\.[^@]+$"}
+                    {"type": "pattern", "pattern": r"^[^@]+@[^@]+\.[^@]+$"},
                 ],
                 "username": [
                     {"type": "required"},
                     {"type": "min_length", "length": 3},
-                    {"type": "max_length", "length": 50}
-                ]
+                    {"type": "max_length", "length": 50},
+                ],
             }
         elif test_type == "integration":
             return {
-                "owner_id": [
-                    {"type": "required"},
-                    {"type": "unique"}
-                ],
+                "owner_id": [{"type": "required"}, {"type": "unique"}],
                 "title": [
                     {"type": "required"},
                     {"type": "min_length", "length": 1},
-                    {"type": "max_length", "length": 100}
-                ]
+                    {"type": "max_length", "length": 100},
+                ],
             }
         return {}
 
@@ -126,6 +124,7 @@ class TestEnvironment:
         settings_path = self.test_dir / f"test_settings_{test_type}.json"
         with open(settings_path, "w") as f:
             import json
+
             json.dump(settings.dict(), f, indent=2)
 
     def setup_database(self):

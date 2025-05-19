@@ -1,4 +1,9 @@
-from flet import NavigationRail, NavigationRailDestination, NavigationRailLabelType, icons
+from flet import (
+    NavigationRail,
+    NavigationRailDestination,
+    NavigationRailLabelType,
+    icons,
+)
 
 
 class SideNav:

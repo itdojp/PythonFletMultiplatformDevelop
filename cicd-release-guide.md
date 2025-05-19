@@ -64,35 +64,35 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov black isort
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
-    
+
     - name: Lint with flake8
       run: |
         flake8 app tests --count --max-complexity=10 --max-line-length=100 --statistics
-    
+
     - name: Check code formatting with black
       run: |
         black --check app tests
-    
+
     - name: Check import order with isort
       run: |
         isort --check-only --profile black app tests
-    
+
     - name: Run tests and generate coverage report
       run: |
         pytest --cov=app --cov-report=xml
-    
+
     - name: Upload coverage report
       uses: codecov/codecov-action@v3
       with:
@@ -161,7 +161,7 @@ pipeline {
             image 'python:3.10-slim'
         }
     }
-    
+
     stages {
         stage('Setup') {
             steps {
@@ -171,7 +171,7 @@ pipeline {
                 sh 'pip install -r requirements-dev.txt'
             }
         }
-        
+
         stage('Lint') {
             steps {
                 sh 'flake8 app tests --count --max-complexity=10 --max-line-length=100 --statistics'
@@ -179,7 +179,7 @@ pipeline {
                 sh 'isort --check-only --profile black app tests'
             }
         }
-        
+
         stage('Test') {
             steps {
                 sh 'pytest --cov=app --cov-report=xml'
@@ -191,7 +191,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Build') {
             steps {
                 sh 'pip install flet'
@@ -227,28 +227,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flet
         pip install -r requirements.txt
-    
+
     - name: Build Web app
       run: |
         flet build web --project-name ${{ github.event.repository.name }}
-    
+
     - name: Upload Web build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: web-build
         path: build/web/
-    
+
     - name: Deploy to Firebase Hosting
       uses: FirebaseExtended/action-hosting-deploy@v0
       with:
@@ -261,28 +261,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Java
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
         java-version: '11'
-    
+
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.x'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flet
         pip install -r requirements.txt
-    
+
     - name: Build Android APK
       run: |
         flet build apk --release
-    
+
     - name: Sign APK
       uses: r0adkll/sign-android-release@v1
       with:
@@ -291,13 +291,13 @@ jobs:
         alias: ${{ secrets.KEY_ALIAS }}
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
-      
+
     - name: Upload APK artifact
       uses: actions/upload-artifact@v3
       with:
         name: android-apk
         path: build/app/outputs/flutter-apk/app-release-signed.apk
-    
+
     - name: Upload to Google Play
       uses: r0adkll/upload-google-play@v1
       with:
@@ -311,39 +311,39 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.x'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flet
         pip install -r requirements.txt
-    
+
     - name: Build iOS IPA
       run: |
         flet build ipa --release
-    
+
     - name: Install Apple Certificate
       uses: apple-actions/import-codesign-certs@v1
       with:
         p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
         p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
-    
+
     - name: Upload IPA artifact
       uses: actions/upload-artifact@v3
       with:
         name: ios-ipa
         path: build/ios/ipa/
-    
+
     - name: Upload to App Store Connect
       uses: Apple-Actions/upload-testflight-build@master
       with:
@@ -382,24 +382,24 @@ stages:
       inputs:
         versionSpec: '$(pythonVersion)'
         addToPath: true
-    
+
     - script: |
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov black isort
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
       displayName: 'Install dependencies'
-    
+
     - script: |
         flake8 app tests
         black --check app tests
         isort --check-only --profile black app tests
       displayName: 'Run lint checks'
-    
+
     - script: |
         pytest --cov=app --cov-report=xml
       displayName: 'Run tests'
-    
+
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: Cobertura
@@ -415,18 +415,18 @@ stages:
       inputs:
         versionSpec: '$(pythonVersion)'
         addToPath: true
-    
+
     - script: |
         pip install flet
         pip install -r requirements.txt
         flet build web --project-name $(projectName)
       displayName: 'Build Web app'
-    
+
     - task: PublishBuildArtifacts@1
       inputs:
         pathtoPublish: 'build/web'
         artifactName: 'web-build'
-    
+
     - task: AzureStaticWebApp@0
       inputs:
         app_location: 'build/web'
@@ -447,23 +447,23 @@ stages:
         versionSpec: '11'
         jdkArchitectureOption: 'x64'
         jdkSourceOption: 'PreInstalled'
-    
+
     - task: FlutterInstall@0
       inputs:
         channel: 'stable'
         version: 'latest'
-    
+
     - task: UsePythonVersion@0
       inputs:
         versionSpec: '$(pythonVersion)'
         addToPath: true
-    
+
     - script: |
         pip install flet
         pip install -r requirements.txt
         flet build apk --release
       displayName: 'Build Android APK'
-    
+
     - task: PublishBuildArtifacts@1
       inputs:
         pathtoPublish: 'build/app/outputs/flutter-apk'
@@ -477,18 +477,18 @@ stages:
       inputs:
         versionSpec: '$(pythonVersion)'
         addToPath: true
-    
+
     - task: FlutterInstall@0
       inputs:
         channel: 'stable'
         version: 'latest'
-    
+
     - script: |
         pip install flet
         pip install -r requirements.txt
         flet build ipa --release
       displayName: 'Build iOS IPA'
-    
+
     - task: PublishBuildArtifacts@1
       inputs:
         pathtoPublish: 'build/ios/ipa'
@@ -524,7 +524,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='マルチプラットフォームビルドスクリプト')
     parser.add_argument('--version', help='アプリのバージョン', required=True)
     parser.add_argument('--build-number', help='ビルド番号', required=True)
-    parser.add_argument('--platforms', help='ビルドするプラットフォーム (comma separated)', 
+    parser.add_argument('--platforms', help='ビルドするプラットフォーム (comma separated)',
                         default='web,android,ios,windows,macos,linux')
     parser.add_argument('--release', action='store_true', help='リリースビルドを作成')
     return parser.parse_args()
@@ -534,7 +534,7 @@ def setup_environment():
     # 依存関係のインストール
     run_command(['pip', 'install', '-r', 'requirements.txt'])
     run_command(['pip', 'install', 'flet'])
-    
+
     # Flutter SDKの確認
     try:
         run_command(['flutter', '--version'])
@@ -545,26 +545,26 @@ def setup_environment():
 def build_web(version, build_number, release=False):
     """Webアプリをビルド"""
     print("\n=== Webアプリのビルド開始 ===")
-    
+
     cmd = [
         'flet',
         'build',
         'web',
         '--project-name', 'flet-app',
     ]
-    
+
     if release:
         cmd.append('--release')
-    
+
     # PWA設定
     cmd.extend(['--web-renderer', 'canvaskit', '--pwa'])
-    
+
     # バージョン情報
     cmd.extend(['--version', version, '--build-number', build_number])
-    
+
     run_command(cmd)
     print("=== Webアプリのビルド完了 ===")
-    
+
     # ビルド成果物を確認
     web_output = os.path.join('build', 'web')
     if os.path.exists(web_output):
@@ -575,26 +575,26 @@ def build_web(version, build_number, release=False):
 def build_android(version, build_number, release=False):
     """Androidアプリをビルド"""
     print("\n=== Androidアプリのビルド開始 ===")
-    
+
     cmd = [
         'flet',
         'build',
         'apk',
         '--project-name', 'flet-app',
     ]
-    
+
     if release:
         cmd.append('--release')
-    
+
     # アプリID設定
     cmd.extend(['--bundle-identifier', 'com.example.fletapp'])
-    
+
     # バージョン情報
     cmd.extend(['--version', version, '--build-number', build_number])
-    
+
     run_command(cmd)
     print("=== Androidアプリのビルド完了 ===")
-    
+
     # ビルド成果物を確認
     apk_output = os.path.join('build', 'app', 'outputs', 'flutter-apk')
     if os.path.exists(apk_output):
@@ -607,28 +607,28 @@ def build_ios(version, build_number, release=False):
     if platform.system() != 'Darwin':
         print("iOSビルドはmacOSでのみ可能です。スキップします。")
         return
-    
+
     print("\n=== iOSアプリのビルド開始 ===")
-    
+
     cmd = [
         'flet',
         'build',
         'ipa',
         '--project-name', 'flet-app',
     ]
-    
+
     if release:
         cmd.append('--release')
-    
+
     # アプリID設定
     cmd.extend(['--bundle-identifier', 'com.example.fletapp'])
-    
+
     # バージョン情報
     cmd.extend(['--version', version, '--build-number', build_number])
-    
+
     run_command(cmd)
     print("=== iOSアプリのビルド完了 ===")
-    
+
     # ビルド成果物を確認
     ipa_output = os.path.join('build', 'ios', 'ipa')
     if os.path.exists(ipa_output):
@@ -641,25 +641,25 @@ def build_windows(version, build_number, release=False):
     if platform.system() != 'Windows':
         print("Windowsビルドは、Windows環境でのみ可能です。スキップします。")
         return
-    
+
     print("\n=== Windowsアプリのビルド開始 ===")
-    
+
     cmd = [
         'flet',
         'build',
         'windows',
         '--project-name', 'flet-app',
     ]
-    
+
     if release:
         cmd.append('--release')
-    
+
     # バージョン情報
     cmd.extend(['--version', version, '--build-number', build_number])
-    
+
     run_command(cmd)
     print("=== Windowsアプリのビルド完了 ===")
-    
+
     # ビルド成果物を確認
     windows_output = os.path.join('build', 'windows')
     if os.path.exists(windows_output):
@@ -672,28 +672,28 @@ def build_macos(version, build_number, release=False):
     if platform.system() != 'Darwin':
         print("macOSビルドは、macOS環境でのみ可能です。スキップします。")
         return
-    
+
     print("\n=== macOSアプリのビルド開始 ===")
-    
+
     cmd = [
         'flet',
         'build',
         'macos',
         '--project-name', 'flet-app',
     ]
-    
+
     if release:
         cmd.append('--release')
-    
+
     # アプリID設定
     cmd.extend(['--bundle-identifier', 'com.example.fletapp'])
-    
+
     # バージョン情報
     cmd.extend(['--version', version, '--build-number', build_number])
-    
+
     run_command(cmd)
     print("=== macOSアプリのビルド完了 ===")
-    
+
     # ビルド成果物を確認
     macos_output = os.path.join('build', 'macos')
     if os.path.exists(macos_output):
@@ -706,25 +706,25 @@ def build_linux(version, build_number, release=False):
     if platform.system() != 'Linux':
         print("Linuxビルドは、Linux環境でのみ可能です。スキップします。")
         return
-    
+
     print("\n=== Linuxアプリのビルド開始 ===")
-    
+
     cmd = [
         'flet',
         'build',
         'linux',
         '--project-name', 'flet-app',
     ]
-    
+
     if release:
         cmd.append('--release')
-    
+
     # バージョン情報
     cmd.extend(['--version', version, '--build-number', build_number])
-    
+
     run_command(cmd)
     print("=== Linuxアプリのビルド完了 ===")
-    
+
     # ビルド成果物を確認
     linux_output = os.path.join('build', 'linux')
     if os.path.exists(linux_output):
@@ -736,34 +736,34 @@ def main():
     """メイン関数"""
     args = parse_args()
     platforms = args.platforms.split(',')
-    
+
     print(f"ビルドバージョン: {args.version}")
     print(f"ビルド番号: {args.build_number}")
     print(f"ビルド対象プラットフォーム: {platforms}")
     print(f"リリースビルド: {'はい' if args.release else 'いいえ'}")
-    
+
     # 環境セットアップ
     setup_environment()
-    
+
     # 各プラットフォームのビルド
     if 'web' in platforms:
         build_web(args.version, args.build_number, args.release)
-    
+
     if 'android' in platforms:
         build_android(args.version, args.build_number, args.release)
-    
+
     if 'ios' in platforms:
         build_ios(args.version, args.build_number, args.release)
-    
+
     if 'windows' in platforms:
         build_windows(args.version, args.build_number, args.release)
-    
+
     if 'macos' in platforms:
         build_macos(args.version, args.build_number, args.release)
-    
+
     if 'linux' in platforms:
         build_linux(args.version, args.build_number, args.release)
-    
+
     print("\n=== 全ビルド完了 ===")
 
 if __name__ == "__main__":
@@ -897,122 +897,122 @@ def setup_environment():
 def run_unit_tests(args):
     """ユニットテストを実行"""
     print("\n=== ユニットテスト実行 ===")
-    
+
     cmd = ['pytest', 'tests/unit', '-v']
-    
+
     if args.coverage:
         cmd.extend(['--cov=app', '--cov-report=xml:test-reports/coverage.xml',
                    '--cov-report=html:test-reports/coverage_html'])
-    
+
     if args.fail_fast:
         cmd.append('-xvs')
-    
+
     cmd.extend(['--junitxml', f'{args.report_dir}/unit-results.xml'])
-    
+
     result = run_command(cmd)
     print(result.stdout)
     if result.returncode != 0:
         print(f"警告: ユニットテストが失敗しました。\n{result.stderr}")
-    
+
     return result.returncode
 
 def run_integration_tests(args):
     """インテグレーションテストを実行"""
     print("\n=== インテグレーションテスト実行 ===")
-    
+
     cmd = ['pytest', 'tests/integration', '-v']
-    
+
     if args.coverage:
         cmd.extend(['--cov=app', '--cov-report=xml:test-reports/coverage-integration.xml',
                    '--cov-report=html:test-reports/coverage_integration_html'])
-    
+
     if args.fail_fast:
         cmd.append('-xvs')
-    
+
     cmd.extend(['--junitxml', f'{args.report_dir}/integration-results.xml'])
-    
+
     result = run_command(cmd)
     print(result.stdout)
     if result.returncode != 0:
         print(f"警告: インテグレーションテストが失敗しました。\n{result.stderr}")
-    
+
     return result.returncode
 
 def run_ui_tests(args):
     """UIテストを実行"""
     print("\n=== UIテスト実行 ===")
-    
+
     cmd = ['pytest', 'tests/ui', '-v']
-    
+
     if args.fail_fast:
         cmd.append('-xvs')
-    
+
     cmd.extend(['--junitxml', f'{args.report_dir}/ui-results.xml'])
-    
+
     result = run_command(cmd)
     print(result.stdout)
     if result.returncode != 0:
         print(f"警告: UIテストが失敗しました。\n{result.stderr}")
-    
+
     return result.returncode
 
 def generate_test_summary(args, results):
     """テスト結果のサマリーを生成"""
     print("\n=== テスト結果サマリー ===")
-    
+
     summary = {
         "timestamp": datetime.now().isoformat(),
         "results": results,
         "success": all(code == 0 for code in results.values())
     }
-    
+
     # サマリーをJSONファイルに保存
     os.makedirs(args.report_dir, exist_ok=True)
     with open(f"{args.report_dir}/test-summary.json", "w") as f:
         json.dump(summary, f, indent=2)
-    
+
     # コンソールに表示
     for test_type, result in results.items():
         status = "成功" if result == 0 else "失敗"
         print(f"{test_type}: {status}")
-    
+
     print(f"\n全体結果: {'成功' if summary['success'] else '失敗'}")
     return summary['success']
 
 def main():
     """メイン関数"""
     args = parse_args()
-    
+
     # 出力ディレクトリを作成
     os.makedirs(args.report_dir, exist_ok=True)
-    
+
     # 環境セットアップ
     setup_environment()
-    
+
     results = {}
-    
+
     # テスト実行
     if args.test_type in ['unit', 'all']:
         results['unit'] = run_unit_tests(args)
         if args.fail_fast and results['unit'] != 0:
             generate_test_summary(args, results)
             sys.exit(results['unit'])
-    
+
     if args.test_type in ['integration', 'all']:
         results['integration'] = run_integration_tests(args)
         if args.fail_fast and results['integration'] != 0:
             generate_test_summary(args, results)
             sys.exit(results['integration'])
-    
+
     if args.test_type in ['ui', 'all']:
         results['ui'] = run_ui_tests(args)
         if args.fail_fast and results['ui'] != 0:
             generate_test_summary(args, results)
             sys.exit(results['ui'])
-    
+
     # 結果サマリー
     success = generate_test_summary(args, results)
-    
+
     # 終了コード
     if not success:
         sys.exit(1)
@@ -1038,25 +1038,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Install lint dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 black isort
-    
+
     - name: Lint with flake8
       run: |
         flake8 app tests
-    
+
     - name: Check formatting with black
       run: |
         black --check app tests
-    
+
     - name: Check imports with isort
       run: |
         isort --check-only --profile black app tests
@@ -1067,31 +1067,31 @@ jobs:
     strategy:
       matrix:
         python-version: [3.9, 3.10]
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    
+
     - name: Run unit tests
       run: |
         python scripts/run_tests.py --test-type unit --coverage --report-dir test-reports
-    
+
     - name: Upload test results
       uses: actions/upload-artifact@v3
       with:
         name: unit-test-results-${{ matrix.python-version }}
         path: test-reports/
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
@@ -1100,25 +1100,25 @@ jobs:
   integration-tests:
     runs-on: ubuntu-latest
     needs: lint
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    
+
     - name: Run integration tests
       run: |
         python scripts/run_tests.py --test-type integration --report-dir test-reports
-    
+
     - name: Upload test results
       uses: actions/upload-artifact@v3
       with:
@@ -1128,25 +1128,25 @@ jobs:
   ui-tests:
     runs-on: ubuntu-latest
     needs: lint
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    
+
     - name: Run UI tests
       run: |
         python scripts/run_tests.py --test-type ui --report-dir test-reports
-    
+
     - name: Upload test results
       uses: actions/upload-artifact@v3
       with:
@@ -1157,15 +1157,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests, ui-tests]
     if: always()
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Download all test results
       uses: actions/download-artifact@v3
       with:
         path: artifacts
-    
+
     - name: Generate test report
       run: |
         echo "# Test Results Summary" > report.md
@@ -1178,7 +1178,7 @@ jobs:
         echo "" >> report.md
         echo "## UI Tests" >> report.md
         cat artifacts/ui-test-results/test-summary.json >> report.md
-    
+
     - name: Upload combined report
       uses: actions/upload-artifact@v3
       with:
@@ -1230,13 +1230,13 @@ def setup_environment():
 def run_flake8(args):
     """flake8を実行"""
     print("\n=== flake8実行 ===")
-    
+
     cmd = ['flake8', 'app', 'tests', '--count', '--max-complexity=10', '--max-line-length=100',
            '--statistics', f'--output-file={args.report_dir}/flake8.txt', '--tee']
-    
+
     result = run_command(cmd)
     print(result.stdout)
-    
+
     # エラー数をカウント
     error_count = 0
     if result.returncode != 0:
@@ -1248,7 +1248,7 @@ def run_flake8(args):
                     error_count = int(last_line)
         except:
             error_count = -1  # カウント失敗
-    
+
     return {
         "tool": "flake8",
         "success": result.returncode == 0,
@@ -1259,21 +1259,21 @@ def run_flake8(args):
 def run_black(args):
     """blackを実行"""
     print("\n=== black実行 ===")
-    
+
     cmd = ['black', '--check', 'app', 'tests']
     if args.fix:
         # --checkフラグを削除して実際に修正
         cmd.remove('--check')
-    
+
     cmd.extend(['--verbose'])
-    
+
     result = run_command(cmd)
     print(result.stdout)
-    
+
     # 出力をファイルに保存
     with open(f"{args.report_dir}/black.txt", "w") as f:
         f.write(result.stdout)
-    
+
     return {
         "tool": "black",
         "success": result.returncode == 0,
@@ -1284,21 +1284,21 @@ def run_black(args):
 def run_isort(args):
     """isortを実行"""
     print("\n=== isort実行 ===")
-    
+
     cmd = ['isort', '--check-only', '--profile', 'black', 'app', 'tests']
     if args.fix:
         # --check-onlyフラグを削除して実際に修正
         cmd.remove('--check-only')
-    
+
     cmd.extend(['--verbose'])
-    
+
     result = run_command(cmd)
     print(result.stdout)
-    
+
     # 出力をファイルに保存
     with open(f"{args.report_dir}/isort.txt", "w") as f:
         f.write(result.stdout)
-    
+
     return {
         "tool": "isort",
         "success": result.returncode == 0,
@@ -1309,12 +1309,12 @@ def run_isort(args):
 def run_pylint(args):
     """pylintを実行"""
     print("\n=== pylint実行 ===")
-    
+
     cmd = ['pylint', 'app', '--output-format=text', f'--output={args.report_dir}/pylint.txt']
-    
+
     result = run_command(cmd)
     rating = "?"
-    
+
     # 評価を抽出
     for line in result.stdout.split('\n'):
         if "Your code has been rated at" in line:
@@ -1322,9 +1322,9 @@ def run_pylint(args):
                 rating = line.split("Your code has been rated at ")[1].split('/')[0]
             except:
                 pass
-    
+
     print(f"Pylint評価: {rating}/10")
-    
+
     return {
         "tool": "pylint",
         "success": result.returncode == 0,
@@ -1335,15 +1335,15 @@ def run_pylint(args):
 def run_bandit(args):
     """bandit（セキュリティチェック）を実行"""
     print("\n=== bandit実行 ===")
-    
+
     cmd = ['bandit', '-r', 'app', '-f', 'json', '-o', f'{args.report_dir}/bandit.json']
-    
+
     result = run_command(cmd)
-    
+
     # テキスト形式の出力も保存
     with open(f"{args.report_dir}/bandit.txt", "w") as f:
         f.write(result.stdout)
-    
+
     issues_count = 0
     try:
         # JSONから問題数を抽出
@@ -1353,10 +1353,10 @@ def run_bandit(args):
                 issues_count = len(data.get("results", []))
     except:
         pass
-    
+
     success = result.returncode == 0
     print(f"セキュリティの問題: {issues_count}件")
-    
+
     return {
         "tool": "bandit",
         "success": success,
@@ -1367,16 +1367,16 @@ def run_bandit(args):
 def run_mypy(args):
     """mypy（型チェック）を実行"""
     print("\n=== mypy実行 ===")
-    
+
     cmd = ['mypy', 'app', '--pretty']
-    
+
     result = run_command(cmd)
     print(result.stdout)
-    
+
     # 出力をファイルに保存
     with open(f"{args.report_dir}/mypy.txt", "w") as f:
         f.write(result.stdout)
-    
+
     return {
         "tool": "mypy",
         "success": result.returncode == 0,
@@ -1386,63 +1386,63 @@ def run_mypy(args):
 def generate_quality_summary(args, results):
     """品質チェック結果のサマリーを生成"""
     print("\n=== コード品質チェック結果サマリー ===")
-    
+
     summary = {
         "timestamp": datetime.now().isoformat(),
         "results": results,
         "success": all(r.get("success", False) for r in results)
     }
-    
+
     # サマリーをJSONファイルに保存
     with open(f"{args.report_dir}/quality-summary.json", "w") as f:
         json.dump(summary, f, indent=2)
-    
+
     # Markdown形式のレポートを生成
     with open(f"{args.report_dir}/quality-report.md", "w") as f:
         f.write("# コード品質レポート\n\n")
         f.write(f"生成日時: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
-        
+
         f.write("## サマリー\n\n")
         f.write(f"全体結果: {'成功' if summary['success'] else '失敗'}\n\n")
-        
+
         f.write("| ツール | 結果 | 詳細 |\n")
         f.write("|--------|------|------|\n")
-        
+
         for result in results:
             tool = result["tool"]
             success = "✅" if result.get("success", False) else "❌"
             details = ""
-            
+
             if tool == "flake8":
                 details = f"エラー数: {result.get('error_count', 0)}"
             elif tool == "pylint":
                 details = f"評価: {result.get('rating', '?')}/10"
             elif tool == "bandit":
                 details = f"セキュリティの問題: {result.get('issues_count', 0)}件"
-            
+
             f.write(f"| {tool} | {success} | {details} |\n")
-    
+
     # コンソールに表示
     for result in results:
         tool = result["tool"]
         success = "成功" if result.get("success", False) else "失敗"
         print(f"{tool}: {success}")
-    
+
     print(f"\n全体結果: {'成功' if summary['success'] else '失敗'}")
     return summary['success']
 
 def main():
     """メイン関数"""
     args = parse_args()
-    
+
     # 出力ディレクトリを作成
     os.makedirs(args.report_dir, exist_ok=True)
-    
+
     # 環境セットアップ
     setup_environment()
-    
+
     results = []
-    
+
     # 各ツールを実行
     results.append(run_flake8(args))
     results.append(run_black(args))
@@ -1450,10 +1450,10 @@ def main():
     results.append(run_pylint(args))
     results.append(run_bandit(args))
     results.append(run_mypy(args))
-    
+
     # 結果サマリー
     success = generate_quality_summary(args, results)
-    
+
     # 終了コード
     if args.fail_on_error and not success:
         sys.exit(1)
@@ -1477,27 +1477,27 @@ on:
 jobs:
   sonarqube:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    
+
     - name: Run tests with coverage
       run: |
         pytest --cov=app --cov-report=xml
-    
+
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@master
       env:
@@ -1524,7 +1524,7 @@ import stat
 def create_pre_commit_hook():
     """pre-commitフックを作成"""
     hook_path = os.path.join('.git', 'hooks', 'pre-commit')
-    
+
     # フックの内容
     hook_content = """#!/bin/bash
 set -e
@@ -1549,20 +1549,20 @@ python -m bandit -r app
 
 echo "All checks passed!"
 """
-    
+
     # フックファイルを作成
     with open(hook_path, 'w') as f:
         f.write(hook_content)
-    
+
     # 実行権限を付与
     os.chmod(hook_path, os.stat(hook_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    
+
     print(f"pre-commitフックを作成しました: {hook_path}")
 
 def create_pre_push_hook():
     """pre-pushフックを作成"""
     hook_path = os.path.join('.git', 'hooks', 'pre-push')
-    
+
     # フックの内容
     hook_content = """#!/bin/bash
 set -e
@@ -1575,14 +1575,14 @@ python -m pytest
 
 echo "All tests passed!"
 """
-    
+
     # フックファイルを作成
     with open(hook_path, 'w') as f:
         f.write(hook_content)
-    
+
     # 実行権限を付与
     os.chmod(hook_path, os.stat(hook_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-    
+
     print(f"pre-pushフックを作成しました: {hook_path}")
 
 def setup_hooks():
@@ -1591,16 +1591,16 @@ def setup_hooks():
     if not os.path.isdir('.git'):
         print("エラー: .gitディレクトリが見つかりません。Gitリポジトリのルートで実行してください。")
         sys.exit(1)
-    
+
     # hooksディレクトリが存在することを確認
     hooks_dir = os.path.join('.git', 'hooks')
     if not os.path.isdir(hooks_dir):
         os.makedirs(hooks_dir)
-    
+
     # 各フックを作成
     create_pre_commit_hook()
     create_pre_push_hook()
-    
+
     print("\nGitフックのセットアップが完了しました！")
     print("これらのフックは、コミット時やプッシュ時に自動的に実行されます。")
 
@@ -1635,28 +1635,28 @@ def run_command(command):
 def parse_args():
     """コマンドライン引数をパース"""
     parser = argparse.ArgumentParser(description='バージョン管理スクリプト')
-    
+
     subparsers = parser.add_subparsers(dest='command', help='コマンド')
-    
+
     # 現在のバージョンを表示
     current_parser = subparsers.add_parser('current', help='現在のバージョンを表示')
-    
+
     # バージョンを更新
     bump_parser = subparsers.add_parser('bump', help='バージョンを更新')
-    bump_parser.add_argument('type', choices=['major', 'minor', 'patch'], 
+    bump_parser.add_argument('type', choices=['major', 'minor', 'patch'],
                           help='更新するバージョン部分')
-    bump_parser.add_argument('--dry-run', action='store_true', 
+    bump_parser.add_argument('--dry-run', action='store_true',
                           help='実際には更新せず、結果だけ表示')
-    
+
     # リリースを作成
     release_parser = subparsers.add_parser('release', help='リリースを作成')
-    release_parser.add_argument('--dry-run', action='store_true', 
+    release_parser.add_argument('--dry-run', action='store_true',
                              help='実際には更新せず、結果だけ表示')
-    
+
     # チェンジログを生成/更新
     changelog_parser = subparsers.add_parser('changelog', help='チェンジログを生成/更新')
     changelog_parser.add_argument('--since', help='指定したタグ以降のコミットを含める')
-    
+
     return parser.parse_args()
 
 def get_current_version():
@@ -1664,10 +1664,10 @@ def get_current_version():
     if not os.path.exists(VERSION_FILE):
         print(f"エラー: バージョンファイル {VERSION_FILE} が見つかりません")
         return None
-    
+
     with open(VERSION_FILE, 'r') as f:
         content = f.read()
-    
+
     match = re.search(r'VERSION\s*=\s*[\'"](.+)[\'"]', content)
     if match:
         return match.group(1)
@@ -1680,17 +1680,17 @@ def update_version_file(new_version, dry_run=False):
     if not os.path.exists(VERSION_FILE):
         print(f"エラー: バージョンファイル {VERSION_FILE} が見つかりません")
         return False
-    
+
     with open(VERSION_FILE, 'r') as f:
         content = f.read()
-    
+
     # バージョン番号を更新
     new_content = re.sub(
         r'(VERSION\s*=\s*[\'"]).+([\'"]\s*)',
         r'\g<1>{}\g<2>'.format(new_version),
         content
     )
-    
+
     # ビルド日時も更新
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     new_content = re.sub(
@@ -1698,16 +1698,16 @@ def update_version_file(new_version, dry_run=False):
         r'\g<1>{}\g<2>'.format(now),
         new_content
     )
-    
+
     if dry_run:
         print(f"[DRY-RUN] バージョンを {new_version} に更新します")
         print(f"[DRY-RUN] ビルド日時を {now} に更新します")
         return True
-    
+
     # ファイルに書き込み
     with open(VERSION_FILE, 'w') as f:
         f.write(new_content)
-    
+
     print(f"バージョンを {new_version} に更新しました")
     print(f"ビルド日時を {now} に更新しました")
     return True
@@ -1717,14 +1717,14 @@ def bump_version(version_type, dry_run=False):
     current = get_current_version()
     if not current:
         return False
-    
+
     # バージョン番号を分解
     try:
         major, minor, patch = map(int, current.split('.'))
     except ValueError:
         print(f"エラー: 現在のバージョン {current} が semantic versioning 形式ではありません")
         return False
-    
+
     # バージョンタイプに応じて更新
     if version_type == 'major':
         new_version = f"{major + 1}.0.0"
@@ -1735,48 +1735,48 @@ def bump_version(version_type, dry_run=False):
     else:
         print(f"エラー: 不明なバージョンタイプ: {version_type}")
         return False
-    
+
     # バージョンファイルを更新
     if not update_version_file(new_version, dry_run):
         return False
-    
+
     return True
 
 def create_git_tag(version, dry_run=False):
     """Gitタグを作成"""
     tag_name = f"v{version}"
-    
+
     # タグが既に存在するか確認
     result = run_command(f"git tag -l {tag_name}")
     if tag_name in result.stdout:
         print(f"エラー: タグ {tag_name} は既に存在します")
         return False
-    
+
     # 変更をコミット
     if not dry_run:
         # まず変更されたファイルを追加
         run_command(f"git add {VERSION_FILE}")
-        
+
         # チェンジログが更新されていれば追加
         if os.path.exists(CHANGELOG_FILE):
             run_command(f"git add {CHANGELOG_FILE}")
-        
+
         # バージョン更新をコミット
         commit_result = run_command(f'git commit -m "バージョン {version} にアップデート"')
         if commit_result.returncode != 0:
             print(f"エラー: コミットに失敗しました: {commit_result.stderr}")
             return False
-        
+
         # タグを作成
         tag_result = run_command(f'git tag -a {tag_name} -m "バージョン {version}"')
         if tag_result.returncode != 0:
             print(f"エラー: タグ作成に失敗しました: {tag_result.stderr}")
             return False
-        
+
         print(f"タグ {tag_name} を作成しました")
     else:
         print(f"[DRY-RUN] タグ {tag_name} を作成します")
-    
+
     return True
 
 def generate_changelog(since=None):
@@ -1784,7 +1784,7 @@ def generate_changelog(since=None):
     current = get_current_version()
     if not current:
         return False
-    
+
     # 変更履歴を収集
     if since:
         result = run_command(f"git log {since}..HEAD --pretty=format:'%h %s' --no-merges")
@@ -1792,59 +1792,59 @@ def generate_changelog(since=None):
         # 既存のタグを確認
         tags_result = run_command("git tag -l 'v*' --sort=-v:refname")
         tags = tags_result.stdout.strip().split('\n')
-        
+
         if tags and tags[0]:
             # 最新のタグからの変更を収集
             result = run_command(f"git log {tags[0]}..HEAD --pretty=format:'%h %s' --no-merges")
         else:
             # タグがなければすべての履歴を収集
             result = run_command("git log --pretty=format:'%h %s' --no-merges")
-    
+
     commits = result.stdout.strip().split('\n')
-    
+
     # コミットを分類
     features = []
     fixes = []
     others = []
-    
+
     for commit in commits:
         if not commit:
             continue
-        
+
         if "fix:" in commit.lower() or "修正:" in commit:
             fixes.append(commit)
         elif "feat:" in commit.lower() or "機能:" in commit:
             features.append(commit)
         else:
             others.append(commit)
-    
+
     # チェンジログを作成/更新
     now = datetime.now().strftime("%Y-%m-%d")
     changelog_entry = f"## {current} ({now})\n\n"
-    
+
     if features:
         changelog_entry += "### 新機能\n\n"
         for feat in features:
             changelog_entry += f"- {feat}\n"
         changelog_entry += "\n"
-    
+
     if fixes:
         changelog_entry += "### バグ修正\n\n"
         for fix in fixes:
             changelog_entry += f"- {fix}\n"
         changelog_entry += "\n"
-    
+
     if others:
         changelog_entry += "### その他の変更\n\n"
         for other in others:
             changelog_entry += f"- {other}\n"
         changelog_entry += "\n"
-    
+
     # ファイルを更新
     if os.path.exists(CHANGELOG_FILE):
         with open(CHANGELOG_FILE, 'r') as f:
             content = f.read()
-        
+
         # ファイルの先頭に追加
         if content.startswith("# "):
             # ヘッダーがある場合は、ヘッダーの後に追加
@@ -1856,10 +1856,10 @@ def generate_changelog(since=None):
     else:
         # ファイルが存在しない場合は新規作成
         new_content = "# 変更履歴\n\n" + changelog_entry
-    
+
     with open(CHANGELOG_FILE, 'w') as f:
         f.write(new_content)
-    
+
     print(f"チェンジログを更新しました: {CHANGELOG_FILE}")
     return True
 
@@ -1868,60 +1868,60 @@ def create_release(dry_run=False):
     current = get_current_version()
     if not current:
         return False
-    
+
     # チェンジログを生成
     if not generate_changelog():
         print("警告: チェンジログの生成に失敗しました")
-    
+
     # Gitタグを作成
     if not create_git_tag(current, dry_run):
         return False
-    
+
     if not dry_run:
         # タグをリモートにプッシュ
         push_result = run_command("git push --follow-tags")
         if push_result.returncode != 0:
             print(f"エラー: プッシュに失敗しました: {push_result.stderr}")
             return False
-        
+
         print("変更をリモートにプッシュしました")
     else:
         print("[DRY-RUN] 変更をリモートにプッシュします")
-    
+
     return True
 
 def main():
     """メイン関数"""
     args = parse_args()
-    
+
     if args.command == 'current':
         # 現在のバージョンを表示
         current = get_current_version()
         if current:
             print(f"現在のバージョン: {current}")
         return current is not None
-    
+
     elif args.command == 'bump':
         # バージョンを更新
         if bump_version(args.type, args.dry_run):
             print(f"{args.type} バージョンの更新が完了しました")
             return True
         return False
-    
+
     elif args.command == 'release':
         # リリースを作成
         if create_release(args.dry_run):
             print("リリース作成が完了しました")
             return True
         return False
-    
+
     elif args.command == 'changelog':
         # チェンジログを生成/更新
         if generate_changelog(args.since):
             print("チェンジログの生成が完了しました")
             return True
         return False
-    
+
     else:
         print("コマンドを指定してください。ヘルプを表示するには -h を使用してください。")
         return False
@@ -2005,7 +2005,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Extract version from tag
       id: get_version
       run: |
@@ -2014,24 +2014,24 @@ jobs:
         # ビルド番号として日付とコミット短縮ハッシュを使用
         BUILD_NUMBER=$(date +%Y%m%d)$(git rev-parse --short HEAD)
         echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
-    
+
     - name: Set up Java
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
         java-version: '11'
-    
+
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.x'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flet
         pip install -r requirements.txt
-    
+
     - name: Build Android App Bundle
       run: |
         flet build appbundle \
@@ -2040,7 +2040,7 @@ jobs:
           --version ${{ steps.get_version.outputs.version }} \
           --build-number ${{ steps.get_version.outputs.build_number }} \
           --bundle-identifier com.example.fletapp
-    
+
     - name: Setup Google Play signing
       env:
         SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
@@ -2050,7 +2050,7 @@ jobs:
       run: |
         # Decode the base64 encoded key to a file
         echo $SIGNING_KEY_BASE64 | base64 --decode > keystore.jks
-        
+
         # 署名設定
         cat >> android/key.properties << EOF
         storePassword=$KEY_STORE_PASSWORD
@@ -2058,7 +2058,7 @@ jobs:
         keyAlias=$KEY_ALIAS
         storeFile=$(pwd)/keystore.jks
         EOF
-    
+
     - name: Sign App Bundle
       uses: r0adkll/sign-android-release@v1
       id: sign_app
@@ -2070,7 +2070,7 @@ jobs:
         keyPassword: ${{ secrets.KEY_PASSWORD }}
       env:
         BUILD_TOOLS_VERSION: "33.0.0"
-    
+
     - name: Upload to Google Play
       uses: r0adkll/upload-google-play@v1
       with:
@@ -2099,7 +2099,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Extract version from tag
       id: get_version
       run: |
@@ -2108,23 +2108,23 @@ jobs:
         # ビルド番号として日付とコミット短縮ハッシュを使用
         BUILD_NUMBER=$(date +%Y%m%d)$(git rev-parse --short HEAD)
         echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.7.x'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flet
         pip install -r requirements.txt
-    
+
     - name: Install Apple Certificate
       uses: apple-actions/import-codesign-certs@v1
       with:
@@ -2132,12 +2132,12 @@ jobs:
         p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
         keychain: build
         keychain-password: ${{ secrets.KEYCHAIN_PASSWORD }}
-    
+
     - name: Install provisioning profile
       run: |
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
         echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-    
+
     - name: Build iOS app
       run: |
         flet build ipa \
@@ -2146,7 +2146,7 @@ jobs:
           --version ${{ steps.get_version.outputs.version }} \
           --build-number ${{ steps.get_version.outputs.build_number }} \
           --bundle-identifier com.example.fletapp
-    
+
     - name: Upload to App Store Connect
       env:
         APP_STORE_CONNECT_USERNAME: ${{ secrets.APP_STORE_CONNECT_USERNAME }}
@@ -2155,7 +2155,7 @@ jobs:
         xcrun altool --upload-app --type ios --file build/ios/ipa/*.ipa \
           --username "$APP_STORE_CONNECT_USERNAME" \
           --password "$APP_STORE_CONNECT_PASSWORD"
-    
+
     # または App Store Connect APIを使用
     - name: Upload to App Store Connect API
       uses: Apple-Actions/upload-testflight-build@master
@@ -2182,7 +2182,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Extract version from tag
       id: get_version
       run: |
@@ -2191,18 +2191,18 @@ jobs:
         # ビルド番号として日付とコミット短縮ハッシュを使用
         BUILD_NUMBER=$(date +%Y%m%d)$(git rev-parse --short HEAD)
         echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flet
         pip install -r requirements.txt
-    
+
     - name: Build Web app
       run: |
         flet build web \
@@ -2211,7 +2211,7 @@ jobs:
           --pwa \
           --version ${{ steps.get_version.outputs.version }} \
           --build-number ${{ steps.get_version.outputs.build_number }}
-    
+
     # Firebase Hostingへのデプロイ
     - name: Deploy to Firebase Hosting
       uses: FirebaseExtended/action-hosting-deploy@v0
@@ -2243,36 +2243,36 @@ from getpass import getpass
 def parse_args():
     """コマンドライン引数のパース"""
     parser = argparse.ArgumentParser(description='CI/CDシークレット管理スクリプト')
-    
+
     subparsers = parser.add_subparsers(dest='command', help='コマンド')
-    
+
     # GitHubシークレットを設定
     github_parser = subparsers.add_parser('github', help='GitHub Actionsのシークレットを設定')
     github_parser.add_argument('--token', help='GitHubパーソナルアクセストークン')
     github_parser.add_argument('--repo', help='リポジトリ名（形式: owner/repo）')
-    
+
     # GitLabシークレットを設定
     gitlab_parser = subparsers.add_parser('gitlab', help='GitLab CIのシークレットを設定')
     gitlab_parser.add_argument('--token', help='GitLabパーソナルアクセストークン')
     gitlab_parser.add_argument('--project-id', help='GitLabプロジェクトID')
-    
+
     # キーストアを生成
     keystore_parser = subparsers.add_parser('generate-keystore', help='Androidキーストアを生成')
     keystore_parser.add_argument('--keystore-path', default='keystore.jks', help='出力キーストアパス')
-    
+
     # キーストアを暗号化
     encrypt_parser = subparsers.add_parser('encrypt-keystore', help='キーストアをBase64エンコード')
     encrypt_parser.add_argument('--keystore-path', default='keystore.jks', help='キーストアパス')
-    
+
     # プロビジョニングプロファイルを暗号化
     profile_parser = subparsers.add_parser('encrypt-profile', help='iOSプロビジョニングプロファイルをBase64エンコード')
     profile_parser.add_argument('--profile-path', required=True, help='プロビジョニングプロファイルパス')
-    
+
     # 環境ファイルを生成
     env_parser = subparsers.add_parser('generate-env', help='環境設定ファイルを生成')
     env_parser.add_argument('--env', choices=['dev', 'test', 'prod'], default='dev', help='環境')
     env_parser.add_argument('--output', default='.env', help='出力ファイルパス')
-    
+
     return parser.parse_args()
 
 def run_command(command):
@@ -2283,23 +2283,23 @@ def set_github_secrets(token, repo):
     """GitHub Actionsのシークレットを設定"""
     if not token:
         token = getpass("GitHubパーソナルアクセストークンを入力: ")
-    
+
     if not repo:
         repo = input("リポジトリ名を入力（形式: owner/repo）: ")
-    
+
     # シークレット名と値のペアを収集
     secrets = {}
     print("\nGitHub Actionsのシークレットを設定します。")
     print("各シークレットの値を入力してください。空白で終了します。")
-    
+
     while True:
         name = input("\nシークレット名（空白で終了）: ")
         if not name:
             break
-        
+
         value = getpass(f"{name}の値: ")
         secrets[name] = value
-    
+
     # シークレットを設定
     for name, value in secrets.items():
         # GitHub APIを使用してシークレットを設定
@@ -2313,44 +2313,44 @@ def set_github_secrets(token, repo):
             "key_id": "012345678901234567"
           }}'
         """
-        
+
         result = run_command(command)
         if result.returncode == 0:
             print(f"シークレット {name} を設定しました。")
         else:
             print(f"エラー: シークレット {name} の設定に失敗しました。")
             print(result.stderr)
-    
+
     print("\n完了しました。")
 
 def set_gitlab_secrets(token, project_id):
     """GitLab CIのシークレットを設定"""
     if not token:
         token = getpass("GitLabパーソナルアクセストークンを入力: ")
-    
+
     if not project_id:
         project_id = input("GitLabプロジェクトIDを入力: ")
-    
+
     # シークレット名と値のペアを収集
     variables = {}
     print("\nGitLab CIの変数を設定します。")
     print("各変数の値を入力してください。空白で終了します。")
-    
+
     while True:
         name = input("\n変数名（空白で終了）: ")
         if not name:
             break
-        
+
         value = getpass(f"{name}の値: ")
         is_protected = input(f"{name}を保護変数にしますか？（y/n）: ").lower() == 'y'
         is_masked = input(f"{name}をマスク変数にしますか？（y/n）: ").lower() == 'y'
-        
+
         variables[name] = {
             "value": value,
             "protected": is_protected,
             "masked": is_masked
         }
-    
+
     # 変数を設定
     for name, config in variables.items():
         # GitLab APIを使用して変数を設定
@@ -2363,34 +2363,34 @@ def set_gitlab_secrets(token, project_id):
           -d "protected={str(config['protected']).lower()}" \
           -d "masked={str(config['masked']).lower()}"
         """
-        
+
         result = run_command(command)
         if result.returncode == 0:
             print(f"変数 {name} を設定しました。")
         else:
             print(f"エラー: 変数 {name} の設定に失敗しました。")
             print(result.stderr)
-    
+
     print("\n完了しました。")
 
 def generate_keystore(keystore_path):
     """Androidキーストアを生成"""
     print("Androidキーストアを生成します。")
-    
+
     alias = input("キーエイリアス名: ")
     keystore_password = getpass("キーストアパスワード: ")
     key_password = getpass("キーパスワード（キーストアパスワードと同じ場合は空白）: ")
-    
+
     if not key_password:
         key_password = keystore_password
-    
+
     common_name = input("氏名（CN）: ")
     org_unit = input("組織単位（OU）: ")
     org = input("組織名（O）: ")
     locality = input("市区町村（L）: ")
     state = input("都道府県（ST）: ")
     country = input("国コード（C、例: JP）: ")
-    
+
     # キーストア生成コマンド
     command = f"""
     keytool -genkey -v \
@@ -2401,11 +2401,11 @@ def generate_keystore(keystore_path):
       -keypass {key_password} \
       -dname "CN={common_name}, OU={org_unit}, O={org}, L={locality}, ST={state}, C={country}"
     """
-    
+
     result = run_command(command)
     if result.returncode == 0:
         print(f"キーストアを生成しました: {keystore_path}")
-        
+
         # キーストア情報を表示
         keystore_info = {
             "keystore_path": keystore_path,
@@ -2413,17 +2413,17 @@ def generate_keystore(keystore_path):
             "keystore_password": keystore_password,
             "key_password": key_password
         }
-        
+
         print("\nキーストア情報:")
         for key, value in keystore_info.items():
             print(f"  {key}: {value}")
-        
+
         # CI/CD用の値を出力
         print("\nCI/CD環境変数の設定例:")
         print(f"SIGNING_KEY_ALIAS={alias}")
         print(f"KEY_STORE_PASSWORD={keystore_password}")
         print(f"KEY_PASSWORD={key_password}")
-        
+
         return True
     else:
         print(f"エラー: キーストア生成に失敗しました。")
@@ -2435,16 +2435,16 @@ def encrypt_keystore(keystore_path):
     if not os.path.exists(keystore_path):
         print(f"エラー: キーストアファイル {keystore_path} が見つかりません")
         return False
-    
+
     # ファイルをBase64エンコード
     try:
         with open(keystore_path, 'rb') as f:
             encoded = base64.b64encode(f.read()).decode('utf-8')
-        
+
         # 結果を表示（セキュリティのため一部のみ）
         print(f"キーストア {keystore_path} をBase64エンコードしました。")
         print(f"エンコード結果（最初の10文字）: {encoded[:10]}...")
-        
+
         # 結果をファイルに保存するか確認
         save = input("エンコード結果をファイルに保存しますか？（y/n）: ").lower() == 'y'
         if save:
@@ -2452,11 +2452,11 @@ def encrypt_keystore(keystore_path):
             with open(output_path, 'w') as f:
                 f.write(encoded)
             print(f"エンコード結果を {output_path} に保存しました。")
-        
+
         # CI/CD用の環境変数名を表示
         print("\nCI/CD環境変数の設定例:")
         print(f"SIGNING_KEY_BASE64=（上記のBase64エンコード文字列）")
-        
+
         return True
     except Exception as e:
         print(f"エラー: キーストアのエンコードに失敗しました: {e}")
@@ -2467,16 +2467,16 @@ def encrypt_profile(profile_path):
     if not os.path.exists(profile_path):
         print(f"エラー: プロビジョニングプロファイル {profile_path} が見つかりません")
         return False
-    
+
     # ファイルをBase64エンコード
     try:
         with open(profile_path, 'rb') as f:
             encoded = base64.b64encode(f.read()).decode('utf-8')
-        
+
         # 結果を表示（セキュリティのため一部のみ）
         print(f"プロファイル {profile_path} をBase64エンコードしました。")
         print(f"エンコード結果（最初の10文字）: {encoded[:10]}...")
-        
+
         # 結果をファイルに保存するか確認
         save = input("エンコード結果をファイルに保存しますか？（y/n）: ").lower() == 'y'
         if save:
@@ -2484,11 +2484,11 @@ def encrypt_profile(profile_path):
             with open(output_path, 'w') as f:
                 f.write(encoded)
             print(f"エンコード結果を {output_path} に保存しました。")
-        
+
         # CI/CD用の環境変数名を表示
         print("\nCI/CD環境変数の設定例:")
         print(f"PROVISIONING_PROFILE=（上記のBase64エンコード文字列）")
-        
+
         return True
     except Exception as e:
         print(f"エラー: プロファイルのエンコードに失敗しました: {e}")
@@ -2497,7 +2497,7 @@ def encrypt_profile(profile_path):
 def generate_env_file(env, output):
     """環境設定ファイルを生成"""
     print(f"{env}環境用の設定ファイルを生成します。")
-    
+
     # 環境ごとの設定テンプレート
     if env == 'dev':
         template = {
@@ -2517,54 +2517,54 @@ def generate_env_file(env, output):
             "DEBUG": "false",
             "LOG_LEVEL": "warning"
         }
-    
+
     # 各設定値を確認または編集
     settings = {}
     print("\n各設定値を確認または編集してください：")
     for key, default_value in template.items():
         value = input(f"{key} （デフォルト: {default_value}）: ") or default_value
         settings[key] = value
-    
+
     # 追加の設定があれば入力
     print("\n追加の設定があれば入力してください。キー名が空白で終了します。")
     while True:
         key = input("\n設定キー名（空白で終了）: ")
         if not key:
             break
-        
+
         value = input(f"{key}の値: ")
         settings[key] = value
-    
+
     # ファイルに書き込み
     with open(output, 'w') as f:
         for key, value in settings.items():
             f.write(f"{key}={value}\n")
-    
+
     print(f"\n環境設定ファイルを {output} に保存しました。")
     return True
 
 def main():
     """メイン関数"""
     args = parse_args()
-    
+
     if args.command == 'github':
         return set_github_secrets(args.token, args.repo)
-    
+
     elif args.command == 'gitlab':
         return set_gitlab_secrets(args.token, args.project_id)
-    
+
     elif args.command == 'generate-keystore':
         return generate_keystore(args.keystore_path)
-    
+
     elif args.command == 'encrypt-keystore':
         return encrypt_keystore(args.keystore_path)
-    
+
     elif args.command == 'encrypt-profile':
         return encrypt_profile(args.profile_path)
-    
+
     elif args.command == 'generate-env':
         return generate_env_file(args.env, args.output)
-    
+
     else:
         print("コマンドを指定してください。ヘルプを表示するには -h を使用してください。")
         return False

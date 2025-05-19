@@ -257,105 +257,105 @@ class SecureApiClient:
         self.base_url = settings.API_BASE_URL
         self.timeout = settings.API_TIMEOUT
         self.token_manager = token_manager
-        
+
         # 共通ヘッダー
         self.common_headers = {
             "Content-Type": "application/json",
             "Accept": "application/json",
             "User-Agent": f"{settings.APP_NAME}/{settings.APP_VERSION}"
         }
-    
+
     async def get(self, endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """GET リクエストを送信"""
         url = f"{self.base_url}{endpoint}"
-        
+
         # 認証ヘッダーを取得
         headers = await self._get_auth_headers()
-        
+
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             # HTTPSの検証を必ず有効化
             response = await client.get(
-                url, 
-                params=params, 
+                url,
+                params=params,
                 headers={**self.common_headers, **headers},
                 verify=True  # SSL検証を強制
             )
-            
+
             return await self._handle_response(response)
-    
+
     async def post(self, endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """POST リクエストを送信"""
         url = f"{self.base_url}{endpoint}"
-        
+
         # 認証ヘッダーを取得
         headers = await self._get_auth_headers()
-        
+
         # リクエストIDを生成（重複リクエスト防止）
         request_id = self._generate_request_id()
         headers["X-Request-ID"] = request_id
-        
+
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
-                url, 
-                json=data, 
+                url,
+                json=data,
                 headers={**self.common_headers, **headers},
                 verify=True
             )
-            
+
             return await self._handle_response(response)
-    
+
     async def put(self, endpoint: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """PUT リクエストを送信"""
         url = f"{self.base_url}{endpoint}"
-        
+
         # 認証ヘッダーを取得
         headers = await self._get_auth_headers()
-        
+
         # リクエストIDを生成
         request_id = self._generate_request_id()
         headers["X-Request-ID"] = request_id
-        
+
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.put(
-                url, 
-                json=data, 
+                url,
+                json=data,
                 headers={**self.common_headers, **headers},
                 verify=True
             )
-            
+
             return await self._handle_response(response)
-    
+
     async def delete(self, endpoint: str) -> Dict[str, Any]:
         """DELETE リクエストを送信"""
         url = f"{self.base_url}{endpoint}"
-        
+
         # 認証ヘッダーを取得
         headers = await self._get_auth_headers()
-        
+
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.delete(
-                url, 
+                url,
                 headers={**self.common_headers, **headers},
                 verify=True
             )
-            
+
             return await self._handle_response(response)
-    
+
     async def _get_auth_headers(self) -> Dict[str, str]:
         """認証ヘッダーを取得"""
         headers = {}
-        
+
         # アクセストークンが存在する場合は追加
         token = await self.token_manager.get_access_token()
         if token:
             headers["Authorization"] = f"Bearer {token}"
-        
+
         # APIキー認証（必要な場合）
         if hasattr(settings, "API_KEY") and settings.API_KEY:
             headers["X-API-Key"] = settings.API_KEY
-        
+
         return headers
-    
+
     async def _handle_response(self, response):
         """レスポンスを処理"""
         if response.status_code >= 200 and response.status_code < 300:
@@ -372,46 +372,46 @@ class SecureApiClient:
         else:
             # その他のエラー
             self._handle_error_response(response)
-    
+
     async def _refresh_and_retry(self, response):
         """トークンをリフレッシュして再試行"""
         # トークンリフレッシュを試みる
         refresh_success = await self.token_manager.refresh_token()
-        
+
         if refresh_success:
             # 原リクエストの情報を取得
             original_request = response.request
-            
+
             # 新しいトークンでヘッダーを更新
             headers = dict(original_request.headers)
             token = await self.token_manager.get_access_token()
             headers["Authorization"] = f"Bearer {token}"
-            
+
             # リクエストを再実行
             async with httpx.AsyncClient(timeout=self.timeout) as client:
                 new_response = await client.send(
                     original_request.copy_with(headers=headers)
                 )
-                
+
                 # 再試行結果を処理
                 if new_response.status_code >= 200 and new_response.status_code < 300:
                     try:
                         return new_response.json()
                     except json.JSONDecodeError:
                         return {"success": True, "data": new_response.text}
-        
+
         return False
-    
+
     def _handle_error_response(self, response):
         """エラーレスポンスを処理"""
         error_data = {"status_code": response.status_code}
-        
+
         try:
             error_body = response.json()
             error_data.update(error_body)
         except json.JSONDecodeError:
             error_data["message"] = response.text
-        
+
         # ステータスコードに基づいて適切な例外を発生
         if response.status_code == 400:
             raise ApiBadRequestException(error_data)
@@ -425,14 +425,14 @@ class SecureApiClient:
             raise ApiServerException(error_data)
         else:
             raise ApiException(error_data)
-    
+
     def _generate_request_id(self) -> str:
         """一意のリクエストIDを生成"""
         # タイムスタンプとランダム文字列を組み合わせて一意のIDを生成
         timestamp = str(int(time.time() * 1000))
         random_bytes = os.urandom(8)
         random_hex = random_bytes.hex()
-        
+
         # ハッシュ化して短縮
         request_id = hashlib.sha256(f"{timestamp}{random_hex}".encode()).hexdigest()[:16]
         return request_id
@@ -487,32 +487,32 @@ class TokenManager:
         self.access_token = None
         self.refresh_token = None
         self.token_expiry = 0
-        
+
         # トークン更新のコールバック
         self.token_refresh_callback = None
-    
+
     async def set_tokens(self, access_token: str, refresh_token: str, expires_in: int):
         """トークンを設定して保存"""
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.token_expiry = int(time.time()) + expires_in
-        
+
         # トークンの安全な保存
         token_data = {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "expires_at": self.token_expiry
         }
-        
+
         # 暗号化して保存
         await self.secure_storage.set_secure_item(self.token_key, json.dumps(token_data))
-    
+
     async def get_access_token(self) -> Optional[str]:
         """アクセストークンを取得（必要に応じてロード）"""
         # メモリ上にない場合はストレージからロード
         if not self.access_token:
             await self._load_tokens()
-        
+
         # トークンの期限切れをチェック
         if self.access_token and self._is_token_expired():
             # 期限切れの場合は更新を試みる
@@ -522,19 +522,19 @@ class TokenManager:
                     return None
             else:
                 return None
-        
+
         return self.access_token
-    
+
     async def refresh_token(self) -> bool:
         """リフレッシュトークンを使用してアクセストークンを更新"""
         if not self.refresh_token:
             return False
-        
+
         try:
             # トークン更新のコールバックが設定されている場合は呼び出し
             if self.token_refresh_callback:
                 result = await self.token_refresh_callback(self.refresh_token)
-                
+
                 if result and result.get("success"):
                     # 新しいトークンを設定
                     new_tokens = result.get("tokens", {})
@@ -544,25 +544,25 @@ class TokenManager:
                         new_tokens.get("expires_in", 3600)
                     )
                     return True
-            
+
             return False
         except Exception as e:
             print(f"Token refresh error: {e}")
             return False
-    
+
     async def clear_tokens(self):
         """トークンを消去"""
         self.access_token = None
         self.refresh_token = None
         self.token_expiry = 0
-        
+
         # ストレージからも削除
         await self.secure_storage.delete_secure_item(self.token_key)
-    
+
     async def _load_tokens(self):
         """ストレージからトークンをロード"""
         token_json = await self.secure_storage.get_secure_item(self.token_key)
-        
+
         if token_json:
             try:
                 token_data = json.loads(token_json)
@@ -572,12 +572,12 @@ class TokenManager:
             except json.JSONDecodeError:
                 # トークンデータの破損
                 await self.clear_tokens()
-    
+
     def _is_token_expired(self) -> bool:
         """トークンが期限切れかどうかをチェック"""
         # 有効期限の30秒前に期限切れと判断（猶予期間）
         return int(time.time()) > (self.token_expiry - 30)
-    
+
     def set_token_refresh_callback(self, callback):
         """トークン更新のコールバックを設定"""
         self.token_refresh_callback = callback
@@ -599,61 +599,61 @@ class SecureStorage:
     def __init__(self, storage: StorageInterface):
         self.storage = storage
         self.prefix = "secure_"
-        
+
         # 暗号化キーの初期化
         self._initialize_encryption_key()
-    
+
     async def set_secure_item(self, key: str, value: str) -> bool:
         """データを暗号化して保存"""
         if not value:
             return await self.delete_secure_item(key)
-        
+
         try:
             # データを暗号化
             encrypted_data = self._encrypt(value.encode('utf-8'))
-            
+
             # Base64エンコードして保存（バイナリデータを文字列として保存するため）
             encoded_data = base64.b64encode(encrypted_data).decode('utf-8')
-            
+
             # ストレージに保存
             return await self.storage.set(f"{self.prefix}{key}", encoded_data)
         except Exception as e:
             print(f"Secure storage encryption error: {e}")
             return False
-    
+
     async def get_secure_item(self, key: str) -> Optional[str]:
         """保存された暗号化データを復号化して取得"""
         try:
             # ストレージからデータを取得
             encoded_data = await self.storage.get(f"{self.prefix}{key}")
-            
+
             if not encoded_data:
                 return None
-            
+
             # Base64デコード
             encrypted_data = base64.b64decode(encoded_data)
-            
+
             # データを復号化
             decrypted_data = self._decrypt(encrypted_data)
-            
+
             return decrypted_data.decode('utf-8')
         except Exception as e:
             print(f"Secure storage decryption error: {e}")
             return None
-    
+
     async def delete_secure_item(self, key: str) -> bool:
         """保存されたデータを削除"""
         return await self.storage.delete(f"{self.prefix}{key}")
-    
+
     def _initialize_encryption_key(self):
         """暗号化キーを初期化（または取得）"""
         # デバイス固有の識別子またはアプリ固有の識別子を使用
         # 注: 実際のアプリではより安全なキー管理が必要
         device_id = self._get_device_id()
-        
+
         # ソルトは固定値または設定から取得（アプリインストール間で一貫性が必要）
         salt = b"secure_storage_salt_value"
-        
+
         # PBKDF2を使用してキーを導出
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -661,37 +661,37 @@ class SecureStorage:
             salt=salt,
             iterations=100000,  # 十分な反復回数
         )
-        
+
         self.encryption_key = kdf.derive(device_id.encode('utf-8'))
-    
+
     def _encrypt(self, data: bytes) -> bytes:
         """AES-GCMでデータを暗号化"""
         # ノンスを生成（毎回異なる値）
         nonce = os.urandom(12)
-        
+
         # AES-GCM暗号化器を初期化
         aesgcm = AESGCM(self.encryption_key)
-        
+
         # データを暗号化（認証タグ付き）
         ciphertext = aesgcm.encrypt(nonce, data, None)
-        
+
         # ノンスと暗号文を連結して返す
         return nonce + ciphertext
-    
+
     def _decrypt(self, data: bytes) -> bytes:
         """AES-GCMでデータを復号化"""
         # ノンスを取得（最初の12バイト）
         nonce = data[:12]
-        
+
         # 暗号文を取得（残りのバイト）
         ciphertext = data[12:]
-        
+
         # AES-GCM復号化器を初期化
         aesgcm = AESGCM(self.encryption_key)
-        
+
         # データを復号化
         return aesgcm.decrypt(nonce, ciphertext, None)
-    
+
     def _get_device_id(self) -> str:
         """デバイス固有の識別子を取得（または生成）"""
         # 注: プラットフォームによって適切な方法で実装
@@ -715,95 +715,95 @@ class PasswordValidator:
         self.require_digit = True
         self.require_special_char = True
         self.max_length = 128
-        
+
         # 特殊文字の定義
         self.special_chars = r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]"
-        
+
         # 一般的なパスワードのブラックリスト
         self.password_blacklist = [
             "password", "123456", "qwerty", "admin", "welcome",
             "password123", "12345678", "letmein", "iloveyou"
         ]
-    
+
     def validate(self, password: str) -> Tuple[bool, List[str]]:
         """パスワードを検証し、有効かどうかとエラーメッセージを返す"""
         errors = []
-        
+
         # 長さのチェック
         if len(password) < self.min_length:
             errors.append(f"パスワードは少なくとも{self.min_length}文字必要です")
-        
+
         if len(password) > self.max_length:
             errors.append(f"パスワードは{self.max_length}文字以下である必要があります")
-        
+
         # 大文字のチェック
         if self.require_uppercase and not re.search(r"[A-Z]", password):
             errors.append("パスワードには少なくとも1つの大文字が必要です")
-        
+
         # 小文字のチェック
         if self.require_lowercase and not re.search(r"[a-z]", password):
             errors.append("パスワードには少なくとも1つの小文字が必要です")
-        
+
         # 数字のチェック
         if self.require_digit and not re.search(r"\d", password):
             errors.append("パスワードには少なくとも1つの数字が必要です")
-        
+
         # 特殊文字のチェック
         if self.require_special_char and not re.search(self.special_chars, password):
             errors.append("パスワードには少なくとも1つの特殊文字が必要です")
-        
+
         # 一般的なパスワードのチェック
         if password.lower() in self.password_blacklist:
             errors.append("このパスワードは一般的すぎるため使用できません")
-        
+
         # パスワードに個人情報が含まれていないかのチェック
         # 注: 実際のアプリでは、ユーザー名や氏名などの個人情報をチェック
-        
+
         return len(errors) == 0, errors
-    
+
     def get_password_strength(self, password: str) -> Dict[str, any]:
         """パスワードの強度を評価"""
         # 基本強度（0-100）
         strength = 0
         feedback = []
-        
+
         # 長さによる強度ボーナス（最大50ポイント）
         length_bonus = min(50, len(password) * 2)
         strength += length_bonus
-        
+
         # 文字種類による強度ボーナス
         if re.search(r"[A-Z]", password):
             strength += 10
         else:
             feedback.append("大文字を追加すると強度が向上します")
-        
+
         if re.search(r"[a-z]", password):
             strength += 10
         else:
             feedback.append("小文字を追加すると強度が向上します")
-        
+
         if re.search(r"\d", password):
             strength += 10
         else:
             feedback.append("数字を追加すると強度が向上します")
-        
+
         if re.search(self.special_chars, password):
             strength += 20
         else:
             feedback.append("特殊文字を追加すると強度が向上します")
-        
+
         # 一般的なパスワードのペナルティ
         if password.lower() in self.password_blacklist:
             strength = max(0, strength - 50)
             feedback.append("このパスワードは一般的すぎるため危険です")
-        
+
         # 強度レベルの決定
         strength_level = "weak"
         if strength >= 80:
             strength_level = "strong"
         elif strength >= 50:
             strength_level = "medium"
-        
+
         return {
             "score": strength,
             "level": strength_level,
@@ -830,7 +830,7 @@ class InputValidator:
             "zipcode": r"^[0-9]{5}(-[0-9]{4})?$",
             "url": r"^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$"
         }
-    
+
     def validate_field(self, field_type: str, value: str) -> Tuple[bool, Optional[str]]:
         """指定されたタイプのフィールドを検証"""
         if field_type in self.patterns:
@@ -839,68 +839,68 @@ class InputValidator:
                 return True, None
             else:
                 return False, f"Invalid {field_type} format"
-        
+
         # 未知のフィールドタイプ
         return False, "Unknown field type"
-    
+
     def validate_form(self, form_data: Dict[str, Any], rules: Dict[str, Dict[str, Any]]) -> Dict[str, List[str]]:
         """フォームデータを検証"""
         errors = {}
-        
+
         for field, field_rules in rules.items():
             field_value = form_data.get(field, "")
             field_errors = []
-            
+
             # 必須フィールドのチェック
             if field_rules.get("required", False) and not field_value:
                 field_errors.append("This field is required")
                 errors[field] = field_errors
                 continue
-            
+
             # 空の非必須フィールドはスキップ
             if not field_value and not field_rules.get("required", False):
                 continue
-            
+
             # 型チェック
             field_type = field_rules.get("type")
             if field_type:
                 is_valid, error_msg = self.validate_field(field_type, field_value)
                 if not is_valid:
                     field_errors.append(error_msg)
-            
+
             # 最小長チェック
             min_length = field_rules.get("min_length")
             if min_length is not None and len(field_value) < min_length:
                 field_errors.append(f"Minimum length is {min_length} characters")
-            
+
             # 最大長チェック
             max_length = field_rules.get("max_length")
             if max_length is not None and len(field_value) > max_length:
                 field_errors.append(f"Maximum length is {max_length} characters")
-            
+
             # カスタムバリデーション
             custom_validator = field_rules.get("validator")
             if custom_validator and callable(custom_validator):
                 custom_result = custom_validator(field_value)
                 if custom_result is not True:
                     field_errors.append(custom_result)
-            
+
             # 一致チェック
             match_field = field_rules.get("match")
             if match_field and match_field in form_data:
                 if field_value != form_data[match_field]:
                     field_errors.append(f"Does not match with {match_field}")
-            
+
             # エラーがあれば追加
             if field_errors:
                 errors[field] = field_errors
-        
+
         return errors
-    
+
     def sanitize_html(self, value: str) -> str:
         """HTMLをサニタイズ（XSS対策）"""
         return html.escape(value)
-    
+
     def sanitize_sql(self, value: str) -> str:
         """SQLインジェクション対策のサニタイズ"""
         # 基本的なSQLインジェクション対策
@@ -910,7 +910,7 @@ class InputValidator:
         for char in dangerous_chars:
             result = result.replace(char, "")
         return result
-    
+
     def sanitize_input(self, value: Union[str, Dict, List]) -> Union[str, Dict, List]:
         """入力値を再帰的にサニタイズ"""
         if isinstance(value, str):

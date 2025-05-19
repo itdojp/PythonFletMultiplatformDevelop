@@ -313,7 +313,7 @@ class PolicyPage(ft.UserControl):
         super().__init__()
         self.page = page
         self.policy_type = policy_type  # "privacy" または "terms"
-    
+
     def build(self):
         # ポリシーファイルを読み込む
         file_path = f"assets/policies/{self.policy_type}_policy.md"
@@ -322,10 +322,10 @@ class PolicyPage(ft.UserControl):
                 policy_md = f.read()
         except Exception as e:
             policy_md = f"ポリシーの読み込みに失敗しました: {str(e)}"
-        
+
         # マークダウンをHTMLに変換
         policy_html = markdown.markdown(policy_md)
-        
+
         # スクロール可能なコンテナでポリシーを表示
         policy_container = ft.Container(
             content=ft.Column([
@@ -340,15 +340,15 @@ class PolicyPage(ft.UserControl):
             expand=True,
             scroll=ft.ScrollMode.AUTO
         )
-        
+
         # 戻るボタン
         back_button = ft.ElevatedButton(
             text="戻る",
             on_click=lambda e: self.page.go("/")
         )
-        
+
         title = "プライバシーポリシー" if self.policy_type == "privacy" else "利用規約"
-        
+
         return ft.Column([
             ft.AppBar(title=ft.Text(title), center_title=True),
             policy_container,
@@ -368,7 +368,7 @@ class PolicyConsentDialog(ft.UserControl):
         self.page = page
         self.on_accept = on_accept or (lambda: None)
         self.on_decline = on_decline or (lambda: None)
-    
+
     def build(self):
         # 同意チェックボックス
         self.privacy_checkbox = ft.Checkbox(
@@ -376,37 +376,37 @@ class PolicyConsentDialog(ft.UserControl):
             value=False,
             on_change=self._update_button_state
         )
-        
+
         self.terms_checkbox = ft.Checkbox(
             label="利用規約に同意します",
             value=False,
             on_change=self._update_button_state
         )
-        
+
         # ポリシーリンク
         privacy_link = ft.TextButton(
             text="プライバシーポリシーを読む",
             on_click=lambda e: self.page.go("/privacy-policy")
         )
-        
+
         terms_link = ft.TextButton(
             text="利用規約を読む",
             on_click=lambda e: self.page.go("/terms-of-service")
         )
-        
+
         # 同意ボタン
         self.accept_button = ft.ElevatedButton(
             text="同意して続ける",
             on_click=lambda e: self._on_accept_click(),
             disabled=True
         )
-        
+
         # 拒否ボタン
         decline_button = ft.TextButton(
             text="同意しない",
             on_click=lambda e: self._on_decline_click()
         )
-        
+
         return ft.Card(
             content=ft.Container(
                 content=ft.Column([
@@ -428,21 +428,21 @@ class PolicyConsentDialog(ft.UserControl):
                 width=400
             )
         )
-    
+
     def _update_button_state(self, e):
         """チェックボックスの状態に基づいて同意ボタンの有効/無効を切り替え"""
         self.accept_button.disabled = not (self.privacy_checkbox.value and self.terms_checkbox.value)
         self.update()
-    
+
     def _on_accept_click(self):
         """同意ボタンクリック時の処理"""
         # 同意情報を保存
         from app.core.storage.storage_service import storage_service
         storage_service.set("policy_accepted", "true")
-        
+
         # コールバックを呼び出し
         self.on_accept()
-    
+
     def _on_decline_click(self):
         """拒否ボタンクリック時の処理"""
         # コールバックを呼び出し
@@ -461,13 +461,13 @@ async def check_policy_consent(page: ft.Page) -> bool:
     """ポリシー同意状況をチェックし、必要に応じて同意ダイアログを表示"""
     # 既に同意済みかチェック
     has_accepted = await storage_service.get("policy_accepted") == "true"
-    
+
     if has_accepted:
         return True
-    
+
     # 同意完了フラグ
     consent_complete = False
-    
+
     # 同意時のコールバック
     def on_accept():
         nonlocal consent_complete
@@ -475,7 +475,7 @@ async def check_policy_consent(page: ft.Page) -> bool:
         # メインページに遷移
         page.go("/")
         page.update()
-    
+
     # 拒否時のコールバック
     def on_decline():
         nonlocal consent_complete
@@ -490,11 +490,11 @@ async def check_policy_consent(page: ft.Page) -> bool:
         )
         page.dialog.open = True
         page.update()
-    
+
     # 同意ダイアログを表示
     consent_dialog = PolicyConsentDialog(page, on_accept, on_decline)
     page.add(consent_dialog)
-    
+
     # 同意結果を返す
     return consent_complete
 ```
@@ -535,18 +535,18 @@ class PolicyPage(ft.UserControl):
         super().__init__()
         self.page = page
         self.policy_type = policy_type  # "privacy" または "terms"
-    
+
     def build(self):
         # 現在の言語を取得
         current_locale = translation_context.get_current_locale()
-        
+
         # ポリシーファイルパスを構築
         file_name = "privacy_policy.md" if self.policy_type == "privacy" else "terms_of_service.md"
         file_path = os.path.join("assets", "policies", current_locale, file_name)
-        
+
         # フォールバック用のパス（指定言語のファイルがない場合）
         fallback_path = os.path.join("assets", "policies", "en", file_name)
-        
+
         # ポリシーファイルを読み込む
         try:
             with open(file_path, "r", encoding="utf-8") as f:
@@ -560,10 +560,10 @@ class PolicyPage(ft.UserControl):
                 policy_md = "Policy file not found."
         except Exception as e:
             policy_md = f"Error loading policy: {str(e)}"
-        
+
         # マークダウンをHTMLに変換
         policy_html = markdown.markdown(policy_md)
-        
+
         # 言語切り替えドロップダウン
         language_dropdown = ft.Dropdown(
             options=[
@@ -575,14 +575,14 @@ class PolicyPage(ft.UserControl):
             value=current_locale,
             on_change=self._on_language_change
         )
-        
+
         # タイトルの翻訳
         title_key = "privacy.title" if self.policy_type == "privacy" else "terms.title"
         title = translation_context.translate(title_key)
-        
+
         # 戻るボタンの翻訳
         back_button_text = translation_context.translate("common.back")
-        
+
         # スクロール可能なコンテナでポリシーを表示
         policy_container = ft.Container(
             content=ft.Column([
@@ -597,13 +597,13 @@ class PolicyPage(ft.UserControl):
             expand=True,
             scroll=ft.ScrollMode.AUTO
         )
-        
+
         # 戻るボタン
         back_button = ft.ElevatedButton(
             text=back_button_text,
             on_click=lambda e: self.page.go("/")
         )
-        
+
         return ft.Column([
             ft.AppBar(
                 title=ft.Text(title),
@@ -617,12 +617,12 @@ class PolicyPage(ft.UserControl):
                 padding=20
             )
         ])
-    
+
     def _on_language_change(self, e):
         """言語変更時の処理"""
         # 言語を変更
         translation_context.set_locale(e.control.value)
-        
+
         # 同じページを再読み込み
         self.page.go(self.page.route)
 ```

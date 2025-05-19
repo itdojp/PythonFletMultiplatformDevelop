@@ -2,7 +2,7 @@
 
 このガイドラインは、Python Fletを使用して開発するアプリケーションにおいて、Android、iOS、Webの各プラットフォームで一貫性のある優れたユーザー体験を提供するための指針を提供します。
 
-> **関連ガイド**: 
+> **関連ガイド**:
 > - [プラットフォーム共通コード管理ガイド](./cross-platform-code-management-guide.md) - レスポンシブデザインとアダプティブUIの実装
 > - [アーキテクチャ設計ガイド](./architecture-design-guide.md) - コンポーネント設計と状態管理
 > - [Androidデプロイガイド](./android-flet-deployment-guide.md) - Androidプラットフォーム固有の考慮事項
@@ -190,13 +190,13 @@ Fletアプリケーションを設計する際の基本原則:
           bgcolor=ft.colors.BLUE_500,
           padding=10,
       ))
-  
+
   def secondary_button(text, on_click):
       return ft.OutlinedButton(text=text, on_click=on_click, style=ft.ButtonStyle(
           color=ft.colors.BLUE_500,
           padding=10,
       ))
-  
+
   def text_button(text, on_click):
       return ft.TextButton(text=text, on_click=on_click, style=ft.ButtonStyle(
           color=ft.colors.BLUE_500,
@@ -215,7 +215,7 @@ Fletアプリケーションを設計する際の基本原則:
           self.name = name
           self.role = role
           self.avatar_url = avatar_url
-  
+
       def build(self):
           return ft.Card(
               content=ft.Container(
@@ -227,7 +227,7 @@ Fletアプリケーションを設計する際の基本原則:
                   padding=10
               )
           )
-  
+
   # 使用例
   page.add(UserCard("山田太郎", "開発者", "https://example.com/avatar.jpg"))
   ```
@@ -265,7 +265,7 @@ Fletアプリケーションを設計する際の基本原則:
   heading_2 = ft.TextStyle(size=20, weight=ft.FontWeight.BOLD)
   body_text = ft.TextStyle(size=16)
   caption = ft.TextStyle(size=12, italic=True)
-  
+
   # 使用例
   page.add(
       ft.Text("見出し", style=heading_1),
@@ -282,7 +282,7 @@ Fletアプリケーションを設計する際の基本原則:
   # ダークモード対応
   def main(page: ft.Page):
       page.theme_mode = ft.ThemeMode.SYSTEM  # システム設定に従う
-      
+
       # ライトモードテーマ
       light_theme = ft.Theme(
           color_scheme=ft.ColorScheme(
@@ -291,7 +291,7 @@ Fletアプリケーションを設計する際の基本原則:
               # その他のカラー設定
           )
       )
-      
+
       # ダークモードテーマ
       dark_theme = ft.Theme(
           color_scheme=ft.ColorScheme(
@@ -300,7 +300,7 @@ Fletアプリケーションを設計する際の基本原則:
               # その他のカラー設定
           )
       )
-      
+
       page.theme = light_theme
       page.dark_theme = dark_theme
   ```
@@ -336,7 +336,7 @@ Fletアプリケーションを設計する際の基本原則:
           ft.Container(height=20, width=150, bgcolor=ft.colors.GREY_300, border_radius=4, margin=ft.margin.only(top=8)),
           ft.Container(height=20, width=180, bgcolor=ft.colors.GREY_300, border_radius=4, margin=ft.margin.only(top=8)),
       ])
-  
+
   # データ読み込み中はスケルトン表示
   loading = True
   content = create_skeleton() if loading else actual_content
@@ -357,12 +357,12 @@ Fletアプリケーションを設計する際の基本原則:
       border_radius=ft.border_radius.all(4),
       animate=ft.animation.Animation(300, ft.AnimationCurve.EASE_IN_OUT),
   )
-  
+
   def animate_container(e):
       container.width = 200 if container.width == 100 else 100
       container.bgcolor = ft.colors.RED if container.bgcolor == ft.colors.BLUE else ft.colors.BLUE
       container.update()
-  
+
   page.add(
       container,
       ft.ElevatedButton("アニメーション", on_click=animate_container)
@@ -419,7 +419,7 @@ def create_responsive_layout(page: ft.Page, content):
                 item.col = {i: i % 2 + 1 for i in range(len(content))}
                 item.expand = True
         page.update()
-    
+
     navbar = ft.NavigationRail(
         selected_index=0,
         label_type=ft.NavigationRailLabelType.ALL,
@@ -432,9 +432,9 @@ def create_responsive_layout(page: ft.Page, content):
         ],
         rail=True,
     )
-    
+
     layout = ft.Row([navbar, ft.Column(content, expand=True)], expand=True)
-    
+
     page.on_resize = page_resize
     return layout
 ```
@@ -448,7 +448,7 @@ class AppCard(ft.UserControl):
         self.description = description
         self.image_url = image_url
         self.on_click = on_click
-    
+
     def build(self):
         return ft.Card(
             elevation=4,

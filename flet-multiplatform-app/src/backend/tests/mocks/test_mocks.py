@@ -12,9 +12,7 @@ class TestMocks:
 
     @staticmethod
     def get_mock_user_data(
-        count: int = 1,
-        is_superuser: bool = False,
-        invalid: bool = False
+        count: int = 1, is_superuser: bool = False, invalid: bool = False
     ) -> List[Dict[str, Any]]:
         """モックユーザーのデータを取得
 
@@ -41,9 +39,7 @@ class TestMocks:
 
     @staticmethod
     def get_mock_item_data(
-        count: int = 1,
-        owner_id: Optional[int] = None,
-        invalid: bool = False
+        count: int = 1, owner_id: Optional[int] = None, invalid: bool = False
     ) -> List[Dict[str, Any]]:
         """モックアイテムのデータを取得
 
@@ -69,8 +65,7 @@ class TestMocks:
 
     @staticmethod
     def get_mock_auth_data(
-        count: int = 1,
-        invalid: bool = False
+        count: int = 1, invalid: bool = False
     ) -> List[Dict[str, str]]:
         """モック認証データを取得
 
@@ -86,9 +81,7 @@ class TestMocks:
 
     @staticmethod
     def get_mock_date_data(
-        count: int = 1,
-        past_days: int = 30,
-        future_days: int = 30
+        count: int = 1, past_days: int = 30, future_days: int = 30
     ) -> List[Dict[str, Any]]:
         """モック日付データを取得
 

@@ -14,6 +14,7 @@ from ..validation.validation_rules import ValidationRuleBuilder
 
 class PerformanceMetric(Enum):
     """パフォーマンスメトリクス"""
+
     EXECUTION_TIME = "execution_time"
     CPU_USAGE = "cpu_usage"
     MEMORY_USAGE = "memory_usage"
@@ -32,10 +33,7 @@ class PerformanceOptimizer:
         self.validation_builder = ValidationRuleBuilder()
 
     def measure_performance(
-        self,
-        func: callable,
-        iterations: int = 1,
-        warmup: int = 1
+        self, func: callable, iterations: int = 1, warmup: int = 1
     ) -> Dict[str, Any]:
         """パフォーマンスを測定
 
@@ -50,7 +48,7 @@ class PerformanceOptimizer:
         metrics = {
             PerformanceMetric.EXECUTION_TIME: [],
             PerformanceMetric.RESPONSE_TIME: [],
-            PerformanceMetric.THROUGHPUT: []
+            PerformanceMetric.THROUGHPUT: [],
         }
 
         # ウォームアップ
@@ -89,7 +87,7 @@ class PerformanceOptimizer:
                     "mean": sum(values) / len(values),
                     "min": min(values),
                     "max": max(values),
-                    "stddev": self._calculate_stddev(values)
+                    "stddev": self._calculate_stddev(values),
                 }
         return results
 
@@ -106,12 +104,10 @@ class PerformanceOptimizer:
             return 0.0
         mean = sum(values) / len(values)
         variance = sum((x - mean) ** 2 for x in values) / len(values)
-        return variance ** 0.5
+        return variance**0.5
 
     def optimize_parallel_execution(
-        self,
-        func: callable,
-        max_workers: Optional[int] = None
+        self, func: callable, max_workers: Optional[int] = None
     ) -> callable:
         """並列実行を最適化
 
@@ -122,17 +118,16 @@ class PerformanceOptimizer:
         Returns:
             callable: 最適化された関数
         """
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             if max_workers is not None:
                 self.executor = ThreadPoolExecutor(max_workers=max_workers)
             return self.executor.submit(func, *args, **kwargs).result()
+
         return wrapper
 
-    def optimize_async_execution(
-        self,
-        func: callable
-    ) -> callable:
+    def optimize_async_execution(self, func: callable) -> callable:
         """非同期実行を最適化
 
         Args:
@@ -141,16 +136,16 @@ class PerformanceOptimizer:
         Returns:
             callable: 最適化された関数
         """
+
         @wraps(func)
         async def wrapper(*args, **kwargs):
             loop = asyncio.get_event_loop()
             return await loop.run_in_executor(self.executor, func, *args, **kwargs)
+
         return wrapper
 
     def optimize_memory_usage(
-        self,
-        func: callable,
-        max_memory: Optional[int] = None
+        self, func: callable, max_memory: Optional[int] = None
     ) -> callable:
         """メモリ使用量を最適化
 
@@ -161,17 +156,17 @@ class PerformanceOptimizer:
         Returns:
             callable: 最適化された関数
         """
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             # メモリ使用量の監視と制限
             result = func(*args, **kwargs)
             return result
+
         return wrapper
 
     def optimize_batch_processing(
-        self,
-        func: callable,
-        batch_size: int = 100
+        self, func: callable, batch_size: int = 100
     ) -> callable:
         """バッチ処理を最適化
 
@@ -182,20 +177,18 @@ class PerformanceOptimizer:
         Returns:
             callable: 最適化された関数
         """
+
         @wraps(func)
         def wrapper(data: List[Any]):
             results = []
             for i in range(0, len(data), batch_size):
-                batch = data[i:i + batch_size]
+                batch = data[i : i + batch_size]
                 results.extend(func(batch))
             return results
+
         return wrapper
 
-    def optimize_data_loading(
-        self,
-        func: callable,
-        cache_size: int = 1000
-    ) -> callable:
+    def optimize_data_loading(self, func: callable, cache_size: int = 1000) -> callable:
         """データローディングを最適化
 
         Args:
@@ -216,12 +209,11 @@ class PerformanceOptimizer:
                     cache.pop(next(iter(cache)))
                 cache[key] = result
             return cache[key]
+
         return wrapper
 
     def optimize_query_execution(
-        self,
-        func: callable,
-        query_limit: int = 1000
+        self, func: callable, query_limit: int = 1000
     ) -> callable:
         """クエリ実行を最適化
 
@@ -232,17 +224,17 @@ class PerformanceOptimizer:
         Returns:
             callable: 最適化された関数
         """
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             # クエリ最適化処理
             result = func(*args, **kwargs)
             return result
+
         return wrapper
 
     def optimize_resource_allocation(
-        self,
-        func: callable,
-        resource_limit: Optional[int] = None
+        self, func: callable, resource_limit: Optional[int] = None
     ) -> callable:
         """リソース割り当てを最適化
 
@@ -253,11 +245,13 @@ class PerformanceOptimizer:
         Returns:
             callable: 最適化された関数
         """
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             # リソース最適化処理
             result = func(*args, **kwargs)
             return result
+
         return wrapper
 
     def generate_performance_test_data(
@@ -265,7 +259,7 @@ class PerformanceOptimizer:
         data_type: str,
         count: int = 1000,
         strategy: Optional[DataGenerationType] = None,
-        rules: Optional[Dict[str, List[Dict[str, Any]]]] = None
+        rules: Optional[Dict[str, List[Dict[str, Any]]]] = None,
     ) -> List[Dict[str, Any]]:
         """パフォーマンステスト用データを生成
 
@@ -282,18 +276,13 @@ class PerformanceOptimizer:
             strategy = DataGenerationType.RANDOM
 
         data = self.data_generator.generate_test_data_batch(
-            data_type,
-            count,
-            strategy,
-            rules
+            data_type, count, strategy, rules
         )
 
         return data
 
     def analyze_performance(
-        self,
-        metrics: Dict[str, Any],
-        thresholds: Dict[str, float]
+        self, metrics: Dict[str, Any], thresholds: Dict[str, float]
     ) -> Dict[str, Any]:
         """パフォーマンスを分析
 
@@ -304,21 +293,19 @@ class PerformanceOptimizer:
         Returns:
             Dict[str, Any]: 分析結果
         """
-        analysis = {
-            "metrics": metrics,
-            "issues": [],
-            "recommendations": []
-        }
+        analysis = {"metrics": metrics, "issues": [], "recommendations": []}
 
         for metric, value in metrics.items():
             if metric in thresholds:
                 threshold = thresholds[metric]
                 if value["mean"] > threshold:
-                    analysis["issues"].append({
-                        "metric": metric,
-                        "current": value["mean"],
-                        "threshold": threshold
-                    })
+                    analysis["issues"].append(
+                        {
+                            "metric": metric,
+                            "current": value["mean"],
+                            "threshold": threshold,
+                        }
+                    )
                     analysis["recommendations"].append(
                         f"Optimize {metric} (current: {value['mean']}, threshold: {threshold})"
                     )

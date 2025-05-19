@@ -52,6 +52,7 @@ def client(test_db: AsyncSession) -> Generator[TestClient, None, None]:
     Yields:
         TestClient: テスト用のクライアント
     """
+
     # 依存関係のオーバーライド
     def override_get_db():
         return test_db
