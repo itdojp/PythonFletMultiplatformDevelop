@@ -24,35 +24,36 @@
 
 ## 前提条件
 
-- Python 3.9 以上
+- Python 3.13 以上
 - Git
-- Node.js 16 以上（Webフロントエンド開発の場合）
-- Docker（コンテナ化された環境で実行する場合）
+- Docker（オプション: コンテナ化された環境で実行する場合）
 
 ## セットアップ手順
 
 1. リポジトリのクローン
    ```bash
-   git clone <repository-url>
+   git clone <repository-url> # ご自身のレポジトリURLに置き換えてください
    cd flet-multiplatform-app
    ```
 
 2. 仮想環境の作成と有効化
    ```bash
    # Windows
-   python -m venv venv
-   .\venv\Scripts\activate
+   python -m venv .venv
+   .\.venv\Scripts\activate
 
    # macOS/Linux
-   python3 -m venv venv
-   source venv/bin/activate
+   python3 -m venv .venv
+   source .venv/bin/activate
    ```
+   (注: 仮想環境のディレクトリ名として `.venv` を推奨します)
 
 3. 依存関係のインストール
+   基本的な依存関係をインストールするには、`flet-multiplatform-app` ディレクトリで以下を実行します:
    ```bash
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt  # 開発用の依存関係
+   pip install .
    ```
+   開発ツール（テスト、リンター等）を含む完全な開発環境をセットアップする場合は、`pip install .[dev]` を使用します。詳細は [開発者ガイド](./DEVELOPER_GUIDE.md) を参照してください。
 
 ## 開発環境の構築
 
@@ -85,25 +86,24 @@ API_KEY=your-api-key
 
 ## アプリケーションの実行
 
-### 開発モードで起動
+開発時には、Flet UIアプリケーションとバックエンドAPIサーバーを個別に起動する必要があります。
 
-```bash
-# バックエンドサーバーの起動
-uvicorn app.main:app --reload
+1.  **Flet UIアプリケーションの起動 (開発モード):**
+    `flet-multiplatform-app` ディレクトリから以下を実行します。
+    ```bash
+    flet run src/flet_app.py
+    ```
+    これにより、Fletアプリケーションが起動し、UI関連のソースコードの変更が自動的にリロードされます。
 
-# フロントエンド開発サーバーの起動（別ターミナルで）
-dev_app.py
-```
+2.  **バックエンドAPIサーバーの起動 (開発モード):**
+    `flet-multiplatform-app` ディレクトリから以下を実行します。
+    ```bash
+    python -m uvicorn src.backend.main:app --reload --port 8001
+    ```
+    これにより、バックエンドAPIサーバーがポート8001で起動し、API関連のソースコードの変更が自動的にリロードされます。
+    (FletのWebビューがデフォルトで8000番ポートを使用する場合があるため、APIサーバーには異なるポート（例: 8001）を指定することを推奨します。)
 
-### 本番モードで起動
-
-```bash
-# 依存関係のインストール
-pip install -r requirements.txt
-
-# 本番サーバーの起動
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
+詳細な開発環境のセットアップやデバッグ方法については、[開発者ガイド](./DEVELOPER_GUIDE.md)を参照してください。
 
 ## テストの実行
 
@@ -177,29 +177,49 @@ git push heroku main
 
 ## ディレクトリ構成
 
+プロジェクトの主要なディレクトリとファイルの構造は以下の通りです。
+
 ```
 flet-multiplatform-app/
-├── app/                    # アプリケーションコード
-│   ├── api/               # APIエンドポイント
-│   ├── core/              # コア機能
-│   ├── db/                # データベース関連
-│   ├── models/            # データモデル
-│   ├── services/          # ビジネスロジック
-│   └── main.py            # アプリケーションエントリーポイント
-├── tests/                  # テストコード
-│   ├── unit/              # 単体テスト
-│   ├── integration/       # 統合テスト
-│   ├── e2e/               # E2Eテスト
-│   └── performance/       # パフォーマンステスト
-├── scripts/               # 便利なスクリプト
-├── static/                # 静的ファイル
-├── templates/             # テンプレートファイル
-├── .github/               # GitHub Actionsワークフロー
-├── .env.example          # 環境変数の例
-├── requirements.txt       # 依存関係
-├── requirements-dev.txt   # 開発用依存関係
-└── README.md             # プロジェクト概要
+├── .env                   # 環境変数 (実際の値は.envファイルに記述し、.env.exampleを元に作成)
+├── .github/               # GitHub Actions ワークフローファイル
+├── Dockerfile             # Dockerイメージ構築用ファイル
+├── README.md              # プロジェクトの概要説明
+├── docs/                  # プロジェクトドキュメント
+│   ├── GETTING_STARTED_JA.md # このファイル
+│   └── ...
+├── pyproject.toml         # Pythonプロジェクト定義、依存関係 (PEP 621)
+├── src/                   # ソースコード
+│   ├── __init__.py
+│   ├── app.py             # Flet UIの構造やカスタムコントロールを定義
+│   ├── flet_app.py        # Flet UIアプリケーションのメインエントリーポイント
+│   ├── main.py            # FastAPIアプリケーションのエントリーポイント (src.backend.mainとは別)
+│   ├── assets/            # 画像、フォントなどの静的アセット
+│   ├── backend/           # バックエンドAPI (FastAPI)
+│   │   ├── __init__.py
+│   │   ├── app.py         # FastAPIアプリケーションインスタンスの定義
+│   │   ├── main.py        # バックエンドAPIの起動スクリプト
+│   │   ├── alembic/       # Alembicデータベースマイグレーション用ディレクトリ
+│   │   │   ├── versions/  # マイグレーションスクリプト
+│   │   │   └── env.py     # Alembic実行環境設定
+│   │   ├── alembic.ini    # Alembic設定ファイル (こちらが主に使われる)
+│   │   ├── api/           # APIルーター定義
+│   │   ├── core/          # 設定読み込み、共通ロジックなど
+│   │   ├── db/            # データベースセッション、エンジン設定
+│   │   ├── models/        # SQLAlchemyデータベースモデル
+│   │   ├── schemas/       # Pydanticデータスキーマ
+│   │   └── tests/         # バックエンド固有のテスト
+│   ├── components/        # Flet UIコンポーネント (共通部品など)
+│   ├── config/            # アプリケーション全体の設定 (データベース接続情報など)
+│   ├── services/          # ビジネスロジック層
+│   └── utils/             # 汎用ユーティリティ関数
+├── tests/                 # プロジェクト全体のテスト (統合テストなど)
+│   ├── conftest.py        # Pytest設定ファイル
+│   └── ...
+├── .gitignore             # Git管理対象外ファイル設定
+└── pytest.ini             # Pytest設定ファイル
 ```
+(上記は主要なファイルとディレクトリの構造です。詳細なファイルは省略されている場合があります。)
 
 ## 開発ワークフロー
 
@@ -251,13 +271,12 @@ git push origin feature/your-feature-name
      alembic upgrade head
      ```
 
-3. **フロントエンドの変更が反映されない**
-   ```bash
-   # キャッシュをクリアして再起動
-   rm -rf __pycache__
-   rm -rf .flet
-   python dev_app.py
-   ```
+3. **フロントエンドの変更が反映されない (Flet)**
+   FletアプリケーションでUIの変更が反映されない場合は、以下の手順を試してください：
+   - アプリケーションを再起動する。
+   - ブラウザで実行している場合は、ブラウザのキャッシュをクリアする（Ctrl+Shift+R または Cmd+Shift+R）。
+   - `flet run` を使用している場合、ターミナルにエラーメッセージが表示されていないか確認する。
+   - `build` ディレクトリや `assets` 内のキャッシュが問題になることは稀ですが、最終手段として関連しそうな一時ファイルを確認することも考慮できます。
 
 ## 貢献方法
 
